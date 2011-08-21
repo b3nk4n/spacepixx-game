@@ -42,6 +42,8 @@ namespace SpacepiXX
         private HighscoreManager()
         {
             this.LoadHighScore();
+
+            this.loadLastName();
         }
 
         #endregion
@@ -107,7 +109,7 @@ namespace SpacepiXX
 
                 spriteBatch.DrawString(Font,
                                        scoreText,
-                                       new Vector2(500, 100 + (i * 35)),
+                                       new Vector2(490, 100 + (i * 35)),
                                        Color.Red * opacity);
 
                 spriteBatch.DrawString(Font,
@@ -153,7 +155,9 @@ namespace SpacepiXX
                 }
 
                 this.currentHighScore = maxScore();
-            } 
+            }
+
+            this.saveLastName();
         }
 
         /// <summary>
@@ -240,13 +244,98 @@ namespace SpacepiXX
         }
 
         /// <summary>
-        /// Checks wheather the score reaches top 5.
+        /// Checks wheather the score reaches top 10.
         /// </summary>
         /// <param name="score">The score to check</param>
-        /// <returns>True if the player is under the top 5.</returns>
+        /// <returns>True if the player is under the top 1.</returns>
         public bool IsInScoreboard(long score)
         {
             return score > topScores[MaxScores - 1].Score;
+        }
+
+        /// <summary>
+        /// Calculates the rank of the new score.
+        /// </summary>
+        /// <param name="score">The new score</param>
+        /// <returns>Returns the calculated rank (-1, if the score is not top 10).</returns>
+        public int GetRank(long score)
+        {
+            if (topScores.Count < 0)
+                return 1;
+
+            for (int i = 0; i < topScores.Count; i++)
+            {
+                if (topScores[i].Score < score)
+                    return i + 1;
+            }
+
+            return -1;
+        }
+
+        private void saveLastName()
+        {
+
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream("user.txt", FileMode.Create, isf))
+                {
+                    using (StreamWriter sw = new StreamWriter(isfs))
+                    {
+                        sw.WriteLine(this.LastName);
+
+                        sw.Flush();
+                        sw.Close();
+                    }
+                }
+            }
+        }
+
+        private void loadLastName()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                bool hasExisted = isf.FileExists(@"user.txt");
+
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(@"user.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
+                {
+                    if (hasExisted)
+                    {
+                        using (StreamReader sr = new StreamReader(isfs))
+                        {
+                            this.lastName = sr.ReadLine();
+                        }
+                    }
+                    else
+                    {
+                        using (StreamWriter sw = new StreamWriter(isfs))
+                        {
+                            sw.WriteLine(this.lastName);
+
+                            // ... ? 
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            this.currentHighScore = Int64.Parse(reader.ReadLine());
+            this.lastName = reader.ReadLine();
+            this.opacity = Single.Parse(reader.ReadLine());
+            this.isActive = Boolean.Parse(reader.ReadLine());
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(currentHighScore);
+            writer.WriteLine(lastName);
+            writer.WriteLine(opacity);
+            writer.WriteLine(isActive);
         }
 
         #endregion

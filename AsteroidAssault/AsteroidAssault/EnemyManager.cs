@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -17,6 +18,14 @@ namespace SpacepiXX
 
         public ShotManager EnemyShotManager;
         private PlayerManager playerManager;
+
+        public const int SOFT_ROCKET_EXPLOSION_RADIUS = 100;
+        public const float ROCKET_POWER_AT_CENTER = 200.0f;
+
+        public const int DAMAGE_ROCKET_MIN = 75;
+        public const int DAMAGE_ROCKET_MAX = 100;
+        public const int DAMAGE_LASER_MIN = 33;
+        public const int DAMAGE_LASER_MAX = 66;
 
         public int MinShipsPerWave = 4;
         public int MaxShipsPerWave = 8;
@@ -36,7 +45,7 @@ namespace SpacepiXX
 
         private int currentLevel;
 
-        private float shotPower = 75.0f;
+        private readonly Rectangle screen = new Rectangle(0, 0, 800, 480);
 
         #endregion
 
@@ -49,7 +58,7 @@ namespace SpacepiXX
             this.playerManager = playerManager;
 
             EnemyShotManager = new ShotManager(texture,
-                                               new Rectangle(0, 430, 5, 5),
+                                               new Rectangle(100, 430, 15, 5),
                                                4,
                                                2,
                                                150.0f,
@@ -66,39 +75,6 @@ namespace SpacepiXX
 
         private void setUpWayPoints()
         {
-            //List<Vector2> path2 = new List<Vector2>();
-            //path2.Add(new Vector2(-100, 50));
-            //path2.Add(new Vector2(150, 50));
-            //path2.Add(new Vector2(200, 75));
-            //path2.Add(new Vector2(200, 125));
-            //path2.Add(new Vector2(150, 150));
-            //path2.Add(new Vector2(150, 175));
-            //path2.Add(new Vector2(200, 200));
-            //path2.Add(new Vector2(600, 200));
-            //path2.Add(new Vector2(850, 480));
-            //pathWayPoints.Add(path2);
-            //waveSpawns.Add(2, new WaveInfo(0, Enemy.EnemyType.Easy));
-
-            //List<Vector2> path3 = new List<Vector2>();
-            //path3.Add(new Vector2(600, -100));
-            //path3.Add(new Vector2(600, 250));
-            //path3.Add(new Vector2(580, 275));
-            //path3.Add(new Vector2(500, 250));
-            //path3.Add(new Vector2(500, 200));
-            //path3.Add(new Vector2(450, 175));
-            //path3.Add(new Vector2(400, 150));
-            //path3.Add(new Vector2(-100, 150));
-            //pathWayPoints.Add(path3);
-            //waveSpawns.Add(3, new WaveInfo(0, Enemy.EnemyType.Easy));
-
-            //List<Vector2> path4 = new List<Vector2>();
-            //path4.Add(new Vector2(-50, 400));
-            //path4.Add(new Vector2(300, 70));
-            //path4.Add(new Vector2(500, 70));
-            //path4.Add(new Vector2(850, 400));
-            //pathWayPoints.Add(path4);
-            //waveSpawns.Add(4, new WaveInfo(0, Enemy.EnemyType.Easy));
-
             List<Vector2> path0 = new List<Vector2>();
             path0.Add(new Vector2(850, 100));
             path0.Add(new Vector2(-50, 100));
@@ -228,6 +204,106 @@ namespace SpacepiXX
             path16.Add(new Vector2(150, -50));
             pathWayPoints.Add(path16);
             waveSpawns.Add(16, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            //Version 1.1:
+            List<Vector2> path17 = new List<Vector2>();
+            path17.Add(new Vector2(-50, 150));
+            path17.Add(new Vector2(725, 150));
+            path17.Add(new Vector2(750, 175));
+            path17.Add(new Vector2(750, 250));
+            path17.Add(new Vector2(725, 275));
+            path17.Add(new Vector2(-50, 275));
+            pathWayPoints.Add(path17);
+            waveSpawns.Add(17, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path18 = new List<Vector2>();
+            path18.Add(new Vector2(850, 200));
+            path18.Add(new Vector2(75, 200));
+            path18.Add(new Vector2(50, 225));
+            path18.Add(new Vector2(50, 300));
+            path18.Add(new Vector2(75, 325));
+            path18.Add(new Vector2(850, 325));
+            pathWayPoints.Add(path18);
+            waveSpawns.Add(18, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path19 = new List<Vector2>();
+            path19.Add(new Vector2(850, 250));
+            path19.Add(new Vector2(75, 250));
+            path19.Add(new Vector2(50, 225));
+            path19.Add(new Vector2(50, 150));
+            path19.Add(new Vector2(75, 125));
+            path19.Add(new Vector2(850, 125));
+            pathWayPoints.Add(path19);
+            waveSpawns.Add(19, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path20 = new List<Vector2>();
+            path20.Add(new Vector2(-50, 25));
+            path20.Add(new Vector2(725, 25));
+            path20.Add(new Vector2(750, 50));
+            path20.Add(new Vector2(750, 150));
+            path20.Add(new Vector2(725, 175));
+            path20.Add(new Vector2(-50, 175));
+            pathWayPoints.Add(path20);
+            waveSpawns.Add(20, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path21 = new List<Vector2>();
+            path21.Add(new Vector2(-50, 100));
+            path21.Add(new Vector2(850, 350));
+            pathWayPoints.Add(path21);
+            waveSpawns.Add(21, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path22 = new List<Vector2>();
+            path22.Add(new Vector2(850, 100));
+            path22.Add(new Vector2(-50, 350));
+            pathWayPoints.Add(path22);
+            waveSpawns.Add(22, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path23 = new List<Vector2>();
+            path23.Add(new Vector2(-100, 50));
+            path23.Add(new Vector2(150, 50));
+            path23.Add(new Vector2(200, 75));
+            path23.Add(new Vector2(200, 125));
+            path23.Add(new Vector2(150, 150));
+            path23.Add(new Vector2(150, 175));
+            path23.Add(new Vector2(200, 200));
+            path23.Add(new Vector2(600, 200));
+            path23.Add(new Vector2(850, 480));
+            pathWayPoints.Add(path23);
+            waveSpawns.Add(23, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path24 = new List<Vector2>();
+            path24.Add(new Vector2(850, 50));
+            path24.Add(new Vector2(650, 50));
+            path24.Add(new Vector2(600, 75));
+            path24.Add(new Vector2(600, 125));
+            path24.Add(new Vector2(650, 150));
+            path24.Add(new Vector2(650, 175));
+            path24.Add(new Vector2(600, 200));
+            path24.Add(new Vector2(200, 200));
+            path24.Add(new Vector2(-50, 480));
+            pathWayPoints.Add(path24);
+            waveSpawns.Add(24, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path25 = new List<Vector2>();
+            path25.Add(new Vector2(600, -100));
+            path25.Add(new Vector2(600, 250));
+            path25.Add(new Vector2(580, 275));
+            path25.Add(new Vector2(500, 250));
+            path25.Add(new Vector2(500, 200));
+            path25.Add(new Vector2(450, 175));
+            path25.Add(new Vector2(400, 150));
+            path25.Add(new Vector2(-100, 150));
+            pathWayPoints.Add(path25);
+            waveSpawns.Add(25, new WaveInfo(0, Enemy.EnemyType.Easy));
+
+            List<Vector2> path26 = new List<Vector2>();
+            path26.Add(new Vector2(-50, 400));
+            path26.Add(new Vector2(300, 70));
+            path26.Add(new Vector2(500, 70));
+            path26.Add(new Vector2(850, 400));
+            pathWayPoints.Add(path26);
+            waveSpawns.Add(26, new WaveInfo(0, Enemy.EnemyType.Easy));
+
         }
 
         public void SpawnEnemy(int path, Enemy.EnemyType type)
@@ -334,7 +410,16 @@ namespace SpacepiXX
 
             if (nextWaveTimer > nextWaveMinTimer)
             {
-                SpawnWave(rand.Next(0, pathWayPoints.Count));
+                int rnd1 = rand.Next(0, pathWayPoints.Count);
+                int rnd2 = rand.Next(0, pathWayPoints.Count);
+
+                int rndSecondSpawn = rand.Next(0, 10); // 10%
+                
+                SpawnWave(rnd1);
+
+                if (rndSecondSpawn == 0 && rnd1 != rnd2)
+                    SpawnWave(rnd2);
+
                 nextWaveTimer = 0.0f;
             }
         }
@@ -354,7 +439,9 @@ namespace SpacepiXX
                 else
                 {
                     if ((float)rand.Next(0, 1000) / 10 <= Enemies[x].ShotChance &&
-                        !playerManager.IsDestroyed)
+                        !playerManager.IsDestroyed &&
+                         screen.Contains((int)Enemies[x].EnemySprite.Center.X,
+                                         (int)Enemies[x].EnemySprite.Center.Y))
                     {
                         Vector2 fireLocation = Enemies[x].EnemySprite.Location;
                         fireLocation += Enemies[x].GunOffset;
@@ -363,11 +450,23 @@ namespace SpacepiXX
 
                         shotDirection.Normalize();
 
-                        EnemyShotManager.FireShot(fireLocation,
-                                                  shotDirection,
-                                                  false,
-                                                  new Color(1.0f, 0.1f, 0.1f),
-                                                  true);
+                        if (Enemies[x].Type == Enemy.EnemyType.Tank &&
+                            (float)rand.Next(0, 7) == 0) // 14.2%
+                        {
+                            EnemyShotManager.FireRocket(fireLocation,
+                                                             shotDirection,
+                                                             false,
+                                                             Color.White,
+                                                             true);
+                        }
+                        else
+                        {
+                            EnemyShotManager.FireShot(fireLocation,
+                                                      shotDirection,
+                                                      false,
+                                                      new Color(1.0f, 0.1f, 0.1f),
+                                                      true);
+                        }
                     }
                 }
             }
@@ -410,21 +509,119 @@ namespace SpacepiXX
         {
             this.currentLevel = lvl;
 
-            float tmp = initialNextWaveMinTimer - (lvl - 1) * 0.075f;
+            // Version 1.0
+            //float tmp = initialNextWaveMinTimer - (lvl - 1) * 0.075f;
+
+            // Version 1.1 (old)
+            //float tmp = initialNextWaveMinTimer - (float)Math.Sqrt(((lvl - 1) * 0.15));
+
+            // Version 1.1
+            float tmp = (int)(initialNextWaveMinTimer - (float)Math.Sqrt(lvl - 1) * 0.075f + 0.015 * (lvl - 1)); // 5 - WURZEL(A2-1) / 2 * 0,15 - 0,015 * (A2 - 1)
 
             this.nextWaveMinTimer = Math.Max(tmp, 1.0f);
         }
 
         #endregion
 
-        #region Properties
+        #region Activate/Deactivate
 
-        public float ShotPower
+        public void Activated(StreamReader reader)
         {
-            get
+            // Enemies
+            int enemiesCount = Int32.Parse(reader.ReadLine());
+
+            for (int i = 0; i < enemiesCount; ++i)
             {
-                return this.shotPower;
+                Enemy.EnemyType type = Enemy.EnemyType.Easy;
+                Enemy e;
+
+                type = (Enemy.EnemyType)Enum.Parse(type.GetType(), reader.ReadLine(), false);
+
+                switch (type)
+                {
+                    case Enemy.EnemyType.Easy:
+                        e = Enemy.CreateEasyEnemy(texture, Vector2.Zero);
+                        break;
+                    case Enemy.EnemyType.Medium:
+                        e = Enemy.CreateMediumEnemy(texture, Vector2.Zero);
+                        break;
+                    case Enemy.EnemyType.Hard:
+                        e = Enemy.CreateHardEnemy(texture, Vector2.Zero);
+                        break;
+                    case Enemy.EnemyType.Speeder:
+                        e = Enemy.CreateSpeederEnemy(texture, Vector2.Zero);
+                        break;
+                    case Enemy.EnemyType.Tank:
+                        e = Enemy.CreateTankEnemy(texture, Vector2.Zero);
+                        break;
+                    default:
+                        e = Enemy.CreateEasyEnemy(texture, Vector2.Zero);
+                        break;
+                }
+                e.Activated(reader);
+
+                Enemies.Add(e);
             }
+
+            EnemyShotManager.Activated(reader);
+
+            this.MinShipsPerWave = Int32.Parse(reader.ReadLine());
+            this.MaxShipsPerWave = Int32.Parse(reader.ReadLine());
+
+            this.nextWaveTimer = Single.Parse(reader.ReadLine());
+            this.nextWaveMinTimer = Single.Parse(reader.ReadLine());
+            this.shipSpawnTimer = Single.Parse(reader.ReadLine());
+            this.shipSpawnWaitTimer = Single.Parse(reader.ReadLine());
+
+            // Wave spawns
+            int waveSpawnsCount = Int32.Parse(reader.ReadLine());
+
+            for (int i = 0; i < waveSpawnsCount; ++i)
+            {
+                int idx = Int32.Parse(reader.ReadLine());
+                WaveInfo waveInfo = new WaveInfo();
+                waveInfo.Activated(reader);
+                waveSpawns[idx] = waveInfo;
+            }
+
+            this.IsActive = Boolean.Parse(reader.ReadLine());
+
+            this.currentLevel = Int32.Parse(reader.ReadLine());
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            //Enemies
+            writer.WriteLine(Enemies.Count);
+
+            for (int i = 0; i < Enemies.Count; ++i)
+            {
+                writer.WriteLine(Enemies[i].Type);
+                Enemies[i].Deactivated(writer);
+            }
+
+            EnemyShotManager.Deactivated(writer);
+
+            writer.WriteLine(MinShipsPerWave);
+            writer.WriteLine(MaxShipsPerWave);
+
+            writer.WriteLine(nextWaveTimer);
+            writer.WriteLine(nextWaveMinTimer);
+            writer.WriteLine(shipSpawnTimer);
+            writer.WriteLine(shipSpawnWaitTimer);
+
+            // Wave spawns
+            writer.WriteLine(waveSpawns.Count);
+
+            foreach (var waveSpawn in waveSpawns)
+            {
+                writer.WriteLine(waveSpawn.Key);
+                waveSpawn.Value.Deactivated(writer);
+            }
+
+            writer.WriteLine(IsActive);
+
+            writer.WriteLine(currentLevel);
         }
 
         #endregion

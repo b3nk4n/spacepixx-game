@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -13,13 +14,18 @@ namespace SpacepiXX
         public string text;
         public Color drawColor;
         public int displayCounter;
-        private int maxDisplayCount = 250;
+        private int maxDisplayCount; // = 250;
         private float lastScaleAmount = 0.0f;
-        private float scaleRate = 0.05f;
+        private float scaleRate; // = 0.05f;
 
         #endregion
 
         #region Constructors
+
+        public ZoomText()
+        {
+            this.displayCounter = 0;
+        }
 
         public ZoomText(string text, Color fontColor,
                         int maxDisplayCount, float scaleRate)
@@ -39,6 +45,42 @@ namespace SpacepiXX
         {
             lastScaleAmount += scaleRate;
             displayCounter++;
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            this.text = reader.ReadLine();
+
+            this.drawColor = new Color(Int32.Parse(reader.ReadLine()),
+                                       Int32.Parse(reader.ReadLine()),
+                                       Int32.Parse(reader.ReadLine()),
+                                       Int32.Parse(reader.ReadLine()));
+
+            this.displayCounter = Int32.Parse(reader.ReadLine());
+            this.maxDisplayCount = Int32.Parse(reader.ReadLine());
+
+            this.lastScaleAmount = Single.Parse(reader.ReadLine());
+            this.scaleRate = Single.Parse(reader.ReadLine());
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(text);
+
+            writer.WriteLine((int)drawColor.R);
+            writer.WriteLine((int)drawColor.G);
+            writer.WriteLine((int)drawColor.B);
+            writer.WriteLine((int)drawColor.A);
+
+            writer.WriteLine(displayCounter);
+            writer.WriteLine(maxDisplayCount);
+
+            writer.WriteLine(lastScaleAmount);
+            writer.WriteLine(scaleRate);
         }
 
         #endregion

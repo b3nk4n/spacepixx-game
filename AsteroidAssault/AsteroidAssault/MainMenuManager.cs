@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -12,7 +13,7 @@ namespace SpacepiXX
     {
         #region Members
 
-        public enum MenuItems { None, Start, Highscores, Instructions, Help };
+        public enum MenuItems { None, Start, Highscores, Instructions, Help, Settings };
 
         private MenuItems lastPressedMenuItem = MenuItems.None;
 
@@ -20,27 +21,32 @@ namespace SpacepiXX
 
         private Rectangle spacepixxSource = new Rectangle(0, 0,
                                                           500, 100);
-        private Rectangle spacepixxDestination = new Rectangle(150, 50,
+        private Rectangle spacepixxDestination = new Rectangle(150, 20,
                                                                500, 100);
 
         private Rectangle startSource = new Rectangle(0, 200,
                                                       300, 50);
-        private Rectangle startDestination = new Rectangle(250, 175,
+        private Rectangle startDestination = new Rectangle(250, 130,
                                                            300, 50);
 
         private Rectangle highscoresSource = new Rectangle(0, 250,
                                                            300, 50);
-        private Rectangle highscoresDestination = new Rectangle(250, 250,
+        private Rectangle highscoresDestination = new Rectangle(250, 270,
                                                                 300, 50);
 
         private Rectangle instructionsSource = new Rectangle(0, 300,
                                                              300, 50);
-        private Rectangle instructionsDestination = new Rectangle(250, 325,
+        private Rectangle instructionsDestination = new Rectangle(250, 200,
                                                                   300, 50);
 
         private Rectangle helpSource = new Rectangle(0, 350,
                                                      300, 50);
-        private Rectangle helpDestination = new Rectangle(250, 400,
+        private Rectangle helpDestination = new Rectangle(250, 410,
+                                                          300, 50);
+
+        private Rectangle settingsSource = new Rectangle(0, 400,
+                                                     300, 50);
+        private Rectangle settingsDestination = new Rectangle(250, 340,
                                                           300, 50);
 
         private float opacity = 0.0f;
@@ -49,6 +55,8 @@ namespace SpacepiXX
         private const float OpacityChangeRate = 0.05f;
 
         private bool isActive = false;
+
+        private float time = 0.0f;
 
         #endregion
 
@@ -71,6 +79,8 @@ namespace SpacepiXX
                     this.opacity += OpacityChangeRate;
             }
 
+            time = (float)gameTime.TotalGameTime.TotalSeconds;
+
             this.handleTouchInputs();
         }
 
@@ -91,14 +101,29 @@ namespace SpacepiXX
                              highscoresSource,
                              Color.Red * opacity);
 
-            spriteBatch.Draw(texture,
-                             instructionsDestination,
-                             instructionsSource,
-                             Color.Red * opacity);
+            if (InstructionManager.HasDoneInstructions)
+            {
+                spriteBatch.Draw(texture,
+                                 instructionsDestination,
+                                 instructionsSource,
+                                 Color.Red * opacity);
+            }
+            else
+            {
+                spriteBatch.Draw(texture,
+                                 instructionsDestination,
+                                 instructionsSource,
+                                 Color.Red * opacity * (float)Math.Pow(Math.Sin(time), 2.0f));
+            }
 
             spriteBatch.Draw(texture,
                              helpDestination,
                              helpSource,
+                             Color.Red * opacity);
+
+            spriteBatch.Draw(texture,
+                             settingsDestination,
+                             settingsSource,
                              Color.Red * opacity);
         }
 
@@ -130,6 +155,11 @@ namespace SpacepiXX
                     {
                         this.lastPressedMenuItem = MenuItems.Help;
                     }
+                    // Settings
+                    else if (settingsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+                    {
+                        this.lastPressedMenuItem = MenuItems.Settings;
+                    }
                     else
                     {
                         this.lastPressedMenuItem = MenuItems.None;
@@ -140,6 +170,26 @@ namespace SpacepiXX
             {
                 this.lastPressedMenuItem = MenuItems.None;
             }
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            this.lastPressedMenuItem = (MenuItems)Enum.Parse(lastPressedMenuItem.GetType(), reader.ReadLine(), false);
+            this.opacity = Single.Parse(reader.ReadLine());
+            this.isActive = Boolean.Parse(reader.ReadLine());
+            this.time = Single.Parse(reader.ReadLine());
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(lastPressedMenuItem);
+            writer.WriteLine(opacity);
+            writer.WriteLine(isActive);
+            writer.WriteLine(time);
         }
 
         #endregion

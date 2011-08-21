@@ -13,15 +13,15 @@ namespace SpacepiXX
 
         private Texture2D texture;
         private SpriteFont font;
-        private readonly Rectangle HelpTitleDestination = new Rectangle(0, 350,
-                                                                        300, 50);
+        private readonly Rectangle HelpTitleSource = new Rectangle(0, 350,
+                                                                   300, 50);
         private readonly Vector2 TitlePosition = new Vector2(250.0f, 40.0f);
 
         private readonly string[] Content = {"If you have any further questions,",
                                             "ideas or problems with SpacepiXX,",
                                             "please do not hesitate to contact us."};
 
-        private readonly string Email = "b.sautermeister@gmx.de";
+        private readonly string Email = "bsautermeister@live.de";
         private readonly string Blog = "bsautermeister.blogspot.com";
 
         private readonly Rectangle screenBounds;
@@ -61,7 +61,7 @@ namespace SpacepiXX
         {
             spriteBatch.Draw(texture,
                              TitlePosition,
-                             HelpTitleDestination,
+                             HelpTitleSource,
                              Color.White * opacity);
 
             for (int i = 0; i < Content.Length; ++i)

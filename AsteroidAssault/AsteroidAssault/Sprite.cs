@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -98,6 +99,61 @@ namespace SpacepiXX
                              1.0f,
                              SpriteEffects.None,
                              0.0f);
+        }
+
+        public void RotateTo(Vector2 direction)
+        {
+            this.Rotation = (float)Math.Atan2(direction.Y, direction.X);
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            this.currentFrame = Int32.Parse(reader.ReadLine());
+            this.timeForCurrentFrame = Single.Parse(reader.ReadLine());
+
+            this.TintColor = new Color(Int32.Parse(reader.ReadLine()),
+                                       Int32.Parse(reader.ReadLine()),
+                                       Int32.Parse(reader.ReadLine()),
+                                       Int32.Parse(reader.ReadLine()));
+
+            this.rotation = Single.Parse(reader.ReadLine());
+
+            this.CollisionRadius = Int32.Parse(reader.ReadLine());
+            this.BoundingXPadding = Int32.Parse(reader.ReadLine());
+            this.BoundingYPadding = Int32.Parse(reader.ReadLine());
+
+            this.location = new Vector2(Single.Parse(reader.ReadLine()),
+                                        Single.Parse(reader.ReadLine()));
+
+            this.velocity = new Vector2(Single.Parse(reader.ReadLine()),
+                                        Single.Parse(reader.ReadLine()));
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(currentFrame);
+            writer.WriteLine(timeForCurrentFrame);
+
+            writer.WriteLine((int)tintColor.R);
+            writer.WriteLine((int)tintColor.G);
+            writer.WriteLine((int)tintColor.B);
+            writer.WriteLine((int)tintColor.A);
+
+            writer.WriteLine(rotation);
+
+            writer.WriteLine(CollisionRadius);
+            writer.WriteLine(BoundingXPadding);
+            writer.WriteLine(BoundingYPadding);
+
+            writer.WriteLine(location.X);
+            writer.WriteLine(location.Y);
+
+            writer.WriteLine(velocity.X);
+            writer.WriteLine(velocity.Y);
         }
 
         #endregion

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -39,6 +40,22 @@ namespace SpacepiXX
 
         #region Methods
 
+        public void Reinitialize(Vector2 location, Texture2D texture,
+                                 Vector2 velocity, Vector2 acceleration, float maxSpeed,
+                                 int duration, Color initialColor, Color finalColor)
+        {
+            this.Location = location;
+            this.Velocity = velocity;
+            this.Frame = 0;
+
+            this.acceleration = acceleration;
+            this.maxSpeed = maxSpeed;
+            this.initialDuration = duration;
+            this.remainingDuration = duration;
+            this.initialColor = initialColor;
+            this.finalColor = finalColor;
+        }
+
         public override void Update(GameTime gameTime)
         {
             if (IsActive)
@@ -67,6 +84,76 @@ namespace SpacepiXX
                 base.Draw(spriteBatch);
             }
             
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public new void Activated(StreamReader reader)
+        {
+            // Sprite
+            //this.location = new Vector2(Single.Parse(reader.ReadLine()),
+            //                            Single.Parse(reader.ReadLine()));
+            //this.Rotation = Single.Parse(reader.ReadLine());
+            //this.TintColor = new Color(Int32.Parse(reader.ReadLine()),
+            //                           Int32.Parse(reader.ReadLine()),
+            //                           Int32.Parse(reader.ReadLine()),
+            //                           Int32.Parse(reader.ReadLine()));
+            //this.velocity = new Vector2(Single.Parse(reader.ReadLine()),
+            //                            Single.Parse(reader.ReadLine()));
+            base.Activated(reader);
+
+            this.acceleration.X = Single.Parse(reader.ReadLine());
+            this.acceleration.Y = Single.Parse(reader.ReadLine());
+
+            this.maxSpeed = Single.Parse(reader.ReadLine());
+
+            this.initialDuration = Int32.Parse(reader.ReadLine());
+            this.remainingDuration = Int32.Parse(reader.ReadLine());
+
+            this.initialColor = new Color(Int32.Parse(reader.ReadLine()),
+                                          Int32.Parse(reader.ReadLine()),
+                                          Int32.Parse(reader.ReadLine()),
+                                          Int32.Parse(reader.ReadLine()));
+
+            this.finalColor = new Color(Int32.Parse(reader.ReadLine()),
+                                        Int32.Parse(reader.ReadLine()),
+                                        Int32.Parse(reader.ReadLine()),
+                                        Int32.Parse(reader.ReadLine()));
+        }
+
+        public new void Deactivated(StreamWriter writer)
+        {
+            // Sprite
+            //writer.WriteLine(location.X);
+            //writer.WriteLine(location.Y);
+            //writer.WriteLine(Rotation);
+            //writer.WriteLine((int)TintColor.R);
+            //writer.WriteLine((int)TintColor.G);
+            //writer.WriteLine((int)TintColor.B);
+            //writer.WriteLine((int)TintColor.A);
+            //writer.WriteLine((int)velocity.X);
+            //writer.WriteLine((int)velocity.Y);
+            base.Deactivated(writer);
+
+            writer.WriteLine(acceleration.X);
+            writer.WriteLine(acceleration.Y);
+
+            writer.WriteLine(maxSpeed);
+
+            writer.WriteLine(initialDuration);
+            writer.WriteLine(remainingDuration);
+
+            writer.WriteLine((int)initialColor.R);
+            writer.WriteLine((int)initialColor.G);
+            writer.WriteLine((int)initialColor.B);
+            writer.WriteLine((int)initialColor.A);
+
+            writer.WriteLine((int)finalColor.R);
+            writer.WriteLine((int)finalColor.G);
+            writer.WriteLine((int)finalColor.B);
+            writer.WriteLine((int)finalColor.A);
         }
 
         #endregion

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -16,9 +17,30 @@ namespace SpacepiXX
             this.Type = type;
         }
 
+        public WaveInfo()
+        {
+
+        }
+
         public void DecrementSpawns()
         {
             this.SpawnsCount -= 1;
         }
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            this.SpawnsCount = Int32.Parse(reader.ReadLine());
+            this.Type = (Enemy.EnemyType)Enum.Parse(Type.GetType(), reader.ReadLine(), false);
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(SpawnsCount);
+            writer.WriteLine(Type);
+        }
+
+        #endregion
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using System.IO;
 
 namespace SpacepiXX
 {
@@ -70,11 +71,36 @@ namespace SpacepiXX
             this.hasChanged = true;
         }
 
-        public void Reset()
+        public void ResetLevelTimer()
         {
             levelTimer = 0.0f;
+        }
+
+        public void Reset()
+        {
+            ResetLevelTimer();
 
             SetLevelAll(LevelManager.StartLevel);
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            this.levelTimer = Single.Parse(reader.ReadLine());
+            this.currentLevel = Int32.Parse(reader.ReadLine());
+            this.lastLevel = Int32.Parse(reader.ReadLine());
+            this.hasChanged = Boolean.Parse(reader.ReadLine());
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(levelTimer);
+            writer.WriteLine(currentLevel);
+            writer.WriteLine(lastLevel);
+            writer.WriteLine(hasChanged);
         }
 
         #endregion

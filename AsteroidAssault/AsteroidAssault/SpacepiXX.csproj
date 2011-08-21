@@ -73,6 +73,7 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Windows, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, processorArchitecture=MSIL" />
     <Reference Include="System.Xml">
       <Private>False</Private>
     </Reference>
@@ -102,11 +103,15 @@
     <Compile Include="MainMenuManager.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="PlayerManager.cs" />
+    <Compile Include="PowerUp.cs" />
+    <Compile Include="PowerUpManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsManager.cs" />
     <Compile Include="ShotManager.cs" />
     <Compile Include="SoundManager.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="StarFieldManager.cs" />
+    <Compile Include="VibrationManager.cs" />
     <Compile Include="WaveInfo.cs" />
     <Compile Include="ZoomText.cs" />
     <Compile Include="ZoomTextManager.cs" />
@@ -119,7 +124,7 @@
       <SubType>Designer</SubType>
     </None>
     <Compile Include="Program.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="Spacepixx.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
