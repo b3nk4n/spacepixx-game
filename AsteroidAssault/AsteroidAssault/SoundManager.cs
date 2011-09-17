@@ -388,9 +388,12 @@ namespace SpacepiXX
         {
             try
             {
-                MediaPlayer.Play(backgroundSound);
-                MediaPlayer.IsRepeating = true;
-                MediaPlayer.Volume = settings.GetMusicValue();
+                if (MediaPlayer.GameHasControl)
+                {
+                    MediaPlayer.Play(backgroundSound);
+                    MediaPlayer.IsRepeating = true;
+                    MediaPlayer.Volume = settings.GetMusicValue();
+                }
             }
             catch (UnauthorizedAccessException)
             {

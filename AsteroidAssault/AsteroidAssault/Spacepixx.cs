@@ -312,6 +312,23 @@ namespace SpacepiXX
         }
 
         /// <summary>
+        /// Pauses the game when a call is incoming.
+        /// Attention: Also called for GUID !!!
+        /// </summary>
+        protected override void OnDeactivated(object sender, EventArgs args)
+        {
+            base.OnDeactivated(sender, args);
+
+            if (gameState == GameStates.Playing
+                || gameState == GameStates.PlayerDead
+                || gameState == GameStates.Inscructions)
+            {
+                stateBeforePaused = gameState;
+                gameState = GameStates.Paused;
+            }
+        }
+
+        /// <summary>
         /// Occurs when the game class (and application) activated during return from tombstoned state
         /// </summary>
         void GameActivated(object sender, ActivatedEventArgs e)
@@ -341,7 +358,7 @@ namespace SpacepiXX
                                 gameState = GameStates.Paused;
                                 stateBeforePaused = GameStates.PlayerDead;
                             }
-                                    
+
                             this.playerDeathTimer = (float)Single.Parse(reader.ReadLine());
                             this.titleScreenTimer = (float)Single.Parse(reader.ReadLine());
                             this.highscoreMessageShown = (bool)Boolean.Parse(reader.ReadLine());
