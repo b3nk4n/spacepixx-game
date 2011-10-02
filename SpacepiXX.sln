@@ -7,17 +7,33 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpacepiXXContent", "Asteroi
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Windows Phone = Debug|Windows Phone
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Windows Phone = Release|Windows Phone
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Any CPU.ActiveCfg = Debug|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Mixed Platforms.ActiveCfg = Debug|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Mixed Platforms.Build.0 = Debug|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Mixed Platforms.Deploy.0 = Debug|Windows Phone
 		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Windows Phone.ActiveCfg = Debug|Windows Phone
 		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Windows Phone.Build.0 = Debug|Windows Phone
 		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Debug|Windows Phone.Deploy.0 = Debug|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Any CPU.ActiveCfg = Release|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Mixed Platforms.ActiveCfg = Release|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Mixed Platforms.Build.0 = Release|Windows Phone
+		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Mixed Platforms.Deploy.0 = Release|Windows Phone
 		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Windows Phone.ActiveCfg = Release|Windows Phone
 		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Windows Phone.Build.0 = Release|Windows Phone
 		{4C3C2121-4BBD-46CF-8FC8-923126D35AC0}.Release|Windows Phone.Deploy.0 = Release|Windows Phone
+		{A3BE8402-6C02-42DE-A7B2-CB585F486FE6}.Debug|Any CPU.ActiveCfg = Debug|Windows Phone
+		{A3BE8402-6C02-42DE-A7B2-CB585F486FE6}.Debug|Mixed Platforms.ActiveCfg = Debug|Windows Phone
 		{A3BE8402-6C02-42DE-A7B2-CB585F486FE6}.Debug|Windows Phone.ActiveCfg = Debug|Windows Phone
+		{A3BE8402-6C02-42DE-A7B2-CB585F486FE6}.Release|Any CPU.ActiveCfg = Release|Windows Phone
+		{A3BE8402-6C02-42DE-A7B2-CB585F486FE6}.Release|Mixed Platforms.ActiveCfg = Release|Windows Phone
 		{A3BE8402-6C02-42DE-A7B2-CB585F486FE6}.Release|Windows Phone.ActiveCfg = Release|Windows Phone
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution

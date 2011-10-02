@@ -38,6 +38,12 @@ namespace SpacepiXX
         private static SoundEffect enemyRocketSound;
         private static SoundEffect shieldSound;
 
+        private static SoundEffect bossEasySound;
+        private static SoundEffect bossMediumSound;
+        private static SoundEffect bossHardSound;
+        private static SoundEffect bossSpeederSound;
+        private static SoundEffect bossTankSound;
+
         private static List<SoundEffect> hitSounds = new List<SoundEffect>();
         private static int hitSoundsCount = 6;
 
@@ -77,6 +83,12 @@ namespace SpacepiXX
                 overheatSound = content.Load<SoundEffect>(@"Sounds\Overheat");
                 enemyRocketSound = content.Load<SoundEffect>(@"Sounds\EnemyRocket");
                 shieldSound = content.Load<SoundEffect>(@"Sounds\Shield");
+
+                bossEasySound = content.Load<SoundEffect>(@"Sounds\boss_easy");
+                bossMediumSound = content.Load<SoundEffect>(@"Sounds\boss_medium");
+                bossHardSound = content.Load<SoundEffect>(@"Sounds\boss_hard");
+                bossSpeederSound = content.Load<SoundEffect>(@"Sounds\boss_speeder");
+                bossTankSound = content.Load<SoundEffect>(@"Sounds\boss_tank");
 
                 for (int x = 1; x <= explosionsCount; x++)
                 {
@@ -384,6 +396,76 @@ namespace SpacepiXX
             }
         }
 
+        public static void PlayBossEasySound()
+        {
+            try
+            {
+                SoundEffectInstance s = bossEasySound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play boss sound failed.");
+            }
+        }
+
+        public static void PlayBossMediumSound()
+        {
+            try
+            {
+                SoundEffectInstance s = bossMediumSound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play boss sound failed.");
+            }
+        }
+
+        public static void PlayBossHardSound()
+        {
+            try
+            {
+                SoundEffectInstance s = bossHardSound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play boss sound failed.");
+            }
+        }
+
+        public static void PlayBossSpeederSound()
+        {
+            try
+            {
+                SoundEffectInstance s = bossSpeederSound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play boss sound failed.");
+            }
+        }
+
+        public static void PlayBossTankSound()
+        {
+            try
+            {
+                SoundEffectInstance s = bossTankSound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play boss sound failed.");
+            }
+        }
+
         public static void PlayBackgroundSound()
         {
             try
@@ -398,6 +480,10 @@ namespace SpacepiXX
             catch (UnauthorizedAccessException)
             {
                 // play no music...
+            }
+            catch (InvalidOperationException)
+            {
+                // play no music (because of Zune on PC)
             }
         }
 

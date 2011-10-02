@@ -18,7 +18,7 @@ namespace SpacepiXX
 
         private static Random rand = new Random();
         public static Texture2D Texture;
-        public static Rectangle ParticleFrame = new Rectangle(0, 450, 2, 2);
+        public static Rectangle ParticleFrame = new Rectangle(0, 350, 2, 2);
         public static List<Rectangle> ExplosionFrames = new List<Rectangle>();
 
         private static Queue<Particle> freeExplosionParticles = new Queue<Particle>(128);
@@ -255,6 +255,12 @@ namespace SpacepiXX
                                20,
                                new Color(1.0f, 1.0f, 1.0f),
                                new Color(1.0f, 1.0f, 1.0f) * 0.0f);
+        }
+
+        public static void AddBossExplosion(Vector2 location, Vector2 momentum)
+        {
+            AddRocketExplosion(location, momentum);
+            AddLargeExplosion(location, momentum);
         }
 
         public static void AddSparksEffect(Vector2 location, Vector2 impectVelocity, Vector2 momentum, Color tintColor, bool sound)

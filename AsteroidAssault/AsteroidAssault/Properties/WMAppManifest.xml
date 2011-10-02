@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2009/deployment" AppPlatformVersion="7.0">
-  <App xmlns="" ProductID="{dae953e6-bdcf-4041-a8c6-fba920511e47}" Title="SpacepiXX" RuntimeType="XNA" Version="1.0.0.0" Genre="Apps.Games" Author="B. Sautermeister" Description="SpacepiXX is an adictive retro space shooter." Publisher="B. Sautermeister">
+  <App xmlns="" ProductID="{cbe0dfa7-2879-4c2c-b7c6-3798781fba16}" Title="SpacepiXX" RuntimeType="XNA" Version="1.0.0.0" Genre="Apps.Games" Author="B. Sautermeister" Description="SpacepiXX is an adictive retro space shooter." Publisher="B. Sautermeister">
     <IconPath IsRelative="true" IsResource="false"></IconPath>
     <Capabilities>
+      <!--<Capability Name="ID_CAP_IDENTITY_DEVICE"/>-->
+      <Capability Name="ID_CAP_IDENTITY_USER"/>
       <Capability Name="ID_CAP_SENSORS" />
-      <Capability Name="ID_CAP_GAMERSERVICES" />
+      <Capability Name="ID_CAP_NETWORKING"/>
       <Capability Name="ID_CAP_MEDIALIB" />
     </Capabilities>
     <Tasks>

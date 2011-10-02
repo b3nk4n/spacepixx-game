@@ -7,10 +7,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.IO.IsolatedStorage;
 using System.IO;
+using SpacepiXX.Inputs;
 
 namespace SpacepiXX
 {
-    public class SettingsManager
+    class SettingsManager
     {
         #region Members
 
@@ -59,6 +60,12 @@ namespace SpacepiXX
 
         private bool isActive = false;
 
+        public static GameInput GameInput;
+        private const string MusicAction = "Music";
+        private const string SfxAction = "Sfx";
+        private const string VibrationAction = "Vibration";
+        private const string NeutralPositionAction = "NeutralPos";
+
         #endregion
 
         #region Constructors
@@ -71,6 +78,22 @@ namespace SpacepiXX
         #endregion
 
         #region Methods
+
+        public void SetupInputs()
+        {
+            GameInput.AddTouchGestureInput(MusicAction,
+                                           GestureType.Tap,
+                                           musicDestination);
+            GameInput.AddTouchGestureInput(SfxAction,
+                                           GestureType.Tap,
+                                           sfxDestination);
+            GameInput.AddTouchGestureInput(VibrationAction,
+                                           GestureType.Tap,
+                                           vibrationDestination);
+            GameInput.AddTouchGestureInput(NeutralPositionAction,
+                                           GestureType.Tap,
+                                           neutralPositionDestination);
+        }
 
         public void Initialize(Texture2D tex, SpriteFont f, Rectangle screen)
         {
@@ -136,34 +159,55 @@ namespace SpacepiXX
 
         private void handleTouchInputs()
         {
-            if (TouchPanel.IsGestureAvailable)
-            {
-                GestureSample gs = TouchPanel.ReadGesture();
+            //if (TouchPanel.IsGestureAvailable)
+            //{
+            //    GestureSample gs = TouchPanel.ReadGesture();
 
-                if (gs.GestureType == GestureType.Tap)
-                {
-                    // Music
-                    if (musicDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        toggleMusic();
-                        Save();
-                    }
-                    // Sfx
-                    else if (sfxDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        toggleSfx();
-                    }
-                    // Vibration
-                    else if (vibrationDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        toggleVibration();
-                    }
-                    // Neutral position
-                    else if (neutralPositionDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        toggleNeutralPosition();
-                    }
-                }
+            //    if (gs.GestureType == GestureType.Tap)
+            //    {
+            //        // Music
+            //        if (musicDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            toggleMusic();
+            //            Save();
+            //        }
+            //        // Sfx
+            //        else if (sfxDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            toggleSfx();
+            //        }
+            //        // Vibration
+            //        else if (vibrationDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            toggleVibration();
+            //        }
+            //        // Neutral position
+            //        else if (neutralPositionDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            toggleNeutralPosition();
+            //        }
+            //    }
+            //}
+
+            // Music
+            if (GameInput.IsPressed(MusicAction))
+            {
+                toggleMusic();
+            }
+            // Sfx
+            if (GameInput.IsPressed(SfxAction))
+            {
+                toggleSfx();
+            }
+            // Vibration
+            if (GameInput.IsPressed(VibrationAction))
+            {
+                toggleVibration();
+            }
+            // NeutralPosition
+            if (GameInput.IsPressed(NeutralPositionAction))
+            {
+                toggleNeutralPosition();
             }
         }
 

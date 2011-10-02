@@ -16,7 +16,7 @@ namespace SpacepiXX
         public const int StartLevel = 1;
 
         private float levelTimer = 0.0f;
-        public const float TimeForLevel = 45.0f;
+        public const float TimeForLevel = 60.0f;
 
         private int currentLevel;
         private int lastLevel;
@@ -44,10 +44,21 @@ namespace SpacepiXX
 
             if (levelTimer >= LevelManager.TimeForLevel)
             {
-                SetLevelAll(currentLevel + 1);
-
-                levelTimer = 0.0f;
+                //SetLevelAll(currentLevel + 1);
+                this.hasChanged = true;
+                //levelTimer = 0.0f;
             }
+            else
+            {
+                this.hasChanged = false;
+            }
+        }
+
+        public void GoToNextLevel()
+        {
+            SetLevelAll(currentLevel + 1);
+
+            levelTimer = 0.0f;
         }
 
         public void Register(ILevel comp)
@@ -68,7 +79,7 @@ namespace SpacepiXX
                 comp.SetLevel(lvl);
             }
 
-            this.hasChanged = true;
+            //this.hasChanged = true;
         }
 
         public void ResetLevelTimer()
@@ -127,9 +138,10 @@ namespace SpacepiXX
         {
             get
             {
-                bool tmp = this.hasChanged;
-                this.hasChanged = false;
-                return tmp;
+                //bool tmp = this.hasChanged;
+                //this.hasChanged = false;
+                //return tmp;
+                return hasChanged;
             }
         }
 

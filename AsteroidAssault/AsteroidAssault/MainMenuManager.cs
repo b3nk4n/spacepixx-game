@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.IO;
+using SpacepiXX.Inputs;
+using Microsoft.Phone.Tasks;
 
 namespace SpacepiXX
 {
@@ -49,6 +51,11 @@ namespace SpacepiXX
         private Rectangle settingsDestination = new Rectangle(250, 340,
                                                           300, 50);
 
+        private Rectangle reviewSource = new Rectangle(400, 800,
+                                                       100, 100);
+        private Rectangle reviewDestination = new Rectangle(10, 380,
+                                                            100, 100);
+
         private float opacity = 0.0f;
         private const float OpacityMax = 1.0f;
         private const float OpacityMin = 0.0f;
@@ -58,18 +65,52 @@ namespace SpacepiXX
 
         private float time = 0.0f;
 
+        private GameInput gameInput;
+        private const string StartAction = "Start";
+        private const string InstructionsAction = "Instructions";
+        private const string HighscoresAction = "Highscores";
+        private const string SettingsAction = "Settings";
+        private const string HelpAction = "Help";
+        private const string ReviewAction = "Review";
+
+        private MarketplaceReviewTask reviewTask = new MarketplaceReviewTask();
+
         #endregion
 
         #region Constructors
 
-        public MainMenuManager(Texture2D spriteSheet)
+        public MainMenuManager(Texture2D spriteSheet, GameInput input)
         {
             this.texture = spriteSheet;
+            this.gameInput = input;
         }
 
         #endregion
 
         #region Methods
+
+        public void SetupInputs()
+        {
+            gameInput.AddTouchGestureInput(StartAction,
+                                           GestureType.Tap, 
+                                           startDestination);
+            gameInput.AddTouchGestureInput(InstructionsAction,
+                                           GestureType.Tap,
+                                           instructionsDestination);
+            gameInput.AddTouchGestureInput(HighscoresAction,
+                                           GestureType.Tap,
+                                           highscoresDestination);
+            gameInput.AddTouchGestureInput(SettingsAction,
+                                           GestureType.Tap,
+                                           settingsDestination);
+            gameInput.AddTouchGestureInput(HelpAction,
+                                           GestureType.Tap,
+                                           helpDestination);
+
+            gameInput.AddTouchGestureInput(ReviewAction,
+                                           GestureType.Tap,
+                                           reviewDestination);
+        }
 
         public void Update(GameTime gameTime)
         {
@@ -125,46 +166,86 @@ namespace SpacepiXX
                              settingsDestination,
                              settingsSource,
                              Color.Red * opacity);
+
+            spriteBatch.Draw(texture,
+                             reviewDestination,
+                             reviewSource,
+                             Color.Red * opacity);
         }
 
         private void handleTouchInputs()
         {
-            if (TouchPanel.IsGestureAvailable)
-            {
-                GestureSample gs = TouchPanel.ReadGesture();
+            //if (TouchPanel.IsGestureAvailable)
+            //{
+            //    GestureSample gs = TouchPanel.ReadGesture();
 
-                if (gs.GestureType == GestureType.Tap)
-                {
-                    // Start
-                    if (startDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        this.lastPressedMenuItem = MenuItems.Start;
-                    }
-                    // Highscores
-                    else if (highscoresDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        this.lastPressedMenuItem = MenuItems.Highscores;
-                    }
-                    // Instructions
-                    else if (instructionsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        this.lastPressedMenuItem = MenuItems.Instructions;
-                    }
-                    // Help
-                    else if (helpDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        this.lastPressedMenuItem = MenuItems.Help;
-                    }
-                    // Settings
-                    else if (settingsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-                    {
-                        this.lastPressedMenuItem = MenuItems.Settings;
-                    }
-                    else
-                    {
-                        this.lastPressedMenuItem = MenuItems.None;
-                    }
-                }
+            //    if (gs.GestureType == GestureType.Tap)
+            //    {
+            //        // Start
+            //        if (startDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            this.lastPressedMenuItem = MenuItems.Start;
+            //        }
+            //        // Highscores
+            //        else if (highscoresDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            this.lastPressedMenuItem = MenuItems.Highscores;
+            //        }
+            //        // Instructions
+            //        else if (instructionsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            this.lastPressedMenuItem = MenuItems.Instructions;
+            //        }
+            //        // Help
+            //        else if (helpDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            this.lastPressedMenuItem = MenuItems.Help;
+            //        }
+            //        // Settings
+            //        else if (settingsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
+            //        {
+            //            this.lastPressedMenuItem = MenuItems.Settings;
+            //        }
+            //        else
+            //        {
+            //            this.lastPressedMenuItem = MenuItems.None;
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    this.lastPressedMenuItem = MenuItems.None;
+            //}
+
+            // Start
+            if (gameInput.IsPressed(StartAction))
+            {
+                this.lastPressedMenuItem = MenuItems.Start;
+            }
+            // Highscores
+            else if (gameInput.IsPressed(HighscoresAction))
+            {
+                this.lastPressedMenuItem = MenuItems.Highscores;
+            }
+            // Instructions
+            else if (gameInput.IsPressed(InstructionsAction))
+            {
+                this.lastPressedMenuItem = MenuItems.Instructions;
+            }
+            // Help
+            else if (gameInput.IsPressed(HelpAction))
+            {
+                this.lastPressedMenuItem = MenuItems.Help;
+            }
+            // Settings
+            else if (gameInput.IsPressed(SettingsAction))
+            {
+                this.lastPressedMenuItem = MenuItems.Settings;
+            }
+            // Settings
+            else if (gameInput.IsPressed(ReviewAction))
+            {
+                reviewTask.Show();
             }
             else
             {

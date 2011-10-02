@@ -8,40 +8,38 @@ using System.IO;
 
 namespace SpacepiXX
 {
-    class Enemy : ILevel
+    class Boss : ILevel
     {
         #region Members
 
-        private Sprite enemySprite;
-        private Vector2 gunOffset = new Vector2(25, 25);
+        private Sprite bossSprite;
         private Queue<Vector2> wayPoints = new Queue<Vector2>();
         private Vector2 currentWayPoint = Vector2.Zero;
 
         private float speed;
 
-        private const int EnemyRadiusEasy = 14;
-        private const int EnemyRadiusMedium = 20;
-        private const int EnemyRadiusHard = 18;
-        private const int EnemyRadiusSpeeder = 18;
-        private const int EnemyRadiusTank = 18;
+        private const int BossRadiusEasy = 30;
+        private const int BossRadiusMedium = 40;
+        private const int BossRadiusHard = 36;
+        private const int BossRadiusSpeeder = 36;
+        private const int BossRadiusTank = 36;
 
-        private const float InitialHitPointsEasy = 25.0f;
-        private const float InitialHitPointsMedium = 80.0f;
-        private const float InitialHitPointsHard = 125.0f;
-        private const float InitialHitPointsSpeeder = 75.0f;
-        private const float InitialHitPointsTank = 210.0f;
+        private const float InitialHitPointsEasy = 1750.0f;
+        private const float InitialHitPointsMedium = 2000.0f;
+        private const float InitialHitPointsHard = 2250.0f;
+        private const float InitialHitPointsSpeeder = 1750.0f;
+        private const float InitialHitPointsTank = 2500.0f;
 
-        private readonly Rectangle EasySource = new Rectangle(0, 200,
-                                                              50, 50);
-        private readonly Rectangle MediumSource = new Rectangle(0, 250,
-                                                                50, 50);
-        private readonly Rectangle HardSource = new Rectangle(350, 200,
-                                                              50, 50);
-        private readonly Rectangle SpeederSource = new Rectangle(350, 250,
-                                                                 50, 50);
-        private readonly Rectangle TankSource = new Rectangle(350, 150,
-                                                              50, 50);
-
+        private readonly Rectangle EasySource = new Rectangle(350, 300,
+                                                              100, 100);
+        private readonly Rectangle MediumSource = new Rectangle(0, 500,
+                                                              100, 100);
+        private readonly Rectangle HardSource = new Rectangle(600, 500,
+                                                                100, 100);
+        private readonly Rectangle SpeederSource = new Rectangle(600, 600,
+                                                              100, 100);
+        private readonly Rectangle TankSource = new Rectangle(0, 600,
+                                                              100, 100);
         private const int EasyFrameCount = 4;
         private const int MediumFrameCount = 6;
         private const int HardFrameCount = 6;
@@ -60,15 +58,14 @@ namespace SpacepiXX
         private readonly int initialKillScore;
         private int killScore;
 
-        private readonly float initialShotChance;
-        private float shotChance;
+        public static PlayerManager Player;
 
         #endregion
 
         #region Constructors
 
-        private Enemy(Texture2D texture, Vector2 location,
-                     float speed, int hitScore, int killScore, float shotChance,
+        private Boss(Texture2D texture, Vector2 location,
+                     float speed, int hitScore, int killScore,
                      int collisionRadius, EnemyType type)
         {
             Rectangle initialFrame = new Rectangle();
@@ -98,20 +95,20 @@ namespace SpacepiXX
                     break;
             }
 
-            enemySprite = new Sprite(location,
+            bossSprite = new Sprite(location,
                                      texture,
                                      initialFrame,
                                      Vector2.Zero);
 
             for (int x = 1; x < frameCount; x++)
             {
-                EnemySprite.AddFrame(new Rectangle(initialFrame.X + (x * initialFrame.Width),
+                BossSprite.AddFrame(new Rectangle(initialFrame.X + (x * initialFrame.Width),
                                                    initialFrame.Y,
                                                    initialFrame.Width,
                                                    initialFrame.Height));
                 previousCenter = location;
                 currentWayPoint = location;
-                EnemySprite.CollisionRadius = collisionRadius;
+                BossSprite.CollisionRadius = collisionRadius;
             }
 
             this.speed = speed;
@@ -121,9 +118,6 @@ namespace SpacepiXX
             this.initialKillScore = killScore;
             this.killScore = killScore;
 
-            this.initialShotChance = shotChance;
-            this.shotChance = shotChance;
-
             this.type = type;
         }
 
@@ -131,89 +125,84 @@ namespace SpacepiXX
 
         #region Methods
 
-        public static Enemy CreateEasyEnemy(Texture2D texture, Vector2 location)
+        public static Boss CreateEasyBoss(Texture2D texture, Vector2 location)
         {
-            Enemy enemy = new Enemy(texture,
-                                    location,
-                                    150.0f,
-                                    50,
-                                    150,
-                                    0.15f,
-                                    Enemy.EnemyRadiusEasy,
-                                    EnemyType.Easy);
+            Boss boss = new Boss(texture,
+                                 location,
+                                 50.0f,
+                                 75,
+                                 10000,
+                                 Boss.BossRadiusEasy,
+                                 EnemyType.Easy);
 
-            enemy.hitPoints = InitialHitPointsEasy;
-            enemy.MaxHitPoints = InitialHitPointsEasy;
+            boss.hitPoints = InitialHitPointsEasy;
+            boss.MaxHitPoints = InitialHitPointsEasy;
 
-            return enemy;
+            return boss;
         }
 
-        public static Enemy CreateMediumEnemy(Texture2D texture, Vector2 location)
+        public static Boss CreateMediumBoss(Texture2D texture, Vector2 location)
         {
-            Enemy enemy = new Enemy(texture,
-                                location,
-                                125.0f,
-                                75,
-                                200,
-                                0.25f,
-                                Enemy.EnemyRadiusMedium,
-                                EnemyType.Medium);
+            Boss boss = new Boss(texture,
+                                 location,
+                                 50.0f,
+                                 100,
+                                 10000,
+                                 Boss.BossRadiusMedium,
+                                 EnemyType.Medium);
 
-            enemy.hitPoints = InitialHitPointsMedium;
-            enemy.MaxHitPoints = InitialHitPointsMedium;
+            boss.hitPoints = InitialHitPointsMedium;
+            boss.MaxHitPoints = InitialHitPointsMedium;
 
-            return enemy;
+            return boss;
         }
 
-        public static Enemy CreateHardEnemy(Texture2D texture, Vector2 location)
+        public static Boss CreateHardBoss(Texture2D texture, Vector2 location)
         {
-            Enemy enemy = new Enemy(texture,
+            Boss boss = new Boss(texture,
                                 location,
-                                100.0f,
-                                100,
-                                300,
-                                0.3f,
-                                Enemy.EnemyRadiusHard,
+                                40.0f,
+                                125,
+                                12500,
+                                Boss.BossRadiusHard,
                                 EnemyType.Hard);
 
-            enemy.hitPoints = InitialHitPointsHard;
-            enemy.MaxHitPoints = InitialHitPointsHard;
+            boss.hitPoints = InitialHitPointsHard;
+            boss.MaxHitPoints = InitialHitPointsHard;
 
-            return enemy;
+            return boss;
         }
 
-        public static Enemy CreateSpeederEnemy(Texture2D texture, Vector2 location)
+        public static Boss CreateSpeederBoss(Texture2D texture, Vector2 location)
         {
-            Enemy enemy = new Enemy(texture,
+            Boss boss = new Boss(texture,
                                 location,
-                                175.0f,
+                                60.0f,
                                 100,
-                                300,
-                                0.25f,
-                                Enemy.EnemyRadiusSpeeder,
+                                12500,
+                                Boss.BossRadiusSpeeder,
                                 EnemyType.Speeder);
 
-            enemy.hitPoints = InitialHitPointsSpeeder;
-            enemy.MaxHitPoints = InitialHitPointsSpeeder;
+            boss.hitPoints = InitialHitPointsSpeeder;
+            boss.MaxHitPoints = InitialHitPointsSpeeder;
 
-            return enemy;
+            return boss;
         }
 
-        public static Enemy CreateTankEnemy(Texture2D texture, Vector2 location)
+        public static Boss CreateTankBoss(Texture2D texture, Vector2 location)
         {
-            Enemy enemy = new Enemy(texture,
+            Boss boss = new Boss(texture,
                                 location,
-                                100.0f,
-                                50,
-                                500,
-                                0.35f,
-                                Enemy.EnemyRadiusTank,
+                                30.0f,
+                                150,
+                                15000,
+                                Boss.BossRadiusTank,
                                 EnemyType.Tank);
 
-            enemy.hitPoints = InitialHitPointsTank;
-            enemy.MaxHitPoints = InitialHitPointsTank;
+            boss.hitPoints = InitialHitPointsTank;
+            boss.MaxHitPoints = InitialHitPointsTank;
 
-            return enemy;
+            return boss;
         }
 
         public void AddWayPoint(Vector2 wayPoint)
@@ -223,8 +212,8 @@ namespace SpacepiXX
 
         public bool WayPointReached()
         {
-            if (Vector2.Distance(EnemySprite.Center, currentWayPoint) <
-                (float)EnemySprite.Source.Width / 2)
+            if (Vector2.Distance(BossSprite.Center, currentWayPoint) <
+                (float)BossSprite.Source.Width / 2)
             {
                 return true;
             }
@@ -258,7 +247,7 @@ namespace SpacepiXX
         {
             if (IsActive())
             {
-                Vector2 heading = currentWayPoint - EnemySprite.Center;
+                Vector2 heading = currentWayPoint - BossSprite.Center;
 
                 if (heading != Vector2.Zero)
                 {
@@ -266,11 +255,11 @@ namespace SpacepiXX
                 }
 
                 heading *= speed;
-                EnemySprite.Velocity = heading;
-                previousCenter = EnemySprite.Center;
-                EnemySprite.Update(gameTime);
-                EnemySprite.Rotation = (float)Math.Atan2(EnemySprite.Center.Y - previousCenter.Y,
-                                                         EnemySprite.Center.X - previousCenter.X);
+                BossSprite.Velocity = heading;
+                previousCenter = BossSprite.Center;
+                BossSprite.Update(gameTime);
+                BossSprite.Rotation = (float)Math.Atan2(BossSprite.Center.Y - previousCenter.Y,
+                                                         BossSprite.Center.X - previousCenter.X);
 
                 if (WayPointReached())
                 {
@@ -281,7 +270,9 @@ namespace SpacepiXX
                 }
 
                 float factor = (float)Math.Max((this.hitPoints / this.MaxHitPoints), 0.66f);
-                this.EnemySprite.TintColor = Color.White * factor;
+                this.BossSprite.TintColor = Color.White * factor;
+
+                this.BossSprite.RotateTo(Player.playerSprite.Center - this.BossSprite.Center);
             }
         }
 
@@ -289,7 +280,7 @@ namespace SpacepiXX
         {
             if (IsActive())
             {
-                EnemySprite.Draw(spriteBatch);
+                BossSprite.Draw(spriteBatch);
             }
         }
 
@@ -298,11 +289,8 @@ namespace SpacepiXX
             this.hitScore = initialHitScore + (lvl - 1) * (initialHitScore / 10);
             this.killScore = initialKillScore + (lvl - 1) * (initialKillScore / 10);
 
-            //this.shotChance = initialShotChance + (lvl - 1) * 0.0075f; // Version 1.0: init + lvl * 0.01f
-            this.shotChance = initialShotChance + (float)Math.Sqrt(lvl - 1) * 0.02f * initialShotChance * (lvl - 1) * 0.002f;
-
-            this.MaxHitPoints += (lvl - 1);
-            this.HitPoints += (lvl - 1);
+            this.MaxHitPoints += 50 * (lvl - 1);
+            this.HitPoints += 50 * (lvl - 1);
         }
 
         #endregion
@@ -311,8 +299,8 @@ namespace SpacepiXX
 
         public void Activated(StreamReader reader)
         {
-            // Enemy sprite
-            enemySprite.Activated(reader);
+            // Boss sprite
+            bossSprite.Activated(reader);
 
             //Waypoints
             int waypointsCount = Int32.Parse(reader.ReadLine());
@@ -340,14 +328,12 @@ namespace SpacepiXX
             this.hitScore = Int32.Parse(reader.ReadLine());
 
             this.killScore = Int32.Parse(reader.ReadLine());
-
-            this.shotChance = Single.Parse(reader.ReadLine());
         }
 
         public void Deactivated(StreamWriter writer)
         {
-            // Enemy sprite
-            enemySprite.Deactivated(writer);
+            // Boss sprite
+            bossSprite.Deactivated(writer);
 
             // Waypoints
             int wayPointsCount = wayPoints.Count;
@@ -376,19 +362,17 @@ namespace SpacepiXX
             writer.WriteLine(hitScore);
 
             writer.WriteLine(killScore);
-
-            writer.WriteLine(shotChance);
         }
 
         #endregion
 
         #region Properties
 
-        public Sprite EnemySprite
+        public Sprite BossSprite
         {
             get
             {
-                return this.enemySprite;
+                return this.bossSprite;
             }
         }
 
@@ -397,14 +381,6 @@ namespace SpacepiXX
             get
             {
                 return this.type;
-            }
-        }
-
-        public Vector2 GunOffset
-        {
-            get
-            {
-                return this.gunOffset;
             }
         }
 
@@ -437,14 +413,6 @@ namespace SpacepiXX
             get
             {
                 return this.initialKillScore;
-            }
-        }
-
-        public float ShotChance
-        {
-            get
-            {
-                return this.shotChance;
             }
         }
 

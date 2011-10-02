@@ -34,21 +34,30 @@ namespace SpacepiXX
             this.level = level;
         }
 
+        public static string CheckedName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return name;
+            
+            string tmp = name;
+
+            for (int i = 0; i < tmp.Length; i++)
+            {
+                if (!((tmp[i] >= 48 && tmp[i] <= 57) || (tmp[i] >= 65 && tmp[i] <= 90) || (tmp[i] >= 97 && tmp[i] <= 122)))
+                {
+                    tmp = tmp.Replace(tmp[i], ' '); ;
+                }
+            }
+            tmp = tmp.Trim();
+
+            return tmp.Substring(0, Math.Min(tmp.Length, MaxNameLength));
+        }
+
         public string Name
         {
             private set
             {
-                string tmp = value.Replace(',',' ').Trim();
-
-                for (int i = 0; i < tmp.Length; i++)
-                {
-                    if (tmp[i] < 32 || tmp[i] > 126)
-                    {
-                        tmp = tmp.Replace(tmp[i], ' '); ;
-                    }
-                }
-
-                this.name = tmp.Substring(0, Math.Min(tmp.Length, MaxNameLength));
+                this.name = Highscore.CheckedName(value);
             }
             get
             {

@@ -15,24 +15,46 @@ namespace SpacepiXX
 
         private float progressTimer = 0.0f;
 
-        public enum InstructionStates { Welcome, Movement, SingleShot, DoubleShot, TripleShot, SpecialShot, Rocket, HitPoints, Shield, ScoreMulti, Overheat, BewareAsteroid, KillEnemies, PowerUps, GoodLuck, ReturnWithBackButton};
+        public enum InstructionStates { 
+            Welcome,                       
+            Movement,                           
+            SingleShot, 
+            DoubleShot, 
+            TripleShot,
+            SideShot,
+            SpecialShot, 
+            Rocket, 
+            HitPoints, 
+            Shield, 
+            ScoreMulti, 
+            Overheat, 
+            BewareAsteroid, 
+            KillEnemies, 
+            PowerUps, 
+            KillBoss,
+            BossBonus,
+            GoodLuck, 
+            ReturnWithBackButton};
 
         private InstructionStates state = InstructionStates.Welcome;
 
-        private const float WelcomeLimit = 3.0f;
-        private const float MovementLimit = 8.0f;
-        private const float SingleShotLimit = 11.0f;
-        private const float DoubleShotLimit = 14.0f;
+        private const float WelcomeLimit = 2.0f;
+        private const float MovementLimit = 5.0f;
+        private const float SingleShotLimit = 9.0f;
+        private const float DoubleShotLimit = 13.0f;
         private const float TripleShotLimit = 17.0f;
-        private const float SpecielShotLimit = 20.0f;
-        private const float RocketLimit = 23.0f;
-        private const float HitPointsLimit = 26.0f;
-        private const float ShieldLimit = 29.0f;
-        private const float ScoreMultiLimit = 32.0f;
-        private const float OverheatLimit = 35.0f;
-        private const float BewareAsteroidsLimit = 40.0f;
-        private const float KillEnemiesLimit = 45.0f;
+        private const float SideShotLimit = 21.0f;
+        private const float SpecielShotLimit = 25.0f;
+        private const float RocketLimit = 29.0f;
+        private const float HitPointsLimit = 32.0f;
+        private const float ShieldLimit = 35.0f;
+        private const float ScoreMultiLimit = 38.0f;
+        private const float OverheatLimit = 41.0f;
+        private const float BewareAsteroidsLimit = 44.0f;
+        private const float KillEnemiesLimit = 47.0f;
         private const float PowerUpsLimit = 50.0f;
+        private const float KillBossLimit = 55.0f;
+        private const float BossBonusLimit = 60.0f;
 
         private SpriteFont font;
 
@@ -40,20 +62,21 @@ namespace SpacepiXX
 
         private Rectangle screenBounds;
 
-        private Rectangle areaSource = new Rectangle(660, 60, 380, 210);
-        private Rectangle areaTopSource = new Rectangle(660, 70, 380, 190);
+        private Rectangle areaSource = new Rectangle(660, 60, 380, 150);
+        private Rectangle sideAreaSource = new Rectangle(950, 210, 250, 140);
         private Rectangle arrowRightSource = new Rectangle(100, 460, 40, 20);
 
-        private Rectangle singleShotDestination = new Rectangle(10, 260, 380, 210);
-        private Rectangle doubleShotDestination = new Rectangle(410, 260, 380, 210);
-        private Rectangle specialShotDestination = new Rectangle(420, 10, 360, 150);
-        private Rectangle rocketDestination = new Rectangle(20, 10, 360, 150);
+        private Rectangle singleShotDestination = new Rectangle(10, 320, 380, 150);
+        private Rectangle doubleShotDestination = new Rectangle(410, 320, 380, 150);
+        private Rectangle sideShotLeftDestination = new Rectangle(10, 170, 250, 140);
+        private Rectangle sideShotRightDestination = new Rectangle(540, 170, 250, 150);
+        private Rectangle specialShotDestination = new Rectangle(410, 10, 380, 150);
+        private Rectangle rocketDestination = new Rectangle(10, 10, 380, 150);
         private Rectangle hitPointsDestination = new Rectangle(575, 5, 40, 20);
         private Rectangle shieldDestination = new Rectangle(575, 25, 40, 20);
         private Rectangle overheatDestination = new Rectangle(575, 45, 40, 20);
         private Rectangle scoreMultiDestination = new Rectangle(575, 65, 40, 20);
 
-        //private Color areaTint = new Color(0.2f, 0.0f, 0.0f, 1f);
         private Color areaTint = Color.Red * 0.5f;
         private Color arrowTint = Color.Red * 0.8f;
 
@@ -65,20 +88,25 @@ namespace SpacepiXX
 
         private PowerUpManager powerUpManager;
 
+        private BossManager bossManager;
+
         private readonly string WelcomeText = "Welcome to SpacepiXX!";
         private readonly string MovementText = "Move your spaceship by tilting your phone";
-        private readonly string SingleShotText = "Push here for single shot...";
+        private readonly string SingleShotText = "Press here for single shot...";
         private readonly string DoubleShotText = "and here for double shot...";
-        private readonly string TripleShotText = "Press both for triple shot";
-        private readonly string SpecialShotText = "Push here to fire your Super-Laser!";
-        private readonly string RocketText = "And here to fire your C.A.R.L.I-Rocket!";
+        private readonly string TripleShotText = "Press both together for triple shot";
+        private readonly string SideShotText = "Flick for side shot!";
+        private readonly string SpecialShotText = "Press here to fire your Super-Laser";
+        private readonly string RocketText = "And here to fire your C.A.R.L.I-Rocket";
         private readonly string HitPointsText = "The HUD display your current hit points...";
         private readonly string ShieldText = "your shield level...";
         private readonly string ScoreMultiText = "and your score multiplier";
         private readonly string OverheatText = "Avoid overheating!";
         private readonly string BewareAsteroidsText = "Beware flying asteroids!";
         private readonly string KillEnemiesText = "Kill enemies to score!";
-        private readonly string PowerUpsText = "Gather powerups ... but avoid the red ones!";
+        private readonly string PowerUpsText = "Gather powerups ... but avoid the red ones";
+        private readonly string KillBossText = "Defeat the BOSS to reach the next level";
+        private readonly string BossBonusText = "Kill the BOSS at the first try results in bonus score!";
         private readonly string GoodLuckText = "Good luck commander!";
         private readonly string ReturnWithBackButtonText = "Press BACK to return...";
 
@@ -90,7 +118,7 @@ namespace SpacepiXX
 
         public InstructionManager(Texture2D texture, SpriteFont font, Rectangle screenBounds,
                                   AsteroidManager asteroidManager, PlayerManager playerManager,
-                                  EnemyManager enemyManager, PowerUpManager powerUpManager)
+                                  EnemyManager enemyManager, BossManager bossManager, PowerUpManager powerUpManager)
         {
             this.texture = texture;
             this.font = font;
@@ -101,6 +129,9 @@ namespace SpacepiXX
 
             this.enemyManager = enemyManager;
             this.enemyManager.Reset();
+
+            this.bossManager = bossManager;
+            this.bossManager.Reset();
 
             this.playerManager = playerManager;
             this.playerManager.Reset();
@@ -128,6 +159,7 @@ namespace SpacepiXX
                 asteroidManager.Update(gameTime);
 
                 enemyManager.Update(gameTime);
+                bossManager.Update(gameTime);
                 return;
             }
             else if (progressTimer < WelcomeLimit)
@@ -149,6 +181,10 @@ namespace SpacepiXX
             else if (progressTimer < TripleShotLimit)
             {
                 this.state = InstructionStates.TripleShot;
+            }
+            else if (progressTimer < SideShotLimit)
+            {
+                this.state = InstructionStates.SideShot;
             }
             else if (progressTimer < SpecielShotLimit)
             {
@@ -202,12 +238,42 @@ namespace SpacepiXX
 
                 powerUpManager.Update(gameTime);
             }
+            else if (progressTimer < KillBossLimit)
+            {
+                if (this.state != InstructionStates.KillBoss)
+                {
+                    bossManager.SpawnRandomBoss();
+                }
+
+                this.state = InstructionStates.KillBoss;
+
+                asteroidManager.Update(gameTime);
+
+                enemyManager.Update(gameTime);
+
+                bossManager.Update(gameTime);
+
+                powerUpManager.Update(gameTime);
+            }
+            else if (progressTimer < BossBonusLimit)
+            {
+                this.state = InstructionStates.BossBonus;
+
+                asteroidManager.Update(gameTime);
+
+                enemyManager.Update(gameTime);
+
+                bossManager.Update(gameTime);
+
+                powerUpManager.Update(gameTime);
+            }
             else
             {
                 this.state = InstructionStates.GoodLuck;
 
                 asteroidManager.Update(gameTime);
                 enemyManager.Update(gameTime);
+                bossManager.Update(gameTime);
                 powerUpManager.Update(gameTime);
             }
 
@@ -280,12 +346,34 @@ namespace SpacepiXX
                     drawRedCenteredText(spriteBatch, TripleShotText);
                     break;
 
+                case InstructionStates.SideShot:
+                    playerManager.Draw(spriteBatch);
+
+                    spriteBatch.Draw(texture,
+                                     sideShotLeftDestination,
+                                     sideAreaSource,
+                                     areaTint,
+                                     0.0f,
+                                     Vector2.Zero,
+                                     SpriteEffects.None,
+                                     0.0f);
+                    spriteBatch.Draw(texture,
+                                     sideShotRightDestination,
+                                     sideAreaSource,
+                                     areaTint,
+                                     0.0f,
+                                     Vector2.Zero,
+                                     SpriteEffects.FlipHorizontally,
+                                     0.0f);
+                    drawRedCenteredText(spriteBatch, SideShotText);
+                    break;
+
                 case InstructionStates.SpecialShot:
                     playerManager.Draw(spriteBatch);
 
                     spriteBatch.Draw(texture,
                                      specialShotDestination,
-                                     areaTopSource,
+                                     areaSource,
                                      areaTint,
                                      0.0f,
                                      Vector2.Zero,
@@ -299,7 +387,7 @@ namespace SpacepiXX
 
                     spriteBatch.Draw(texture,
                                      rocketDestination,
-                                     areaTopSource,
+                                     areaSource,
                                      areaTint,
                                      0.0f,
                                      Vector2.Zero,
@@ -373,10 +461,31 @@ namespace SpacepiXX
                     drawRedCenteredText(spriteBatch, PowerUpsText);
                     break;
 
+                case InstructionStates.KillBoss:
+                    powerUpManager.Draw(spriteBatch);
+                    asteroidManager.Draw(spriteBatch);
+                    enemyManager.Draw(spriteBatch);
+                    bossManager.Draw(spriteBatch);
+                    playerManager.Draw(spriteBatch);
+
+                    drawRedCenteredText(spriteBatch, KillBossText);
+                    break;
+
+                case InstructionStates.BossBonus:
+                    powerUpManager.Draw(spriteBatch);
+                    asteroidManager.Draw(spriteBatch);
+                    enemyManager.Draw(spriteBatch);
+                    bossManager.Draw(spriteBatch);
+                    playerManager.Draw(spriteBatch);
+
+                    drawRedCenteredText(spriteBatch, BossBonusText);
+                    break;
+
                 case InstructionStates.GoodLuck:
                     powerUpManager.Draw(spriteBatch);
                     asteroidManager.Draw(spriteBatch);
                     enemyManager.Draw(spriteBatch);
+                    bossManager.Draw(spriteBatch);
                     playerManager.Draw(spriteBatch);
 
                     drawRedCenteredText(spriteBatch, GoodLuckText);
@@ -386,6 +495,7 @@ namespace SpacepiXX
                     powerUpManager.Draw(spriteBatch);
                     asteroidManager.Draw(spriteBatch);
                     enemyManager.Draw(spriteBatch);
+                    bossManager.Draw(spriteBatch);
 
                     drawRedCenteredText(spriteBatch, ReturnWithBackButtonText);
                     break;
@@ -412,7 +522,7 @@ namespace SpacepiXX
 
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream("instructions.txt", FileMode.Create, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream("instructions2.txt", FileMode.Create, isf))
                 {
                     using (StreamWriter sw = new StreamWriter(isfs))
                     {
@@ -429,9 +539,9 @@ namespace SpacepiXX
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                bool hasExisted = isf.FileExists(@"instructions.txt");
+                bool hasExisted = isf.FileExists(@"instructions2.txt");
 
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(@"instructions.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(@"instructions2.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
                 {
                     if (hasExisted)
                     {
@@ -450,6 +560,10 @@ namespace SpacepiXX
                         }
                     }
                 }
+
+                // Delete the old file
+                if (isf.FileExists(@"instructions.txt"))
+                    isf.DeleteFile(@"instructions.txt");
             }
         }
 

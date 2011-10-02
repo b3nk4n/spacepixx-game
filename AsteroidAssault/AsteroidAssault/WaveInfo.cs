@@ -9,9 +9,9 @@ namespace SpacepiXX
     class WaveInfo
     {
         public int SpawnsCount;
-        public Enemy.EnemyType Type;
+        public EnemyType Type;
 
-        public WaveInfo(int spawns, Enemy.EnemyType type)
+        public WaveInfo(int spawns, EnemyType type)
         {
             this.SpawnsCount = spawns;
             this.Type = type;
@@ -32,7 +32,7 @@ namespace SpacepiXX
         public void Activated(StreamReader reader)
         {
             this.SpawnsCount = Int32.Parse(reader.ReadLine());
-            this.Type = (Enemy.EnemyType)Enum.Parse(Type.GetType(), reader.ReadLine(), false);
+            this.Type = (EnemyType)Enum.Parse(Type.GetType(), reader.ReadLine(), false);
         }
 
         public void Deactivated(StreamWriter writer)

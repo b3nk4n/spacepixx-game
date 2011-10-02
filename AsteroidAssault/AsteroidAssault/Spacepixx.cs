@@ -13,6 +13,7 @@ using System.Text;
 using Microsoft.Phone.Shell;
 using System.IO.IsolatedStorage;
 using System.IO;
+using SpacepiXX.Inputs;
 
 namespace SpacepiXX
 {
@@ -24,22 +25,33 @@ namespace SpacepiXX
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private readonly string HighscoreText = "New Highscore!";
+        private readonly string HighscoreText = "Personal Highscore!";
         private readonly string GameOverText = "GAME OVER!";
-        private readonly string KeyboardTitleTextBad = "Not bad!";
+
+        private readonly string KeyboardTitleTextVeryBad = "Are you kidding me???";
+        private readonly string KeyboardTitleTextBad = "Really?!?";
+        private readonly string KeyboardTitleTextVeryLow = "Not bad!";
         private readonly string KeyboardTitleTextLow = "Well done!";
         private readonly string KeyboardTitleTextMed = "Congratulation!";
-        private readonly string KeyboardTitleTextHigh = "Amazing!";
+        private readonly string KeyboardTitleTextHigh = "Nice!";
+        private readonly string KeyboardTitleTextVeryHigh = "Amazing!";
         private readonly string KeyboardTitleTextUltra = "Awesome!";
-        private readonly string KeyboardMessageFormatText = "You are ranked {0}/10 with a score of {1}!\nPlease enter your name...";
-        private readonly string GetReadyText = "Get Ready!";
+        private readonly string KeyboardTitleTextUltraPlus = "Excellent!";
+        private readonly string KeyboardTitleTextGodlike = "God? Is it you?";
+
+        private readonly string KeyboardInLocalMessageFormatText = "You are locally ranked {0}/10!\nPlease enter your name...\n[only: A..Z, a..z, 0..9, 12 characters]";
+        private readonly string KeyboardNotInLocalMessageFormatText = "You are not locally ranked!\nPlease enter your name online submission...\n[only: A..Z, a..z, 0..9, 12 characters]";
+
+        private Random rand = new Random();
+        private readonly string[] GetReadyText = { "Get Ready!", "Rock 'n' Roll!", "Rock on!", "Knock yourself out!" };
+
         private readonly string ContinueText = "Push to continue...";
         private string VersionText;
         private readonly string MusicByText = "Music by";
         private readonly string MusicCreatorText = "Tscho";
         private readonly string CreatorText = "by B. Sautermeister";
 
-        enum GameStates { TitleScreen, MainMenu, Highscores, Inscructions, Help, Settings, Playing, Paused, PlayerDead, GameOver };
+        enum GameStates { TitleScreen, MainMenu, Highscores, Inscructions, Help, Settings, Playing, BossDuell, Paused, PlayerDead, GameOver, Leaderboards, Submittion };
         GameStates gameState = GameStates.TitleScreen;
         GameStates stateBeforePaused;
         Texture2D spriteSheet;
@@ -54,6 +66,7 @@ namespace SpacepiXX
         PlayerManager playerManager;
 
         EnemyManager enemyManager;
+        BossManager bossManager;
 
         CollisionManager collisionManager;
 
@@ -77,6 +90,10 @@ namespace SpacepiXX
         HighscoreManager highscoreManager;
         private bool highscoreMessageShown = false;
 
+        LeaderboardManager leaderboardManager;
+
+        SubmissionManager submissionManager;
+
         MainMenuManager mainMenuManager;
 
         private float backButtonTimer = 0.0f;
@@ -92,6 +109,14 @@ namespace SpacepiXX
         Texture2D powerUpSheet;
 
         SettingsManager settingsManager;
+
+        private bool bossDirectKill = true;
+        private const long InitialBossBonusScore = 5000;
+        private long bossBonusScore = InitialBossBonusScore;
+
+        GameInput gameInput = new GameInput();
+        private const string TitleAction = "Title";
+        private const string BackToGameAction = "BackToGame";
 
         public Spacepixx()
         {
@@ -142,19 +167,19 @@ namespace SpacepiXX
                                                     100,
                                                     new Vector2(0, 20.0f),
                                                     spriteSheet,
-                                                    new Rectangle(0, 450, 1, 1));
+                                                    new Rectangle(0, 350, 1, 1));
             starFieldManager2 = new StarFieldManager(this.GraphicsDevice.Viewport.Width,
                                                     this.GraphicsDevice.Viewport.Height,
                                                     70,
                                                     new Vector2(0, 40.0f),
                                                     spriteSheet,
-                                                    new Rectangle(0, 450, 2, 2));
+                                                    new Rectangle(0, 350, 2, 2));
             starFieldManager3 = new StarFieldManager(this.GraphicsDevice.Viewport.Width,
                                                     this.GraphicsDevice.Viewport.Height,
                                                     30,
                                                     new Vector2(0, 60.0f),
                                                     spriteSheet,
-                                                    new Rectangle(0, 450, 3, 3));
+                                                    new Rectangle(0, 350, 3, 3));
 
             asteroidManager = new AsteroidManager(3,
                                                   spriteSheet,
@@ -169,7 +194,8 @@ namespace SpacepiXX
                                               new Rectangle(0, 0,
                                                             this.GraphicsDevice.Viewport.Width,
                                                             this.GraphicsDevice.Viewport.Height),
-                                              playerStartLocation);
+                                              playerStartLocation,
+                                              gameInput);
 
             enemyManager = new EnemyManager(spriteSheet,
                                             playerManager,
@@ -177,8 +203,15 @@ namespace SpacepiXX
                                                           this.GraphicsDevice.Viewport.Width,
                                                           this.GraphicsDevice.Viewport.Height));
 
+            bossManager = new BossManager(spriteSheet,
+                                          playerManager,
+                                          new Rectangle(0, 0,
+                                                        this.GraphicsDevice.Viewport.Width,
+                                                        this.GraphicsDevice.Viewport.Height));
+            Boss.Player = playerManager;
+
             EffectManager.Initialize(spriteSheet,
-                                     new Rectangle(0, 450, 2, 2),
+                                     new Rectangle(0, 350, 2, 2),
                                      new Rectangle(0, 100, 50, 50),
                                      5);
 
@@ -187,6 +220,7 @@ namespace SpacepiXX
             collisionManager = new CollisionManager(asteroidManager,
                                                     playerManager,
                                                     enemyManager,
+                                                    bossManager,
                                                     powerUpManager);
 
             SoundManager.Initialize(Content);
@@ -209,17 +243,29 @@ namespace SpacepiXX
                                   3,
                                   10,
                                   PlayerManager.MIN_SCORE_MULTI,
-                                  1);
+                                  1,
+                                  bossManager);
 
             highscoreManager = HighscoreManager.GetInstance();
             HighscoreManager.Font = pericles18;
             HighscoreManager.Texture = menuSheet;
 
-            mainMenuManager = new MainMenuManager(menuSheet);
+            leaderboardManager = LeaderboardManager.GetInstance();
+            LeaderboardManager.Font = pericles18;
+            LeaderboardManager.Texture = menuSheet;
+            HighscoreManager.GameInput = gameInput;
+
+            submissionManager = SubmissionManager.GetInstance();
+            SubmissionManager.Font = pericles18;
+            SubmissionManager.Texture = menuSheet;
+            SubmissionManager.GameInput = gameInput;
+
+            mainMenuManager = new MainMenuManager(menuSheet, gameInput);
 
             levelManager = new LevelManager();
             levelManager.Register(asteroidManager);
             levelManager.Register(enemyManager);
+            levelManager.Register(bossManager);
             levelManager.Register(playerManager);
 
             instructionManager = new InstructionManager(spriteSheet,
@@ -230,6 +276,7 @@ namespace SpacepiXX
                                                         asteroidManager,
                                                         playerManager,
                                                         enemyManager,
+                                                        bossManager,
                                                         powerUpManager);
 
             helpManager = new HelpManager(menuSheet, pericles18, new Rectangle(0, 0,
@@ -242,6 +289,22 @@ namespace SpacepiXX
             settingsManager.Initialize(menuSheet, pericles18, new Rectangle(0, 0,
                                                                             GraphicsDevice.Viewport.Width,
                                                                             GraphicsDevice.Viewport.Height));
+            SettingsManager.GameInput = gameInput;
+
+            setupInputs();
+        }
+
+        private void setupInputs()
+        {
+            gameInput.AddTouchGestureInput(TitleAction, GestureType.Tap, new Rectangle(0, 0,
+                                                                                   800, 480));
+            gameInput.AddTouchGestureInput(BackToGameAction, GestureType.Tap, new Rectangle(0, 0,
+                                                                                   800, 480));
+            mainMenuManager.SetupInputs();
+            playerManager.SetupInputs();
+            submissionManager.SetupInputs();
+            highscoreManager.SetupInputs();
+            settingsManager.SetupInputs();
         }
 
         /// <summary>
@@ -285,11 +348,16 @@ namespace SpacepiXX
                         writer.WriteLine(this.highscoreMessageShown);
                         writer.WriteLine(this.backButtonTimer);
 
+                        writer.WriteLine(bossBonusScore);
+                        writer.WriteLine(bossDirectKill);
+
                         asteroidManager.Deactivated(writer);
 
                         playerManager.Deactivated(writer);
 
                         enemyManager.Deactivated(writer);
+
+                        bossManager.Deactivated(writer);
 
                         EffectManager.Deactivated(writer);
 
@@ -304,6 +372,8 @@ namespace SpacepiXX
                         mainMenuManager.Deactivated(writer);
 
                         highscoreManager.Deactivated(writer);
+
+                        submissionManager.Deactivated(writer);
 
                         writer.Close();
                     }
@@ -321,7 +391,8 @@ namespace SpacepiXX
 
             if (gameState == GameStates.Playing
                 || gameState == GameStates.PlayerDead
-                || gameState == GameStates.Inscructions)
+                || gameState == GameStates.Inscructions
+                || gameState == GameStates.BossDuell)
             {
                 stateBeforePaused = gameState;
                 gameState = GameStates.Paused;
@@ -364,11 +435,16 @@ namespace SpacepiXX
                             this.highscoreMessageShown = (bool)Boolean.Parse(reader.ReadLine());
                             this.backButtonTimer = (float)Single.Parse(reader.ReadLine());
 
+                            this.bossBonusScore = Int64.Parse(reader.ReadLine());
+                            this.bossDirectKill = Boolean.Parse(reader.ReadLine());
+
                             asteroidManager.Activated(reader);
 
                             playerManager.Activated(reader);
 
                             enemyManager.Activated(reader);
+
+                            bossManager.Activated(reader);
 
                             EffectManager.Activated(reader);
 
@@ -383,6 +459,8 @@ namespace SpacepiXX
                             mainMenuManager.Activated(reader);
 
                             highscoreManager.Activated(reader);
+
+                            submissionManager.Activated(reader);
 
                             reader.Close();
                         }
@@ -407,6 +485,8 @@ namespace SpacepiXX
         {
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            gameInput.BeginUpdate();
+
             bool backButtonPressed = false;
 
             backButtonTimer += elapsed;
@@ -430,15 +510,19 @@ namespace SpacepiXX
 
                     if (titleScreenTimer >= titleScreenDelayTime)
                     {
-                        if (TouchPanel.IsGestureAvailable)
-                        {
-                            GestureSample gs = TouchPanel.ReadGesture();
+                        //if (TouchPanel.IsGestureAvailable)
+                        //{
+                        //    GestureSample gs = TouchPanel.ReadGesture();
 
-                            if (gs.GestureType == GestureType.Tap)
-                            {
-                                gameState = GameStates.MainMenu;
-                            }
+                        //    if (gs.GestureType == GestureType.Tap)
+                        //    {
+                        //        gameState = GameStates.MainMenu;
+                        //    }
                             
+                        //}
+                        if (gameInput.IsPressed(TitleAction))
+                        {
+                            gameState = GameStates.MainMenu;
                         }
                     }
 
@@ -525,6 +609,21 @@ namespace SpacepiXX
 
                     break;
 
+                case GameStates.Submittion:
+
+                    updateBackground(gameTime);
+
+                    submissionManager.IsActive = true;
+                    submissionManager.Update(gameTime);
+
+                    if (submissionManager.ContinueClicked || submissionManager.CancelClicked || backButtonPressed)
+                    {
+                        submissionManager.IsActive = false;
+                        gameState = GameStates.MainMenu;
+                    }
+
+                    break;
+
                 case GameStates.Inscructions:
 
                     //updateBackground(gameTime);
@@ -588,9 +687,14 @@ namespace SpacepiXX
 
                     updateBackground(gameTime);
 
+                    levelManager.Update(gameTime);
+
                     playerManager.Update(gameTime);
 
                     enemyManager.Update(gameTime);
+                    enemyManager.IsActive = true;
+
+                    bossManager.Update(gameTime);
 
                     EffectManager.Update(gameTime);
 
@@ -610,14 +714,18 @@ namespace SpacepiXX
                                playerManager.ScoreMulti,
                                levelManager.CurrentLevel);
 
-                    levelManager.Update(gameTime);
+                    //levelManager.Update(gameTime);
 
-                    if (levelManager.HasChanged && levelManager.CurrentLevel != 1)
+                    if (levelManager.HasChanged)
                     {
-                        zoomTextManager.ShowText("Level " + levelManager.CurrentLevel);
+                        //zoomTextManager.ShowText("Level " + levelManager.CurrentLevel);
+                        enemyManager.IsActive = false;
 
-                        // Extra special shot for level up
-                        //playerManager.SpecialShotsRemaining += 1;
+                        if (enemyManager.Enemies.Count == 0)
+                        {
+                            bossManager.SpawnRandomBoss();
+                            gameState = GameStates.BossDuell;
+                        }
                     }
 
                     if (playerManager.PlayerScore > highscoreManager.CurrentHighscore &&
@@ -632,6 +740,7 @@ namespace SpacepiXX
                     {
                         playerDeathTimer = 0.0f;
                         enemyManager.IsActive = false;
+                        bossManager.IsActive = false;
                         playerManager.LivesRemaining--;
 
                         if (playerManager.LivesRemaining < 0)
@@ -655,46 +764,139 @@ namespace SpacepiXX
 
                     break;
 
-                case GameStates.Paused:
+                case GameStates.BossDuell:
 
-                    if (TouchPanel.IsGestureAvailable)
+                    updateBackground(gameTime);
+
+                    levelManager.Update(gameTime);
+
+                    playerManager.Update(gameTime);
+
+                    enemyManager.Update(gameTime);
+                    //enemyManager.IsActive = false;
+
+                    bossManager.Update(gameTime);
+
+                    EffectManager.Update(gameTime);
+
+                    collisionManager.Update();
+
+                    powerUpManager.Update(gameTime);
+
+                    zoomTextManager.Update();
+
+                    hud.Update(playerManager.PlayerScore,
+                               playerManager.LivesRemaining,
+                               playerManager.Overheat,
+                               playerManager.HitPoints,
+                               playerManager.ShieldPoints,
+                               playerManager.SpecialShotsRemaining,
+                               playerManager.CarliRocketsRemaining,
+                               playerManager.ScoreMulti,
+                               levelManager.CurrentLevel);
+
+                    if (bossManager.Bosses.Count == 0 && levelManager.HasChanged)
                     {
-                        GestureSample gs = TouchPanel.ReadGesture();
-
-                        if (gs.GestureType == GestureType.Tap)
+                        if (bossManager.BossWasKilled)
                         {
-                            gameState = stateBeforePaused;
+                            bossManager.BossWasKilled = false;
+
+                            if (bossDirectKill)
+                            {
+                                zoomTextManager.ShowText("+" + bossBonusScore + " Bonus");
+                                playerManager.IncreasePlayerScore(bossBonusScore, false);
+                                bossBonusScore += InitialBossBonusScore;
+                            }
+                            else
+                            {
+                                bossBonusScore = InitialBossBonusScore;
+                            }
+                            levelManager.GoToNextLevel();
+                            zoomTextManager.ShowText("Level " + levelManager.CurrentLevel);
+
+                            bossDirectKill = true;
+                        }
+                        else
+                        {
+                            bossDirectKill = false;
+
+                            levelManager.ResetLevelTimer();
+                        }
+
+                        gameState = GameStates.Playing;
+                    }
+
+                    if (playerManager.PlayerScore > highscoreManager.CurrentHighscore &&
+                        highscoreManager.CurrentHighscore != 0 &&
+                        !highscoreMessageShown)
+                    {
+                        zoomTextManager.ShowText(HighscoreText);
+                        highscoreMessageShown = true;
+                    }
+
+                    if (playerManager.IsDestroyed)
+                    {
+                        playerDeathTimer = 0.0f;
+                        enemyManager.IsActive = false;
+                        bossManager.IsActive = false;
+                        playerManager.LivesRemaining--;
+
+                        if (playerManager.LivesRemaining < 0)
+                        {
+                            levelManager.Reset();
+                            gameState = GameStates.GameOver;
+                            zoomTextManager.ShowText(GameOverText);
+                        }
+                        else
+                        {
+                            levelManager.ResetLevelTimer();
+                            gameState = GameStates.PlayerDead;
+                            bossDirectKill = false;
                         }
                     }
 
                     if (backButtonPressed)
                     {
-                        if (!Guide.IsVisible && highscoreManager.IsInScoreboard(playerManager.PlayerScore))
+                        stateBeforePaused = GameStates.Playing;
+                        gameState = GameStates.Paused;
+                    }
+
+                    break;
+
+                case GameStates.Paused:
+
+                    //if (TouchPanel.IsGestureAvailable)
+                    //{
+                    //    GestureSample gs = TouchPanel.ReadGesture();
+
+                    //    if (gs.GestureType == GestureType.Tap)
+                    //    {
+                    //        gameState = stateBeforePaused;
+                    //    }
+                    //}
+                    if (gameInput.IsPressed(BackToGameAction))
+                    {
+                        gameState = stateBeforePaused;
+                    }
+
+                    if (backButtonPressed)
+                    {
+                        if (!Guide.IsVisible && playerManager.PlayerScore > 0)
                         {
-                            int rank = highscoreManager.GetRank(playerManager.PlayerScore);
-
-                            string title = KeyboardTitleTextBad;
-
-                            if (playerManager.PlayerScore > 250000)
-                                title = KeyboardTitleTextLow;
-
-                            if (playerManager.PlayerScore > 1000000)
-                                title = KeyboardTitleTextMed;
-
-                            if (playerManager.PlayerScore > 2500000)
-                                title = KeyboardTitleTextHigh;
-
-                            if (playerManager.PlayerScore > 5000000)
-                                title = KeyboardTitleTextUltra;
-
-                            Guide.BeginShowKeyboardInput(PlayerIndex.One,
-                                                         title,
-                                                         string.Format(KeyboardMessageFormatText, rank, playerManager.PlayerScore),
-                                                         highscoreManager.LastName,
-                                                         keyboardCallback,
-                                                         null);
+                            showGuid();
                         }
-                        gameState = GameStates.MainMenu;
+                        //gameState = GameStates.MainMenu;
+
+                        if (playerManager.PlayerScore > 0)
+                        {
+                            gameState = GameStates.Submittion;
+                            submissionManager.SetUp(highscoreManager.LastName, playerManager.PlayerScore, levelManager.CurrentLevel);
+                        }
+                        else
+                        {
+                            gameState = GameStates.MainMenu;
+                        }
+
                     }
 
                     break;
@@ -717,6 +919,8 @@ namespace SpacepiXX
 
                     enemyManager.Update(gameTime);
                     enemyManager.Update(gameTime);
+                    bossManager.Update(gameTime);
+                    bossManager.Update(gameTime);
                     EffectManager.Update(gameTime);
                     EffectManager.Update(gameTime);
                     collisionManager.Update();
@@ -762,6 +966,7 @@ namespace SpacepiXX
                     playerManager.PlayerShotManager.Update(gameTime);
                     powerUpManager.Update(gameTime);
                     enemyManager.Update(gameTime);
+                    bossManager.Update(gameTime);
                     EffectManager.Update(gameTime);
                     collisionManager.Update();
                     zoomTextManager.Update();
@@ -777,36 +982,24 @@ namespace SpacepiXX
 
                     if (playerDeathTimer >= playerGameOverDelayTime)
                     {
-                        if (!Guide.IsVisible && highscoreManager.IsInScoreboard(playerManager.PlayerScore))
+                        if (!Guide.IsVisible && playerManager.PlayerScore > 0)
                         {
-                            int rank = highscoreManager.GetRank(playerManager.PlayerScore);
-
-                            string title = KeyboardTitleTextBad;
-
-                            if (playerManager.PlayerScore > 250000)
-                                title = KeyboardTitleTextLow;
-
-                            if (playerManager.PlayerScore > 1000000)
-                                title = KeyboardTitleTextMed;
-
-                            if (playerManager.PlayerScore > 2500000)
-                                title = KeyboardTitleTextHigh;
-
-                            if (playerManager.PlayerScore > 5000000)
-                                title = KeyboardTitleTextUltra;
-
-                            Guide.BeginShowKeyboardInput(PlayerIndex.One,
-                                                         title,
-                                                         string.Format(KeyboardMessageFormatText, rank, playerManager.PlayerScore),
-                                                         highscoreManager.LastName,
-                                                         keyboardCallback,
-                                                         null);
+                            showGuid();
                         }
                         else
                         {
                             playerDeathTimer = 0.0f;
                             titleScreenTimer = 0.0f;
-                            gameState = GameStates.MainMenu;
+
+                            if (playerManager.PlayerScore > 0)
+                            {
+                                gameState = GameStates.Submittion;
+                                submissionManager.SetUp(highscoreManager.LastName, playerManager.PlayerScore, levelManager.CurrentLevel);
+                            }
+                            else
+                            {
+                                gameState = GameStates.MainMenu;
+                            }
                         }
                     }
 
@@ -820,13 +1013,15 @@ namespace SpacepiXX
             }
 
             // Remove gesture queue
-            while (TouchPanel.IsGestureAvailable)
-            {
-                TouchPanel.ReadGesture();
-            }
+            //while (TouchPanel.IsGestureAvailable)
+            //{
+            //    TouchPanel.ReadGesture();
+            //}
 
             // Reset Back-Button flag
             backButtonPressed = false;
+
+            gameInput.EndUpdate();
 
             base.Update(gameTime);
         }
@@ -897,6 +1092,13 @@ namespace SpacepiXX
                 highscoreManager.Draw(spriteBatch);
             }
 
+            if (gameState == GameStates.Submittion)
+            {
+                drawBackground(spriteBatch);
+
+                submissionManager.Draw(spriteBatch);
+            }
+
             if (gameState == GameStates.Inscructions)
             {
                 starFieldManager1.Draw(spriteBatch);
@@ -936,6 +1138,8 @@ namespace SpacepiXX
 
                 enemyManager.Draw(spriteBatch);
 
+                bossManager.Draw(spriteBatch);
+
                 EffectManager.Draw(spriteBatch);
 
                 spriteBatch.Draw(menuSheet,
@@ -954,7 +1158,8 @@ namespace SpacepiXX
 
             if (gameState == GameStates.Playing ||
                 gameState == GameStates.PlayerDead ||
-                gameState == GameStates.GameOver)
+                gameState == GameStates.GameOver ||
+                gameState == GameStates.BossDuell)
             {
                 drawBackground(spriteBatch);
 
@@ -963,6 +1168,8 @@ namespace SpacepiXX
                 playerManager.Draw(spriteBatch);
 
                 enemyManager.Draw(spriteBatch);
+
+                bossManager.Draw(spriteBatch);
 
                 EffectManager.Draw(spriteBatch);
 
@@ -1004,12 +1211,13 @@ namespace SpacepiXX
         {
             asteroidManager.Reset();
             enemyManager.Reset();
+            bossManager.Reset();
             playerManager.Reset();
             EffectManager.Reset();
             powerUpManager.Reset();
 
             zoomTextManager.Reset();
-            zoomTextManager.ShowText(GetReadyText);
+            zoomTextManager.ShowText(GetReadyText[rand.Next(GetReadyText.Length)]);
         }
 
         private void resetGame()
@@ -1021,17 +1229,33 @@ namespace SpacepiXX
             playerManager.ResetPlayerScore();
             playerManager.ResetRemainingLives();
             playerManager.ResetSpecialWeapons();
+
+            bossDirectKill = true;
+            bossBonusScore = InitialBossBonusScore;
         }
 
         private void keyboardCallback(IAsyncResult result)
         {
             string name = Guide.EndShowKeyboardInput(result);
 
+            name = Highscore.CheckedName(name);
+
             if (!string.IsNullOrEmpty(name))
             {
-                highscoreManager.SaveHighScore(name,
-                                               playerManager.PlayerScore,
-                                               levelManager.LastLevel);
+                submissionManager.SetUp(name,
+                                        playerManager.PlayerScore,
+                                        levelManager.LastLevel);
+
+                if (highscoreManager.IsInScoreboard(playerManager.PlayerScore))
+                {
+                    highscoreManager.SaveHighScore(name,
+                                                   playerManager.PlayerScore,
+                                                   levelManager.LastLevel);
+                }
+            }
+            else
+            {
+                gameState = GameStates.MainMenu;
             }
             
             highscoreMessageShown = false;
@@ -1050,6 +1274,61 @@ namespace SpacepiXX
                                                   .Append('.')
                                                   .Append(an.Version.Minor)
                                                   .ToString();
+        }
+
+        /// <summary>
+        /// Displays the GUID for name input.
+        /// </summary>
+        private void showGuid()
+        {
+            int rank = highscoreManager.GetRank(playerManager.PlayerScore);
+
+            string title = KeyboardTitleTextVeryBad;
+
+            if (playerManager.PlayerScore > 10000)
+                title = KeyboardTitleTextBad;
+
+            if (playerManager.PlayerScore > 50000)
+                title = KeyboardTitleTextVeryLow;
+
+            if (playerManager.PlayerScore > 100000)
+                title = KeyboardTitleTextLow;
+
+            if (playerManager.PlayerScore > 250000)
+                title = KeyboardTitleTextMed;
+
+            if (playerManager.PlayerScore > 500000)
+                title = KeyboardTitleTextHigh;
+
+            if (playerManager.PlayerScore > 1000000)
+                title = KeyboardTitleTextVeryHigh;
+
+            if (playerManager.PlayerScore > 2500000)
+                title = KeyboardTitleTextUltra;
+
+            if (playerManager.PlayerScore > 5000000)
+                title = KeyboardTitleTextUltraPlus;
+
+            if (playerManager.PlayerScore > 10000000)
+                title = KeyboardTitleTextGodlike;
+
+            string text;
+
+            if (highscoreManager.IsInScoreboard(playerManager.PlayerScore))
+            {
+                text = string.Format(KeyboardInLocalMessageFormatText, rank);
+            }
+            else
+            {
+                text = KeyboardNotInLocalMessageFormatText;
+            }
+
+            Guide.BeginShowKeyboardInput(PlayerIndex.One,
+                                         title,
+                                         text,
+                                         highscoreManager.LastName,
+                                         keyboardCallback,
+                                         null);
         }
     }
 }

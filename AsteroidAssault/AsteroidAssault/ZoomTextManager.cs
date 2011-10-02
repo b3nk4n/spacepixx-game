@@ -44,7 +44,7 @@ namespace SpacepiXX
         {
             infoTexts.Enqueue(new ZoomText(text,
                                        Color.White,
-                                       35,
+                                       55,
                                        0.05f));
         }
 

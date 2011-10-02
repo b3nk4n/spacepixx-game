@@ -23,6 +23,8 @@ namespace SpacepiXX
         private float scoreMulti;
         private int level;
 
+        private BossManager bossManager;
+
         private Rectangle screenBounds;
         private Texture2D texture;
         private SpriteFont font;
@@ -50,6 +52,10 @@ namespace SpacepiXX
         private readonly Rectangle RocketsDestination = new Rectangle(7, 57, 24, 24);
         private readonly Rectangle RocketsSource = new Rectangle(925, 350, 24, 24);
 
+        private Vector2 bossHitPointLocation = new Vector2(345, 40);
+        private readonly Rectangle bossHitPointSymbolSoruce = new Rectangle(0, 320, 14, 14);
+        private Vector2 bossHitPointSymbolLocation = new Vector2(325, 38);
+
         Vector2 barOverlayStart = new Vector2(0, 350);
 
         #endregion
@@ -58,7 +64,7 @@ namespace SpacepiXX
 
         private Hud(Rectangle screen, Texture2D texture, SpriteFont font,
                     long score, int lives, float overHeat, float hitPoints, float shieldPoints,
-                    int rockets, int specialShots, float scoreMulti, int level)
+                    int rockets, int specialShots, float scoreMulti, int level, BossManager bossManager)
         {
             this.screenBounds = screen;
             this.texture = texture;
@@ -72,6 +78,7 @@ namespace SpacepiXX
             this.rockets = rockets;
             this.scoreMulti = scoreMulti;
             this.level = level;
+            this.bossManager = bossManager;
         }
 
         #endregion
@@ -80,7 +87,7 @@ namespace SpacepiXX
 
         public static Hud GetInstance(Rectangle screen, Texture2D texture, SpriteFont font, long score,
                                       int lives, float overHeat, float hitPoints, float shieldPoints,
-                                      int specialShots, int rockets, float scoreMulti, int level)
+                                      int specialShots, int rockets, float scoreMulti, int level, BossManager boss)
         {
             if (hud == null)
             {
@@ -95,7 +102,8 @@ namespace SpacepiXX
                               specialShots,
                               rockets,
                               scoreMulti,
-                              level);
+                              level,
+                              boss);
             }
 
             return hud;
@@ -121,6 +129,7 @@ namespace SpacepiXX
 
             if (remainingLives >= 0)
             {
+                drawLevel(spriteBatch);
                 drawOverheat(spriteBatch);
                 drawScoreMulti(spriteBatch);
                 drawHitPoints(spriteBatch);
@@ -128,7 +137,9 @@ namespace SpacepiXX
                 drawRemainingLives(spriteBatch);
                 drawSpecialShots(spriteBatch);
                 drawRockets(spriteBatch);
-                drawLevel(spriteBatch);
+
+                if (bossManager.Bosses.Count > 0)
+                    drawBossHitPoints(spriteBatch, bossManager.Bosses[0].HitPoints, bossManager.Bosses[0].MaxHitPoints);
             }       
         }
 
@@ -337,6 +348,42 @@ namespace SpacepiXX
                                    new Vector2(screenBounds.Width / 2 - (font.MeasureString(lvlText).Y / 2),
                                                5),
                                    Color.White * 0.8f);
+        }
+
+        private void drawBossHitPoints(SpriteBatch spriteBatch, float bossHitPoints, float bossMaxHitPoints)
+        {
+            float factor = 150 / bossMaxHitPoints;
+
+            spriteBatch.Draw(texture,
+                             bossHitPointSymbolLocation,
+                             bossHitPointSymbolSoruce,
+                             Color.White * 0.8f);
+
+            spriteBatch.Draw(texture,
+                    new Rectangle(
+                        (int)bossHitPointLocation.X,
+                        (int)bossHitPointLocation.Y,
+                        150,
+                        10),
+                    new Rectangle(
+                        (int)barOverlayStart.X,
+                        (int)barOverlayStart.Y,
+                        150,
+                        10),
+                    Color.White * 0.2f);
+
+            spriteBatch.Draw(texture,
+                    new Rectangle(
+                        (int)bossHitPointLocation.X,
+                        (int)bossHitPointLocation.Y,
+                        (int)(factor * bossHitPoints),
+                        10),
+                    new Rectangle(
+                        (int)barOverlayStart.X,
+                        (int)barOverlayStart.Y,
+                        (int)(factor * bossHitPoints),
+                        10),
+                    Color.White * 0.5f);
         }
 
         #endregion

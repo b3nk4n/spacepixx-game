@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Devices.Sensors;
 using Microsoft.Xna.Framework.Input;
 using System.IO;
+using SpacepiXX.Inputs;
 
 namespace SpacepiXX
 {
@@ -32,7 +33,10 @@ namespace SpacepiXX
         public const int CARLI_ROCKET_EXPLOSION_RADIUS = 150;
 
         private float shotPower = 50.0f;
-        public const float ROCKET_POWER_AT_CENTER = 500.0f;
+        
+        // *** Before version 2.0 ***
+        //public const float ROCKET_POWER_AT_CENTER = 500.0f;
+        public const float ROCKET_POWER_AT_CENTER = 300.0f;
 
         private float hitPoints = 100.0f;
         public const float MaxHitPoints = 100.0f;
@@ -40,40 +44,54 @@ namespace SpacepiXX
 
         private Vector2 gunOffset = new Vector2(19, 5);
         private float shotTimer = 0.0f;
+        private float sideShotTimer = 0.0f;
         private float rocketTimer = 0.0f;
         private float specialShotTimer = 0.0f;
         private float minShotTimer = 0.15f;
         private float minDoubleShotTimer = 0.25f;
         private float minTripleShotTimer = 0.35f;
-        private float minSpecialShotTimer = 1.0f;
+        private float minSideShotTimer = 0.30f;
+        private float minSpecialShotTimer = 0.5f;
         private float minCarliRocketTimer = 0.5f;
         
         private const int PlayerRadius = 20;
         public ShotManager PlayerShotManager;
 
         private float overheat = 0.0f;
-        private const float OverheatSingleShot = 0.045f;
-        private const float OverheatDoubleShot = 0.09f;
-        private const float OverheatTripleShot = 0.135f;
+        //private const float OverheatSingleShot = 0.045f;
+        //private const float OverheatTripleShot = 0.09f;
+        //private const float OverheatSideShot = 0.135f;
+        //private const float OverheatSpecialShot = 0.25f;
+        //private const float OverheatCarliRocket = 0.05f;
+        //private const float OverheatSingleShot = 0.1f;
+        //private const float OverheatTripleShot = 0.18f;
+        //private const float OverheatSideShot = 0.26f;
+        //private const float OverheatSpecialShot = 0.25f;
+        //private const float OverheatCarliRocket = 0.05f;
+        private const float OverheatSingleShot = 0.08f;
+        private const float OverheatDoubleShot = 0.129f;
+        private const float OverheatTripleShot = 0.178f;
+        private const float OverheatSideShot = 0.18f;
         private const float OverheatSpecialShot = 0.25f;
         private const float OverheatCarliRocket = 0.05f;
         public const float OVERHEAT_MAX = 1.0f;
         public const float OVERHEAT_MIN = 0.0f;
-        private const float CoolDownRate = 0.266f; // Version 1.0:  0.25
-        private const float OverheatKillRateMax = 0.1f;
+        private const float CoolDownRate = 0.45f; // Version 1.0:  0.25   Before version 2.0: 0.266
+        private const float OverheatKillRateMax = 0.08f; // Befor version 2.0: 0.1
 
         Accelerometer accelerometer = new Accelerometer();
         Vector3 currentAccValue = Vector3.Zero;
 
         Rectangle leftSideScreen;
         Rectangle rightSideScreen;
+        Rectangle middleScreen;
         Rectangle upperRightScreen;
         Rectangle upperLeftScreen;
 
         public const float MIN_SCORE_MULTI = 1.0f;
         private float scoreMulti = MIN_SCORE_MULTI;
         public const float MAX_SCORE_MULTI = 3.0f;
-        private const float MULTI_DECREASE_RATE = 0.085f;
+        private const float MULTI_DECREASE_RATE = 0.09f; // before version 2.0: 0.85
 
         // OutOfControl
         private float outOfControlTimer = 0.0f;
@@ -96,13 +114,21 @@ namespace SpacepiXX
 
         SettingsManager settings = SettingsManager.GetInstance();
 
+        GameInput gameInput;
+        private const string ActionLeft = "Left";
+        private const string ActionRight = "Right";
+        private const string ActionUpperLeft = "UpperLeft";
+        private const string ActionUpperRight = "UpperRight";
+        private const string ActionSlideLeft = "SlideLeft";
+        private const string ActionSlideRight = "SlideRight";
+
         #endregion
 
         #region Constructors
 
         public PlayerManager(Texture2D texture, Rectangle initialFrame,
                              int frameCount, Rectangle screenBounds,
-                             Vector2 startLocation)
+                             Vector2 startLocation, GameInput input)
         {
             this.playerSprite = new Sprite(new Vector2(500, 500),
                                            texture,
@@ -117,9 +143,9 @@ namespace SpacepiXX
                                                      screenBounds);
 
             this.playerAreaLimit = new Rectangle(0,
-                                                 screenBounds.Height / 3,
+                                                 screenBounds.Height / 5,
                                                  screenBounds.Width,
-                                                 2 * screenBounds.Height / 3);
+                                                 4 * screenBounds.Height / 5);
 
             for (int x = 0; x < frameCount; x++)
             {
@@ -135,23 +161,28 @@ namespace SpacepiXX
             accelerometer.Start();
 
             leftSideScreen = new Rectangle(0,
-                                           screenBounds.Height / 2,
+                                           2 * screenBounds.Height / 3,
                                            screenBounds.Width / 2,
-                                           screenBounds.Height / 2);
+                                           screenBounds.Height / 3);
 
             rightSideScreen = new Rectangle(screenBounds.Width / 2,
-                                           screenBounds.Height / 2,
+                                           2 * screenBounds.Height / 3,
                                            screenBounds.Width / 2,
-                                           screenBounds.Height / 2);
+                                           screenBounds.Height / 3);
+
+            middleScreen = new Rectangle(0,
+                                              screenBounds.Height / 3,
+                                              screenBounds.Width,
+                                              screenBounds.Height / 3);
 
             upperLeftScreen = new Rectangle(0, 0,
                                             screenBounds.Width / 2,
-                                            screenBounds.Height / 3);
+                                            screenBounds.Height / 4);
 
             upperRightScreen = new Rectangle(screenBounds.Width / 2,
                                              0,
                                              screenBounds.Width / 2,
-                                             screenBounds.Height / 3);
+                                             screenBounds.Height / 4);
 
             this.startLocation = startLocation;
 
@@ -160,18 +191,36 @@ namespace SpacepiXX
                                            initialShieldFrame,
                                            Vector2.Zero);
 
-            //for (int x = 1; x < 12; x++)
-            //{
-            //    this.shieldSprite.AddFrame(new Rectangle(initialShieldFrame.X + (x * initialShieldFrame.Width),
-            //                                             initialShieldFrame.Y,
-            //                                             initialShieldFrame.Width,
-            //                                             initialShieldFrame.Height));
-            //}
+            gameInput = input;
         }
 
         #endregion
 
         #region Methods
+
+        public void SetupInputs()
+        {
+            gameInput.AddTouchTapInput(ActionLeft,
+                                       leftSideScreen,
+                                       false);
+            gameInput.AddTouchTapInput(ActionRight,
+                                       rightSideScreen,
+                                       false);
+
+            gameInput.AddTouchTapInput(ActionUpperLeft,
+                                       upperLeftScreen,
+                                       true);
+            gameInput.AddTouchTapInput(ActionUpperRight,
+                                       upperRightScreen,
+                                       true);
+
+            gameInput.AddTouchSlideInput(ActionSlideLeft,
+                                         Input.Direction.Left,
+                                         25.0f);
+            gameInput.AddTouchSlideInput(ActionSlideRight,
+                                         Input.Direction.Right,
+                                         25.0f);
+        }
 
         public void Reset()
         {
@@ -226,27 +275,25 @@ namespace SpacepiXX
         {
             if (shotTimer <= 0.0f)
             {
-                overheat += (OverheatDoubleShot);
+                overheat += OverheatDoubleShot;
 
                 if (overheat < OVERHEAT_MAX)
                 {
-                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset - new Vector2(-15, 0),
+                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset + new Vector2(13, 0),
                                                     new Vector2(0, -1),
                                                     true,
                                                     new Color(0, 255, 33),
                                                     true);
-
-                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset - new Vector2(15, 0),
+                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset - new Vector2(13, 0),
                                                     new Vector2(0, -1),
                                                     true,
                                                     new Color(0, 255, 33),
                                                     true);
-
                     shotTimer = minDoubleShotTimer;
                 }
                 else
                 {
-                    shotTimer = minDoubleShotTimer * 2.0f;
+                    shotTimer = minDoubleShotTimer * 1.5f;
                 }
             }
         }
@@ -265,19 +312,17 @@ namespace SpacepiXX
                                                     new Color(0, 255, 33),
                                                     true);
 
-                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset,
-                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(75.0f)), -(float)Math.Sin(MathHelper.ToRadians(75.0f))),
+                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset - new Vector2(-13, 0),
+                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(87.5f)), -(float)Math.Sin(MathHelper.ToRadians(87.5f))),
                                                     true,
                                                     new Color(0, 255, 33),
                                                     true);
 
-                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset,
-                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(105.0f)), -(float)Math.Sin(MathHelper.ToRadians(105.0f))),
+                    this.PlayerShotManager.FireShot(this.playerSprite.Location + gunOffset - new Vector2(13, 0),
+                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(92.5f)), -(float)Math.Sin(MathHelper.ToRadians(92.5f))),
                                                     true,
                                                     new Color(0, 255, 33),
                                                     false);
-
-                    
 
                     shotTimer = minTripleShotTimer;
                 }
@@ -288,13 +333,83 @@ namespace SpacepiXX
             }
         }
 
+        private void fireSideLeftShot()
+        {
+            if (sideShotTimer <= 0.0f)
+            {
+                overheat += (OverheatSideShot);
+
+                if (overheat < OVERHEAT_MAX)
+                {
+                    this.PlayerShotManager.FireShot(this.playerSprite.Center + new Vector2(-20, 5),
+                                                    new Vector2(-1, 0),
+                                                    true,
+                                                    new Color(0, 255, 33),
+                                                    true);
+
+                    this.PlayerShotManager.FireShot(this.playerSprite.Center + new Vector2(-20, 5),
+                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(187.5f)), -(float)Math.Sin(MathHelper.ToRadians(187.5f))),
+                                                    true,
+                                                    new Color(0, 255, 33),
+                                                    false);
+
+                    this.PlayerShotManager.FireShot(this.playerSprite.Center + new Vector2(-20, 5),
+                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(172.5f)), -(float)Math.Sin(MathHelper.ToRadians(172.5f))),
+                                                    true,
+                                                    new Color(0, 255, 33),
+                                                    true);
+
+                    sideShotTimer = minSideShotTimer;
+                }
+                else
+                {
+                    sideShotTimer = minSideShotTimer * 2.0f;
+                }
+            }
+        }
+
+        private void fireSideRightShot()
+        {
+            if (sideShotTimer <= 0.0f)
+            {
+                overheat += (OverheatSideShot);
+
+                if (overheat < OVERHEAT_MAX)
+                {
+                    this.PlayerShotManager.FireShot(this.playerSprite.Center + new Vector2(20, 5),
+                                                    new Vector2(1, 0),
+                                                    true,
+                                                    new Color(0, 255, 33),
+                                                    true);
+
+                    this.PlayerShotManager.FireShot(this.playerSprite.Center + new Vector2(20, 5),
+                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(7.5f)), -(float)Math.Sin(MathHelper.ToRadians(7.5f))),
+                                                    true,
+                                                    new Color(0, 255, 33),
+                                                    false);
+
+                    this.PlayerShotManager.FireShot(this.playerSprite.Center + new Vector2(20, 5),
+                                                    new Vector2((float)Math.Cos(MathHelper.ToRadians(-7.5f)), -(float)Math.Sin(MathHelper.ToRadians(-7.5f))),
+                                                    true,
+                                                    new Color(0, 255, 33),
+                                                    true);
+
+                    sideShotTimer = minSideShotTimer;
+                }
+                else
+                {
+                    sideShotTimer = minSideShotTimer * 2.0f;
+                }
+            }
+        }
+
         private void fireSpecialShot()
         {
             if (specialShotTimer <= 0.0f &&
                 SpecialShotsRemaining > 0 &&
                 overheat < (OVERHEAT_MAX - OverheatSpecialShot))
             {
-                overheat += (OverheatTripleShot);
+                overheat += (OverheatSideShot);
                 SpecialShotsRemaining--;
 
                 if (overheat < OVERHEAT_MAX)
@@ -420,138 +535,76 @@ namespace SpacepiXX
 
         private void HandleTouchInput(TouchCollection touches)
         {
-            #if DEBUG
-
-            Microsoft.Xna.Framework.Input.KeyboardState state = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1))
-            {
-                fireShot();
-            }
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D2))
-            {
-                fireDoubleShot();
-            }
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D3))
-            {
-                fireTripleShot();
-            }
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4))
-            {
-                fireSpecialShot();
-            }
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D5))
-            {
-                fireCarliRocket();
-            }
-
-            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
-            {
-                playerSprite.Velocity = new Vector2(-1.0f, 0.0f);
-            } 
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
-            {
-                playerSprite.Velocity = new Vector2(1.0f, 0.0f);
-            }
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
-            {
-                playerSprite.Velocity = new Vector2(0.0f, -1.0f);
-            }
-            else if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
-            {
-                playerSprite.Velocity = new Vector2(0.0f, 1.0f);
-            }
-
-            #else
-
-            //if (touches.Count == 1)
-            //{
-            //    TouchLocation touch = touches[0];
-            //    if (leftSideScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-            //    {
-            //        fireShot();
-            //    }
-            //    else if (rightSideScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-            //    {
-            //        fireDoubleShot();
-            //    }
-            //    else if (upperLeftScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-            //    {
-            //        fireCarliRocket();
-            //    }
-            //    else if (upperRightScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-            //    {
-            //        fireSpecialShot();
-            //    }
-
-            //}
-            //else if (touches.Count == 2)
-            //{
-            //    fireTripleShot();
-            //}
-
-            if (touches.Count == 1)
-            {
-                TouchLocation touch = touches[0];
-                if (leftSideScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
+                if (touches.Count == 1)
                 {
-                    fireShot();
-                }
-                else if (rightSideScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-                {
-                    fireDoubleShot();
-                }
-                else if (upperLeftScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-                {
-                    fireCarliRocket();
-                }
-                else if (upperRightScreen.Contains(new Point((int)touch.Position.X, (int)touch.Position.Y)))
-                {
-                    fireSpecialShot();
-                }
+                    if (gameInput.IsPressed(ActionSlideLeft) && middleScreen.Contains(gameInput.CurrentTouchPoint(ActionSlideLeft)))
+                    {
+                        shotTimer = minShotTimer;
+                        fireSideLeftShot();
+                    }
+                    if (gameInput.IsPressed(ActionSlideRight) && middleScreen.Contains(gameInput.CurrentTouchPoint(ActionSlideRight)))
+                    {
+                        shotTimer = minShotTimer;
+                        fireSideRightShot();
+                    }
 
-            }
-            else if (touches.Count == 2)
-            {
-                if ((leftSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
-                    rightSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
-                    (leftSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
-                    rightSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
-                {
-                    fireTripleShot();
+                    if (gameInput.IsPressed(ActionLeft))
+                    {
+                        fireShot();
+                    }
+                    if (gameInput.IsPressed(ActionRight))
+                    {
+                        fireDoubleShot();
+                    }
+                    if (gameInput.IsPressed(ActionUpperLeft))
+                    {
+                        fireCarliRocket();
+                    }
+                    if (gameInput.IsPressed(ActionUpperRight))
+                    {
+                        fireSpecialShot();
+                    }
                 }
-                else if ((leftSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
-                         upperLeftScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
+                else if (touches.Count == 2)
+                {
+                    if ((leftSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
+                        rightSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
                         (leftSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
-                         upperLeftScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
-                {
-                    fireShot();
-                    fireCarliRocket();
+                        rightSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
+                    {
+                        fireTripleShot();
+                    }
+                    else if ((leftSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
+                             upperLeftScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
+                            (leftSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
+                             upperLeftScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
+                    {
+                        fireShot();
+                        fireCarliRocket();
+                    }
+                    else if ((rightSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
+                             upperLeftScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
+                            (rightSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
+                             upperLeftScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
+                    {
+                        fireDoubleShot();
+                        fireCarliRocket();
+                    }
+                    else if ((leftSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
+                             upperRightScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
+                            (leftSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
+                             upperRightScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
+                    {
+                        fireSpecialShot();
+                    }
+                    else if ((rightSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
+                             upperRightScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
+                            (rightSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
+                             upperRightScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
+                    {
+                        fireSpecialShot();
+                    }
                 }
-                else if ((rightSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
-                         upperLeftScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
-                        (rightSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
-                         upperLeftScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
-                {
-                    fireDoubleShot();
-                    fireCarliRocket();
-                }
-                else if ((leftSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
-                         upperRightScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
-                        (leftSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
-                         upperRightScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
-                {
-                    fireSpecialShot();
-                }
-                else if ((rightSideScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y)) &&
-                         upperRightScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y))) ||
-                        (rightSideScreen.Contains(new Point((int)touches[1].Position.X, (int)touches[1].Position.Y)) &&
-                         upperRightScreen.Contains(new Point((int)touches[0].Position.X, (int)touches[0].Position.Y))))
-                {
-                    fireSpecialShot();
-                }
-            }
-
 
             // ***** up to version 1.1 *****
             // Movement (X = left/right, Y = up/down)
@@ -578,46 +631,69 @@ namespace SpacepiXX
                 playerSprite.Velocity = new Vector2(currentAccValue.Y * 6,
                                                     -currentAccValue.X * 3);
 
-            if (playerSprite.Velocity.Length() < 0.1f)
+            if (playerSprite.Velocity.Length() < 0.2f) // Before version 2.0 : < 0.1f
             {
                 playerSprite.Velocity = Vector2.Zero;
             }
-
-            #endif
         }
 
-        private void HandleGamepadInput(GamePadState gamePadState)
+        private void HandleKeyboardInput(KeyboardState state)
         {
             #if DEBUG
-            playerSprite.Velocity +=
-                new Vector2(
-                    gamePadState.ThumbSticks.Left.X,
-                    -gamePadState.ThumbSticks.Left.Y);
 
-            if (gamePadState.Buttons.A == ButtonState.Pressed)
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1))
             {
                 fireShot();
             }
-
-            if (gamePadState.Buttons.X == ButtonState.Pressed)
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D2))
             {
                 fireDoubleShot();
             }
-
-            if (gamePadState.Buttons.B == ButtonState.Pressed)
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D3))
             {
                 fireTripleShot();
             }
-
-            if (gamePadState.Buttons.RightShoulder == ButtonState.Pressed)
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Q))
+            {
+                fireSideLeftShot();
+            }
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.W))
+            {
+                fireSideRightShot();
+            }
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4))
             {
                 fireSpecialShot();
             }
-
-            if (gamePadState.Buttons.LeftShoulder == ButtonState.Pressed)
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D5))
             {
                 fireCarliRocket();
             }
+
+            Vector2 velo = Vector2.Zero;
+
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
+            {
+                velo += new Vector2(-1.0f, 0.0f);
+            }
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
+            {
+                velo += new Vector2(1.0f, 0.0f);
+            }
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
+            {
+                velo += new Vector2(0.0f, -1.0f);
+            }
+            if (state.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
+            {
+                velo += new Vector2(0.0f, 1.0f);
+            }
+
+            if (velo != Vector2.Zero)
+                velo.Normalize();
+
+            playerSprite.Velocity = velo;
+
             #endif
         }
 
@@ -659,11 +735,12 @@ namespace SpacepiXX
                 playerSprite.Velocity = Vector2.Zero;
 
                 shotTimer -= elapsed;
+                sideShotTimer -= elapsed;
                 specialShotTimer -= elapsed;
                 rocketTimer -= elapsed;
 
                 HandleTouchInput(TouchPanel.GetState());
-                HandleGamepadInput(GamePad.GetState(PlayerIndex.One));
+                HandleKeyboardInput(Keyboard.GetState());
 
                 if (playerSprite.Velocity.Length() != 0.0f)
                 {
@@ -678,14 +755,25 @@ namespace SpacepiXX
                 playerSprite.Update(gameTime);
                 adaptMovementLimits();
 
-                Overheat -= CoolDownRate * elapsed;
+                if (Overheat > 0.95f)
+                    Overheat -= CoolDownRate * elapsed * 0.5f;
+                else if (Overheat > 0.9f)
+                    Overheat -= CoolDownRate * elapsed * 0.6f;
+                else if (Overheat > 0.85f)
+                    Overheat -= CoolDownRate * elapsed * 0.7f;
+                else if (Overheat > 0.80f)
+                    Overheat -= CoolDownRate * elapsed * 0.8f;
+                else if (Overheat > 0.75f)
+                    Overheat -= CoolDownRate * elapsed * 0.9f;
+                else
+                    Overheat -= CoolDownRate * elapsed;
 
                 if (HitPoints != 0.0f)
                 {
                     this.IncreaseHitPoints(HealRate * elapsed);
                 }
 
-                if (this.overheat > 0.75f)
+                if (this.overheat > 0.80f)
                 {
                     this.DecreaseHitPoints(OverheatKillRateMax * this.overheat);
                     this.hitPoints = Math.Max(1.0f, this.hitPoints);
@@ -738,6 +826,11 @@ namespace SpacepiXX
 
             if (!IsDestroyed)
             {
+                if (isOutOfControl)
+                {
+                    playerSprite.TintColor = new Color(1.0f, 0.5f, 0.5f);
+                    playerSprite.Draw(spriteBatch);
+                }
                 playerSprite.Draw(spriteBatch);
 
                 if (IsShieldActive)
@@ -814,9 +907,9 @@ namespace SpacepiXX
         public void IncreaseScoreMulti(long score, bool kill)
         {
             if (kill)
-                ScoreMulti += score / 3000.0f;
+                ScoreMulti += score / 4000.0f;
             else
-                ScoreMulti += score / 3500.0f;
+                ScoreMulti += score / 4500.0f;
         }
 
         public void ResetPlayerScore()
@@ -848,6 +941,7 @@ namespace SpacepiXX
             this.hitPoints = Single.Parse(reader.ReadLine());
 
             this.shotTimer = Single.Parse(reader.ReadLine());
+            this.sideShotTimer = Single.Parse(reader.ReadLine());
             this.rocketTimer = Single.Parse(reader.ReadLine());
             this.specialShotTimer = Single.Parse(reader.ReadLine());
 
@@ -893,6 +987,7 @@ namespace SpacepiXX
             writer.WriteLine(this.hitPoints);
 
             writer.WriteLine(this.shotTimer);
+            writer.WriteLine(this.sideShotTimer);
             writer.WriteLine(this.rocketTimer);
             writer.WriteLine(this.specialShotTimer);
 
@@ -942,7 +1037,7 @@ namespace SpacepiXX
             }
             set
             {
-                this.overheat = Math.Max(value, 0.0f);
+                this.overheat = MathHelper.Clamp(value, OVERHEAT_MIN, OVERHEAT_MAX);
             }
         }
 

@@ -17,7 +17,11 @@ namespace SpacepiXX
 
         private const int SPAWN_CHANCE = 10; // 10%
 
-        private int lastPowerUpNumber = -1;
+        //private int lastPowerUpNumber = -1;
+        private PowerUp.PowerUpType lastPowerUp = PowerUp.PowerUpType.Life;
+
+        private float extraLifeTimer = 0.0f;
+        private const float extraLifeMinTimer = 120.0f;
 
         private Random rand = new Random();
 
@@ -42,13 +46,6 @@ namespace SpacepiXX
                 return;
 
             int rnd = rand.Next(59);
-
-            // check, that the new powerup to drop is not equal
-            // to the last one
-            if (rnd == lastPowerUpNumber)
-                return;
-            else
-                lastPowerUpNumber = rnd;
 
             PowerUp.PowerUpType type = PowerUp.PowerUpType.SpecialShot;
             Rectangle initialFrame = new Rectangle(0, 0, 25, 25);
@@ -195,6 +192,18 @@ namespace SpacepiXX
                     break;
             }
 
+            if (type == PowerUp.PowerUpType.Life && extraLifeTimer < extraLifeMinTimer)
+                return;
+            else if (type == PowerUp.PowerUpType.Life && extraLifeTimer > extraLifeMinTimer)
+                extraLifeTimer = 0.0f;
+
+            // check, that the new powerup to drop is not equal
+            // to the last one
+            if (type == lastPowerUp)
+                return;
+            else
+                lastPowerUp = type;
+
             PowerUp p = new PowerUp(texture,
                                     location - new Vector2(12.5f, 12.5f),
                                     initialFrame,
@@ -294,11 +303,17 @@ namespace SpacepiXX
         public void Reset()
         {
             this.PowerUps.Clear();
-            this.lastPowerUpNumber = -1;
+            this.lastPowerUp = PowerUp.PowerUpType.Life;
+
+            this.extraLifeTimer = 0.0f;
         }
 
         public void Update(GameTime gameTime)
         {
+            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            extraLifeTimer += elapsed;
+
             for (int x = powerUps.Count - 1; x >= 0; --x)
             {
                 powerUps[x].Update(gameTime);
@@ -391,7 +406,8 @@ namespace SpacepiXX
                 powerUps.Add(p);
             }
 
-            this.lastPowerUpNumber = Int32.Parse(reader.ReadLine());
+            this.lastPowerUp = (PowerUp.PowerUpType)Enum.Parse(lastPowerUp.GetType(), reader.ReadLine(), false);
+            this.extraLifeTimer = Single.Parse(reader.ReadLine());
         }
 
         public void Deactivated(StreamWriter writer)
@@ -405,7 +421,8 @@ namespace SpacepiXX
                 powerUps[i].Deactivated(writer);
             }
 
-            writer.WriteLine(lastPowerUpNumber);
+            writer.WriteLine(lastPowerUp);
+            writer.WriteLine(extraLifeTimer);
         }
 
         #endregion
