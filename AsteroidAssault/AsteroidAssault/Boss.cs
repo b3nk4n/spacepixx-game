@@ -286,11 +286,11 @@ namespace SpacepiXX
 
         public void SetLevel(int lvl)
         {
-            this.hitScore = initialHitScore + (lvl - 1) * (initialHitScore / 10);
-            this.killScore = initialKillScore + (lvl - 1) * (initialKillScore / 10);
+            this.hitScore = initialHitScore + ((lvl - 1) / 5) * (initialHitScore / 2);
+            this.killScore = initialKillScore + ((lvl - 1) / 5) * (initialKillScore / 2);
 
-            this.MaxHitPoints += 50 * (lvl - 1);
-            this.HitPoints += 50 * (lvl - 1);
+            this.MaxHitPoints += 250 * ((lvl - 1) / 5);
+            this.HitPoints += 250 * ((lvl - 1) / 5);
         }
 
         #endregion

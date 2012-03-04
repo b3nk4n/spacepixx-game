@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
@@ -21,34 +18,34 @@ namespace SpacepiXX
         private static SpriteFont font;
         private readonly Rectangle SettingsTitleSource = new Rectangle(0, 400,
                                                                        300, 50);
-        private readonly Vector2 TitlePosition = new Vector2(250.0f, 40.0f);
+        private readonly Vector2 TitlePosition = new Vector2(250.0f, 100.0f);
 
         public enum SoundValues {Off, VeryLow, Low, Med, High, VeryHigh};
         public enum VibrationValues { On, Off };
         public enum NeutralPositionValues { Angle0, Angle15, Angle30, Angle45 };
 
-        private readonly string musicTitle = "Music: ";
+        private const string MUSIC_TITLE = "Music: ";
         private SoundValues musicValue = SoundValues.Med;
-        private readonly int musicPositionY = 150;
-        private readonly Rectangle musicDestination = new Rectangle(250, 145,
+        private readonly int musicPositionY = 180;
+        private readonly Rectangle musicDestination = new Rectangle(250, 175,
                                                                     300, 50);
 
-        private readonly string sfxTitle = "Sfx: ";
+        private const string SFX_TITLE = "SFX: ";
         private SoundValues sfxValue = SoundValues.Med;
-        private readonly int sfxPositionY = 220;
-        private readonly Rectangle sfxDestination = new Rectangle(250, 215,
+        private readonly int sfxPositionY = 250;
+        private readonly Rectangle sfxDestination = new Rectangle(250, 245,
                                                                   300, 50);
 
-        private readonly string vibrationTitle = "Vibration: ";
+        private const string VIBRATION_TITLE = "Vibration: ";
         private VibrationValues vibrationValue = VibrationValues.On;
-        private readonly int vibrationPositionY = 290;
-        private readonly Rectangle vibrationDestination = new Rectangle(250, 285,
+        private readonly int vibrationPositionY = 320;
+        private readonly Rectangle vibrationDestination = new Rectangle(250, 315,
                                                                         300, 50);
 
-        private readonly string neutralPositionTitle = "Neutral Position: ";
+        private const string NEUTRAL_POSITION_TITLE = "Neutral Position: ";
         private NeutralPositionValues neutralPositionValue = NeutralPositionValues.Angle30;
-        private readonly int neutralPositionY = 360;
-        private readonly Rectangle neutralPositionDestination = new Rectangle(250, 355,
+        private readonly int neutralPositionY = 390;
+        private readonly Rectangle neutralPositionDestination = new Rectangle(250, 385,
                                                                               300, 50);
 
         private static Rectangle screenBounds;
@@ -62,9 +59,24 @@ namespace SpacepiXX
 
         public static GameInput GameInput;
         private const string MusicAction = "Music";
-        private const string SfxAction = "Sfx";
+        private const string SfxAction = "SFX";
         private const string VibrationAction = "Vibration";
         private const string NeutralPositionAction = "NeutralPos";
+
+        private const string ON = "ON";
+        private const string OFF = "OFF";
+        private const string VERY_LOW = "VERY LOW";
+        private const string LOW = "LOW";
+        private const string MEDIUM = "MEDIUM";
+        private const string HIGH = "HIGH";
+        private const string VERY_HIGH = "VERY HIGH";
+        private const string LEFT = "LEFT";
+        private const string RIGHT = "RIGHT";
+
+        private const string ANGLE0 = "0   ";
+        private const string ANGLE15 = "15   ";
+        private const string ANGLE30 = "30   ";
+        private const string ANGLE45 = "45   ";
 
         #endregion
 
@@ -130,27 +142,6 @@ namespace SpacepiXX
                              SettingsTitleSource,
                              Color.White * opacity);
 
-            //for (int i = 0; i < Content.Length; ++i)
-            //{
-            //    spriteBatch.DrawString(font,
-            //           Content[i],
-            //           new Vector2((screenBounds.Width - font.MeasureString(Content[i]).X) / 2,
-            //                       150 + (i * 35)),
-            //           Color.Red * opacity);
-            //}
-
-            //spriteBatch.DrawString(font,
-            //           Email,
-            //           new Vector2((screenBounds.Width - font.MeasureString(Email).X) / 2,
-            //                       325),
-            //           Color.Red * opacity);
-
-            //spriteBatch.DrawString(font,
-            //           Blog,
-            //           new Vector2((screenBounds.Width - font.MeasureString(Blog).X) / 2,
-            //                       360),
-            //           Color.Red * opacity);
-
             drawMusic(spriteBatch);
             drawSfx(spriteBatch);
             drawVibration(spriteBatch);
@@ -159,36 +150,6 @@ namespace SpacepiXX
 
         private void handleTouchInputs()
         {
-            //if (TouchPanel.IsGestureAvailable)
-            //{
-            //    GestureSample gs = TouchPanel.ReadGesture();
-
-            //    if (gs.GestureType == GestureType.Tap)
-            //    {
-            //        // Music
-            //        if (musicDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            toggleMusic();
-            //            Save();
-            //        }
-            //        // Sfx
-            //        else if (sfxDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            toggleSfx();
-            //        }
-            //        // Vibration
-            //        else if (vibrationDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            toggleVibration();
-            //        }
-            //        // Neutral position
-            //        else if (neutralPositionDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            toggleNeutralPosition();
-            //        }
-            //    }
-            //}
-
             // Music
             if (GameInput.IsPressed(MusicAction))
             {
@@ -303,69 +264,34 @@ namespace SpacepiXX
             }
         }
 
-        //private void drawMusic(SpriteBatch spriteBatch)
-        //{
-        //    string text = musicTitle;
-
-        //    switch (musicValue)
-        //    {
-        //        case SoundValues.Off:
-        //            text += "OFF";
-        //            break;
-        //        case SoundValues.VeryLow:
-        //            text += "VERY LOW";
-        //            break;
-        //        case SoundValues.Low:
-        //            text += "LOW";
-        //            break;
-        //        case SoundValues.Med:
-        //            text += "MEDIUM";
-        //            break;
-        //        case SoundValues.High:
-        //            text += "HIGH";
-        //            break;
-        //        case SoundValues.VeryHigh:
-        //            text += "VERY HIGH";
-        //            break;
-        //    }
-
-        //    spriteBatch.DrawString(font,
-        //                           text,
-        //                           new Vector2((screenBounds.Width - font.MeasureString(text).X) / 2,
-        //                                       musicPositionY),
-        //                           Color.Red * opacity);
-
-        //    //spriteBatch.Draw(texture, musicDestination, new Rectangle(350, 350, 50, 50), Color.Red * 0.2f);
-        //}
-
         private void drawMusic(SpriteBatch spriteBatch)
         {
-            string text = string.Empty;
+            string text;
 
             switch (musicValue)
             {
-                case SoundValues.Off:
-                    text = "OFF";
-                    break;
                 case SoundValues.VeryLow:
-                    text = "VERY LOW";
+                    text = VERY_LOW;
                     break;
                 case SoundValues.Low:
-                    text = "LOW";
+                    text = LOW;
                     break;
                 case SoundValues.Med:
-                    text = "MEDIUM";
+                    text = MEDIUM;
                     break;
                 case SoundValues.High:
-                    text = "HIGH";
+                    text = HIGH;
                     break;
                 case SoundValues.VeryHigh:
-                    text = "VERY HIGH";
+                    text = VERY_HIGH;
+                    break;
+                default:
+                    text = OFF;
                     break;
             }
 
             spriteBatch.DrawString(font,
-                                   musicTitle,
+                                   MUSIC_TITLE,
                                    new Vector2(250,
                                                musicPositionY),
                                    Color.Red * opacity);
@@ -375,71 +301,36 @@ namespace SpacepiXX
                                    new Vector2((550 - font.MeasureString(text).X),
                                                musicPositionY),
                                    Color.Red * opacity);
-
-            //spriteBatch.Draw(texture, musicDestination, new Rectangle(350, 350, 50, 50), Color.Red * 0.2f);
         }
-
-        //private void drawSfx(SpriteBatch spriteBatch)
-        //{
-        //    string text = sfxTitle;
-
-        //    switch (sfxValue)
-        //    {
-        //        case SoundValues.Off:
-        //            text += "OFF";
-        //            break;
-        //        case SoundValues.VeryLow:
-        //            text += "VERY LOW";
-        //            break;
-        //        case SoundValues.Low:
-        //            text += "LOW";
-        //            break;
-        //        case SoundValues.Med:
-        //            text += "MEDIUM";
-        //            break;
-        //        case SoundValues.High:
-        //            text += "HIGH";
-        //            break;
-        //        case SoundValues.VeryHigh:
-        //            text += "VERY HIGH";
-        //            break;
-        //    }
-
-        //    spriteBatch.DrawString(font,
-        //                           text,
-        //                           new Vector2((screenBounds.Width - font.MeasureString(text).X) / 2,
-        //                                       sfxPositionY),
-        //                           Color.Red * opacity);
-        //}
 
         private void drawSfx(SpriteBatch spriteBatch)
         {
-            string text = string.Empty;
+            string text;
 
             switch (sfxValue)
             {
-                case SoundValues.Off:
-                    text = "OFF";
-                    break;
                 case SoundValues.VeryLow:
-                    text = "VERY LOW";
+                    text = VERY_LOW;
                     break;
                 case SoundValues.Low:
-                    text = "LOW";
+                    text = LOW;
                     break;
                 case SoundValues.Med:
-                    text = "MEDIUM";
+                    text = MEDIUM;
                     break;
                 case SoundValues.High:
-                    text = "HIGH";
+                    text = HIGH;
                     break;
                 case SoundValues.VeryHigh:
-                    text = "VERY HIGH";
+                    text = VERY_HIGH;
+                    break;
+                default:
+                    text = OFF;
                     break;
             }
 
             spriteBatch.DrawString(font,
-                                   sfxTitle,
+                                   SFX_TITLE,
                                    new Vector2(250,
                                                sfxPositionY),
                                    Color.Red * opacity);
@@ -451,43 +342,22 @@ namespace SpacepiXX
                                    Color.Red * opacity);
         }
 
-        //private void drawVibration(SpriteBatch spriteBatch)
-        //{
-        //    string text = vibrationTitle;
-
-        //    switch (vibrationValue)
-        //    {
-        //        case VibrationValues.On:
-        //            text += "ON";
-        //            break;
-        //        case VibrationValues.Off:
-        //            text += "OFF";
-        //            break;
-        //    }
-
-        //    spriteBatch.DrawString(font,
-        //                           text,
-        //                           new Vector2((screenBounds.Width - font.MeasureString(text).X) / 2,
-        //                                       vibrationPositionY),
-        //                           Color.Red * opacity);
-        //}
-
         private void drawVibration(SpriteBatch spriteBatch)
         {
-            string text = string.Empty;
+            string text;
 
             switch (vibrationValue)
             {
                 case VibrationValues.On:
-                    text = "ON";
+                    text = ON;
                     break;
-                case VibrationValues.Off:
-                    text = "OFF";
+                default:
+                    text = OFF;
                     break;
             }
 
             spriteBatch.DrawString(font,
-                                   vibrationTitle,
+                                   VIBRATION_TITLE,
                                    new Vector2(250,
                                                vibrationPositionY),
                                    Color.Red * opacity);
@@ -499,55 +369,28 @@ namespace SpacepiXX
                                    Color.Red * opacity);
         }
 
-        //private void drawNeutralPosition(SpriteBatch spriteBatch)
-        //{
-        //    string text = neutralPositionTitle;
-
-        //    switch (neutralPositionValue)
-        //    {
-        //        case NeutralPositionValues.Angle0:
-        //            text += "0 degree";
-        //            break;
-        //        case NeutralPositionValues.Angle15:
-        //            text += "15 degree";
-        //            break;
-        //        case NeutralPositionValues.Angle30:
-        //            text += "30 degree";
-        //            break;
-        //        case NeutralPositionValues.Angle45:
-        //            text += "45 degree";
-        //            break;
-        //    }
-
-        //    spriteBatch.DrawString(font,
-        //                           text,
-        //                           new Vector2((screenBounds.Width - font.MeasureString(text).X) / 2,
-        //                                       neutralPositionY),
-        //                           Color.Red * opacity);
-        //}
-
         private void drawNeutralPosition(SpriteBatch spriteBatch)
         {
-            string text = string.Empty;
+            string text;
 
             switch (neutralPositionValue)
             {
                 case NeutralPositionValues.Angle0:
-                    text = "0   ";
+                    text = ANGLE0;
                     break;
                 case NeutralPositionValues.Angle15:
-                    text = "15   ";
+                    text = ANGLE15;
                     break;
                 case NeutralPositionValues.Angle30:
-                    text = "30   ";
+                    text = ANGLE30;
                     break;
-                case NeutralPositionValues.Angle45:
-                    text = "45   ";
+                default:
+                    text = ANGLE45;
                     break;
             }
 
             spriteBatch.DrawString(font,
-                                   neutralPositionTitle,
+                                   NEUTRAL_POSITION_TITLE,
                                    new Vector2(250,
                                                neutralPositionY),
                                    Color.Red * opacity);

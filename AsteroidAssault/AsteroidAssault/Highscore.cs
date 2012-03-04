@@ -95,7 +95,7 @@ namespace SpacepiXX
         {
             get
             {
-                return string.Format("{0:00000000000}", score);
+                return string.Format("{0:000000000000}", score);
             }
         }
 

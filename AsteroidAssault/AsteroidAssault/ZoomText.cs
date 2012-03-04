@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using System.IO;
 
@@ -14,9 +11,9 @@ namespace SpacepiXX
         public string text;
         public Color drawColor;
         public int displayCounter;
-        private int maxDisplayCount; // = 250;
+        private int maxDisplayCount;
         private float lastScaleAmount = 0.0f;
-        private float scaleRate; // = 0.05f;
+        private float scaleRate;
 
         #endregion
 

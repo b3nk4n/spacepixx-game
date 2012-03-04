@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -17,8 +14,8 @@ namespace SpacepiXX
         private const float SPEED = 100.0f;
         private const int RADIUS = 10;
 
-        public enum PowerUpType { Health25, Health50, Health100, CoolWater, Life, SpecialShot, KillAll, LowBonusScore, MediumBonusScore, HighBonusScore, ScoreMultiLow, ScoreMultiMedium, ScoreMultiHigh, BonusRockets, Shield,
-                                  AntiScoreMulti, OutOfControl, Slow, OverHeat,
+        public enum PowerUpType { Health25, Health50, Health100, CoolWater, Life, SpecialShot, KillAll, LowBonusScore, MediumBonusScore, HighBonusScore, ScoreMultiLow, ScoreMultiMedium, ScoreMultiHigh, BonusRockets, Shield, Overdrive,
+                                  AntiScoreMulti, OutOfControl, Slow, OverHeat, Underdrive,
                                   Random};
 
         private PowerUpType type;
@@ -74,11 +71,6 @@ namespace SpacepiXX
 
         public void Activated(StreamReader reader)
         {
-            //powerUpSprite.Location = new Vector2(Single.Parse(reader.ReadLine()),
-            //                                     Single.Parse(reader.ReadLine()));
-            //powerUpSprite.Rotation = Single.Parse(reader.ReadLine());
-            //powerUpSprite.Velocity = new Vector2(Single.Parse(reader.ReadLine()),
-            //                                     Single.Parse(reader.ReadLine()));
             powerUpSprite.Activated(reader);
 
             this.type = (PowerUpType)Enum.Parse(type.GetType(), reader.ReadLine(), false);
@@ -89,11 +81,6 @@ namespace SpacepiXX
         public void Deactivated(StreamWriter writer)
         {
             // Powerup sprite
-            //writer.WriteLine(powerUpSprite.Location.X);
-            //writer.WriteLine(powerUpSprite.Location.Y);
-            //writer.WriteLine(powerUpSprite.Rotation);
-            //writer.WriteLine(powerUpSprite.Velocity.X);
-            //writer.WriteLine(powerUpSprite.Velocity.Y);
             powerUpSprite.Deactivated(writer);
 
             writer.WriteLine(type);

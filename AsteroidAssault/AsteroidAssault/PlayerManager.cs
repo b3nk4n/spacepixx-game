@@ -1,14 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Devices.Sensors;
 using Microsoft.Xna.Framework.Input;
 using System.IO;
 using SpacepiXX.Inputs;
+using Microsoft.Phone.Applications.Common;
 
 namespace SpacepiXX
 {
@@ -40,7 +37,7 @@ namespace SpacepiXX
 
         private float hitPoints = 100.0f;
         public const float MaxHitPoints = 100.0f;
-        const float HealRate = 1.0f; // Version 1.0:  1.5
+        const float HealRate = 0.5f; // Version 1.0:  1.5    Version 1.4: 1.0
 
         private Vector2 gunOffset = new Vector2(19, 5);
         private float shotTimer = 0.0f;
@@ -58,28 +55,28 @@ namespace SpacepiXX
         public ShotManager PlayerShotManager;
 
         private float overheat = 0.0f;
-        //private const float OverheatSingleShot = 0.045f;
-        //private const float OverheatTripleShot = 0.09f;
-        //private const float OverheatSideShot = 0.135f;
+
+        // Version 2.4
+        //private const float OverheatSingleShot = 0.08025f;
+        //private const float OverheatDoubleShot = 0.1295f;
+        //private const float OverheatTripleShot = 0.1795f;
+        //private const float OverheatSideShot = 0.18f;
         //private const float OverheatSpecialShot = 0.25f;
         //private const float OverheatCarliRocket = 0.05f;
-        //private const float OverheatSingleShot = 0.1f;
-        //private const float OverheatTripleShot = 0.18f;
-        //private const float OverheatSideShot = 0.26f;
-        //private const float OverheatSpecialShot = 0.25f;
-        //private const float OverheatCarliRocket = 0.05f;
-        private const float OverheatSingleShot = 0.08f;
-        private const float OverheatDoubleShot = 0.129f;
-        private const float OverheatTripleShot = 0.178f;
+
+        // Version 2.5 (had to be adjusted because of the 60 fps change)
+        private const float OverheatSingleShot = 0.0725f;
+        private const float OverheatDoubleShot = 0.12225f;
+        private const float OverheatTripleShot = 0.172f;
         private const float OverheatSideShot = 0.18f;
         private const float OverheatSpecialShot = 0.25f;
         private const float OverheatCarliRocket = 0.05f;
+
         public const float OVERHEAT_MAX = 1.0f;
         public const float OVERHEAT_MIN = 0.0f;
         private const float CoolDownRate = 0.45f; // Version 1.0:  0.25   Before version 2.0: 0.266
-        private const float OverheatKillRateMax = 0.08f; // Befor version 2.0: 0.1
+        private const float OverheatKillRateMax = 0.075f;
 
-        Accelerometer accelerometer = new Accelerometer();
         Vector3 currentAccValue = Vector3.Zero;
 
         Rectangle leftSideScreen;
@@ -122,6 +119,14 @@ namespace SpacepiXX
         private const string ActionSlideLeft = "SlideLeft";
         private const string ActionSlideRight = "SlideRight";
 
+        // Over/Underdrive
+        private float overdriveTimer = 0.0f;
+        public const float OVERDRIVE_DURATION = 20.0f;
+        private float overdriveFactor = OVERDRIVE_NORMAL_FACTOR;
+        public const float OVERDRIVE_FACTOR = 1.75f;
+        public const float OVERDRIVE_NORMAL_FACTOR = 1.0f;
+        public const float UNDERDRIVE_FACTOR = 0.70f;
+
         #endregion
 
         #region Constructors
@@ -139,7 +144,7 @@ namespace SpacepiXX
                                                      new Rectangle(100, 430, 15, 5),
                                                      4,
                                                      2,
-                                                     300.0f,
+                                                     350.0f,
                                                      screenBounds);
 
             this.playerAreaLimit = new Rectangle(0,
@@ -157,8 +162,8 @@ namespace SpacepiXX
 
             playerSprite.CollisionRadius = PlayerRadius;
 
-            accelerometer.ReadingChanged += new EventHandler<AccelerometerReadingEventArgs>(accelerometer_ReadingChanged);
-            accelerometer.Start();
+            AccelerometerHelper.Instance.ReadingChanged += new EventHandler<AccelerometerHelperReadingEventArgs>(OnAccelerometerHelperReadingChanged);
+            AccelerometerHelper.Instance.Active = true;
 
             leftSideScreen = new Rectangle(0,
                                            2 * screenBounds.Height / 3,
@@ -236,6 +241,12 @@ namespace SpacepiXX
 
             this.isOutOfControl = false;
             this.outOfControlTimer = 0.0f;
+
+            this.isSlow = false;
+            this.slowTimer = 0.0f;
+
+            this.overdriveFactor = OVERDRIVE_NORMAL_FACTOR;
+            this.overdriveTimer = 0.0f;
         }
 
         public void ResetSpecialWeapons()
@@ -262,11 +273,11 @@ namespace SpacepiXX
                                                     true,
                                                     new Color(0, 255, 33),
                                                     true);
-                    shotTimer = minShotTimer;
+                    shotTimer = minShotTimer / overdriveFactor;
                 }
                 else
                 {
-                    shotTimer = minShotTimer * 1.5f;
+                    shotTimer = minShotTimer * 1.5f / overdriveFactor;
                 }
             }
         }
@@ -289,11 +300,11 @@ namespace SpacepiXX
                                                     true,
                                                     new Color(0, 255, 33),
                                                     true);
-                    shotTimer = minDoubleShotTimer;
+                    shotTimer = minDoubleShotTimer / overdriveFactor;
                 }
                 else
                 {
-                    shotTimer = minDoubleShotTimer * 1.5f;
+                    shotTimer = minDoubleShotTimer * 1.5f / overdriveFactor;
                 }
             }
         }
@@ -324,11 +335,11 @@ namespace SpacepiXX
                                                     new Color(0, 255, 33),
                                                     false);
 
-                    shotTimer = minTripleShotTimer;
+                    shotTimer = minTripleShotTimer / overdriveFactor;
                 }
                 else
                 {
-                    shotTimer = minTripleShotTimer * 2.0f;
+                    shotTimer = minTripleShotTimer * 2.0f / overdriveFactor;
                 }
             }
         }
@@ -359,11 +370,11 @@ namespace SpacepiXX
                                                     new Color(0, 255, 33),
                                                     true);
 
-                    sideShotTimer = minSideShotTimer;
+                    sideShotTimer = minSideShotTimer / overdriveFactor;
                 }
                 else
                 {
-                    sideShotTimer = minSideShotTimer * 2.0f;
+                    sideShotTimer = minSideShotTimer * 2.0f / overdriveFactor;
                 }
             }
         }
@@ -394,11 +405,11 @@ namespace SpacepiXX
                                                     new Color(0, 255, 33),
                                                     true);
 
-                    sideShotTimer = minSideShotTimer;
+                    sideShotTimer = minSideShotTimer / overdriveFactor;
                 }
                 else
                 {
-                    sideShotTimer = minSideShotTimer * 2.0f;
+                    sideShotTimer = minSideShotTimer * 2.0f / overdriveFactor;
                 }
             }
         }
@@ -505,7 +516,7 @@ namespace SpacepiXX
                                                     new Color(75, 75, 255),
                                                     false);
 
-                    specialShotTimer = minSpecialShotTimer;
+                    specialShotTimer = minSpecialShotTimer / overdriveFactor;
                 }
             }
         }
@@ -528,7 +539,7 @@ namespace SpacepiXX
                                                            Color.White,
                                                            true);
 
-                    rocketTimer = minCarliRocketTimer;
+                    rocketTimer = minCarliRocketTimer / overdriveFactor;
                 }
             }
         }
@@ -606,32 +617,39 @@ namespace SpacepiXX
                     }
                 }
 
-            // ***** up to version 1.1 *****
-            // Movement (X = left/right, Y = up/down)
+            // ***** new in version 1.2 to 2.4 - 30fps *****
+            //currentAccValue.X = currentAccValue.X + (float)Math.Sin(settings.GetNeutralPosition());
+
             //currentAccValue.Y = MathHelper.Clamp(currentAccValue.Y, -0.4f, 0.4f);
             //currentAccValue.X = MathHelper.Clamp(currentAccValue.X, -0.4f, 0.4f);
 
             //if (!IsOutOfControl)
             //    playerSprite.Velocity = new Vector2(-currentAccValue.Y * 6,
-            //                                        -currentAccValue.X * 3 - 0.6f);
+            //                                        -currentAccValue.X * 3);
             //else
             //    playerSprite.Velocity = new Vector2(currentAccValue.Y * 6,
-            //                                        -currentAccValue.X * 3 - 0.6f);
+            //                                        -currentAccValue.X * 3);
 
-            // ***** new in version 1.2 *****
-            currentAccValue.X = currentAccValue.X + (float)Math.Sin(settings.GetNeutralPosition());
+            //if (playerSprite.Velocity.Length() < 0.1f)
+            //{
+            //    playerSprite.Velocity = Vector2.Zero;
+            //}
 
-            currentAccValue.Y = MathHelper.Clamp(currentAccValue.Y, -0.4f, 0.4f);
-            currentAccValue.X = MathHelper.Clamp(currentAccValue.X, -0.4f, 0.4f);
+            // ******* Version 2.5 - 60 fps ********
+            Vector3 current = currentAccValue;
+            current.X = current.X + (float)Math.Sin(settings.GetNeutralPosition());
+
+            current.Y = MathHelper.Clamp(current.Y, -0.4f, 0.4f);
+            current.X = MathHelper.Clamp(current.X, -0.4f, 0.4f);
 
             if (!IsOutOfControl)
-                playerSprite.Velocity = new Vector2(-currentAccValue.Y * 6,
-                                                    -currentAccValue.X * 3);
+                playerSprite.Velocity = new Vector2(-current.Y * 6,
+                                                    -current.X * 3);
             else
-                playerSprite.Velocity = new Vector2(currentAccValue.Y * 6,
-                                                    -currentAccValue.X * 3);
+                playerSprite.Velocity = new Vector2(current.Y * 6,
+                                                    -current.X * 3);
 
-            if (playerSprite.Velocity.Length() < 0.2f) // Before version 2.0 : < 0.1f
+            if (playerSprite.Velocity.Length() < 0.15f)
             {
                 playerSprite.Velocity = Vector2.Zero;
             }
@@ -732,8 +750,6 @@ namespace SpacepiXX
 
             if (!IsDestroyed)
             {
-                playerSprite.Velocity = Vector2.Zero;
-
                 shotTimer -= elapsed;
                 sideShotTimer -= elapsed;
                 specialShotTimer -= elapsed;
@@ -746,7 +762,7 @@ namespace SpacepiXX
                 {
                     playerSprite.Velocity.Normalize();
                 }
-                
+
                 if (!IsSlow)
                     playerSprite.Velocity *= PLAYER_SPEED;
                 else
@@ -756,17 +772,17 @@ namespace SpacepiXX
                 adaptMovementLimits();
 
                 if (Overheat > 0.95f)
-                    Overheat -= CoolDownRate * elapsed * 0.5f;
+                    Overheat -= CoolDownRate * elapsed * 0.5f * overdriveFactor;
                 else if (Overheat > 0.9f)
-                    Overheat -= CoolDownRate * elapsed * 0.6f;
+                    Overheat -= CoolDownRate * elapsed * 0.6f * overdriveFactor;
                 else if (Overheat > 0.85f)
-                    Overheat -= CoolDownRate * elapsed * 0.7f;
+                    Overheat -= CoolDownRate * elapsed * 0.7f * overdriveFactor;
                 else if (Overheat > 0.80f)
-                    Overheat -= CoolDownRate * elapsed * 0.8f;
+                    Overheat -= CoolDownRate * elapsed * 0.8f * overdriveFactor;
                 else if (Overheat > 0.75f)
-                    Overheat -= CoolDownRate * elapsed * 0.9f;
+                    Overheat -= CoolDownRate * elapsed * 0.9f * overdriveFactor;
                 else
-                    Overheat -= CoolDownRate * elapsed;
+                    Overheat -= CoolDownRate * elapsed * overdriveFactor;
 
                 if (HitPoints != 0.0f)
                 {
@@ -775,7 +791,7 @@ namespace SpacepiXX
 
                 if (this.overheat > 0.80f)
                 {
-                    this.DecreaseHitPoints(OverheatKillRateMax * this.overheat);
+                    this.DecreaseHitPoints(OverheatKillRateMax);
                     this.hitPoints = Math.Max(1.0f, this.hitPoints);
                 }
 
@@ -817,6 +833,17 @@ namespace SpacepiXX
                     shieldSprite.Rotation += (float)Math.PI / 25;
                     shieldSprite.Rotation = (float)Math.Max(shieldSprite.Rotation, Math.PI * 2);
                 }
+
+                // Overdrive/Underdrive
+                if (IsOverUnderdrive)
+                {
+                    overdriveTimer -= elapsed;
+
+                    if (overdriveTimer <= 0.0f)
+                    {
+                        overdriveFactor = OVERDRIVE_NORMAL_FACTOR;
+                    }
+                }
             }
         }
 
@@ -826,11 +853,15 @@ namespace SpacepiXX
 
             if (!IsDestroyed)
             {
-                if (isOutOfControl)
+                if (IsOverdrive)
+                {
+                    playerSprite.TintColor = new Color(0.5f, 1.0f, 0.5f);
+                }
+                else if (isOutOfControl || IsUnderdrive)
                 {
                     playerSprite.TintColor = new Color(1.0f, 0.5f, 0.5f);
-                    playerSprite.Draw(spriteBatch);
                 }
+                
                 playerSprite.Draw(spriteBatch);
 
                 if (IsShieldActive)
@@ -861,6 +892,18 @@ namespace SpacepiXX
         {
             this.slowTimer = SLOW_DURATION;
             this.isSlow = true;
+        }
+
+        public void StartOverdrive()
+        {
+            this.overdriveTimer = OVERDRIVE_DURATION;
+            this.overdriveFactor = OVERDRIVE_FACTOR;
+        }
+
+        public void StartUnderdrive()
+        {
+            this.overdriveTimer = OVERDRIVE_DURATION;
+            this.overdriveFactor = UNDERDRIVE_FACTOR;
         }
 
         public void ActivateShield()
@@ -965,6 +1008,9 @@ namespace SpacepiXX
             this.shieldSprite.Rotation = Single.Parse(reader.ReadLine());
             this.shieldSprite.Velocity = new Vector2(Single.Parse(reader.ReadLine()),
                                                      Single.Parse(reader.ReadLine()));
+
+            this.overdriveTimer = Single.Parse(reader.ReadLine());
+            this.overdriveFactor = Single.Parse(reader.ReadLine());
         }
 
         public void Deactivated(StreamWriter writer)
@@ -1011,6 +1057,9 @@ namespace SpacepiXX
             writer.WriteLine(shieldSprite.Rotation);
             writer.WriteLine(shieldSprite.Velocity.X);
             writer.WriteLine(shieldSprite.Velocity.Y);
+
+            writer.WriteLine(this.overdriveTimer);
+            writer.WriteLine(this.overdriveFactor);
         }
 
         #endregion
@@ -1105,6 +1154,30 @@ namespace SpacepiXX
             }
         }
 
+        public bool IsOverUnderdrive
+        {
+            get
+            {
+                return overdriveFactor != OVERDRIVE_NORMAL_FACTOR;
+            }
+        }
+
+        public bool IsOverdrive
+        {
+            get
+            {
+                return overdriveFactor == OVERDRIVE_FACTOR;
+            }
+        }
+
+        public bool IsUnderdrive
+        {
+            get
+            {
+                return overdriveFactor == UNDERDRIVE_FACTOR;
+            }
+        }
+
         public float ShieldPoints
         {
             get
@@ -1125,11 +1198,11 @@ namespace SpacepiXX
 
         #region Events
 
-        void accelerometer_ReadingChanged(object sender, AccelerometerReadingEventArgs e)
+        private void OnAccelerometerHelperReadingChanged(object sender, AccelerometerHelperReadingEventArgs e)
         {
-            currentAccValue = new Vector3((float)e.X,
-                                          (float)e.Y,
-                                          (float)e.Z);
+            currentAccValue = new Vector3((float)e.OptimalyFilteredAcceleration.X,
+                                          (float)e.OptimalyFilteredAcceleration.Y,
+                                          (float)e.OptimalyFilteredAcceleration.Z);
         }
 
         #endregion

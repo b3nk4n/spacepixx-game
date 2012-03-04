@@ -6,11 +6,11 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Spacepixx")]
-[assembly: AssemblyProduct("Spacepixx")]
-[assembly: AssemblyDescription("SpacepiXX is an adictive retro space shooter.")]
+[assembly: AssemblyTitle("SpacepiXX")]
+[assembly: AssemblyProduct("SpacepiXX")]
+[assembly: AssemblyDescription("SpacepiXX is an addictive retro space shooter.")]
 [assembly: AssemblyCompany("B. Sautermeister")]
-[assembly: AssemblyCopyright("Copyright © B. Sautermeister 2011")]
+[assembly: AssemblyCopyright("Copyright © B. Sautermeister 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyVersion("2.6.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en")]

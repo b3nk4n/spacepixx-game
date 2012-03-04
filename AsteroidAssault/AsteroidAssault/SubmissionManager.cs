@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.IO;
 using SpacepiXX.Inputs;
+using SpacepiXX.Extensions;
 
 namespace SpacepiXX
 {
@@ -33,14 +31,13 @@ namespace SpacepiXX
 
         private static SubmissionManager submissionManager;
 
-        private List<Highscore> topScores = new List<Highscore>();
         public const int MaxScores = 10;
 
         public static Texture2D Texture;
         public static SpriteFont Font;
         private readonly Rectangle TitleSource = new Rectangle(0, 600,
                                                                500, 100);
-        private readonly Vector2 TitlePosition = new Vector2(150.0f, 20.0f);
+        private readonly Vector2 TitlePosition = new Vector2(150.0f, 80.0f);
 
         private float opacity = 0.0f;
         private const float OpacityMax = 1.0f;
@@ -108,45 +105,6 @@ namespace SpacepiXX
 
         private void handleTouchInputs()
         {
-            //if (TouchPanel.IsGestureAvailable)
-            //{
-            //    GestureSample gs = TouchPanel.ReadGesture();
-
-            //    if (gs.GestureType == GestureType.Tap)
-            //    {
-            //        // Submit
-            //        if (submitDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (submitState == SubmitState.Submit)
-            //            {
-            //                leaderboardManager.Submit(LeaderboardManager.SUBMIT,
-            //                                          name,
-            //                                          score,
-            //                                          level);
-            //                submitState = SubmitState.Submitted;
-            //            }
-            //        }
-            //        // Cancel
-            //        if (cancelDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (submitState == SubmitState.Submit)
-            //            {
-            //                leaderboardManager.StatusText = LeaderboardManager.TEXT_NONE;
-            //                cancelClicked = true;
-            //            }
-            //        }
-
-            //        // Continue
-            //        if (continueDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (submitState == SubmitState.Submitted)
-            //            {
-            //                cancelClicked = true;
-            //            }
-            //        }
-            //    }
-            //}
-
             // Submit
             if (GameInput.IsPressed(SubmitAction))
             {
@@ -228,47 +186,46 @@ namespace SpacepiXX
             spriteBatch.DrawString(Font,
                                    TEXT_SUBMIT,
                                    new Vector2(800 / 2 - Font.MeasureString(TEXT_SUBMIT).X / 2,
-                                               140),
+                                               180),
                                    Color.Red * opacity);
 
             // Title:
             spriteBatch.DrawString(Font,
                                    TEXT_NAME,
                                    new Vector2(300,
-                                               215),
+                                               230),
                                    Color.Red * opacity);
 
             spriteBatch.DrawString(Font,
                                    TEXT_SCORE,
                                    new Vector2(300,
-                                               260),
+                                               270),
                                    Color.Red * opacity);
 
             spriteBatch.DrawString(Font,
                                    TEXT_LEVEL,
                                    new Vector2(300,
-                                               305),
+                                               310),
                                    Color.Red * opacity);
 
             // Content:
             spriteBatch.DrawString(Font,
                                    name,
                                    new Vector2(450,
-                                               215),
+                                               230),
                                    Color.Red * opacity);
 
-            spriteBatch.DrawString(Font,
-                                   score.ToString(),
-                                   new Vector2(450,
-                                               260),
-                                   Color.Red * opacity);
+            spriteBatch.DrawInt64(Font,
+                                  score,
+                                  new Vector2(450,
+                                              270),
+                                  Color.Red * opacity);
 
-            spriteBatch.DrawString(Font,
-                                   level.ToString(),
-                                   new Vector2(450,
-                                               305),
-                                   Color.Red * opacity);
-
+            spriteBatch.DrawInt64(Font,
+                                  level,
+                                  new Vector2(450,
+                                              310),
+                                  Color.Red * opacity);
 
             spriteBatch.Draw(Texture,
                              TitlePosition,

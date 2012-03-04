@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -12,12 +10,11 @@ namespace SpacepiXX
     {
         #region Members
 
-        private List<PowerUp> powerUps = new List<PowerUp>();
+        private List<PowerUp> powerUps = new List<PowerUp>(16);
         private Texture2D texture;
 
         private const int SPAWN_CHANCE = 10; // 10%
 
-        //private int lastPowerUpNumber = -1;
         private PowerUp.PowerUpType lastPowerUp = PowerUp.PowerUpType.Life;
 
         private float extraLifeTimer = 0.0f;
@@ -45,7 +42,7 @@ namespace SpacepiXX
             if (spawnChance >= SPAWN_CHANCE)
                 return;
 
-            int rnd = rand.Next(59);
+            int rnd = rand.Next(63);
 
             PowerUp.PowerUpType type = PowerUp.PowerUpType.SpecialShot;
             Rectangle initialFrame = new Rectangle(0, 0, 25, 25);
@@ -190,6 +187,18 @@ namespace SpacepiXX
                     type = PowerUp.PowerUpType.Slow;
                     initialFrame = new Rectangle(0, 475, 25, 25);
                     break;
+
+                case 59:
+                case 60:
+                    type = PowerUp.PowerUpType.Overdrive;
+                    initialFrame = new Rectangle(0, 500, 25, 25);
+                    break;
+                
+                case 61:
+                case 62:
+                    type = PowerUp.PowerUpType.Underdrive;
+                    initialFrame = new Rectangle(0, 525, 25, 25);
+                    break;
             }
 
             if (type == PowerUp.PowerUpType.Life && extraLifeTimer < extraLifeMinTimer)
@@ -215,7 +224,7 @@ namespace SpacepiXX
 
         public PowerUp.PowerUpType GetPowerUpNotRandom()
         {
-            int rnd = rand.Next(19);
+            int rnd = rand.Next(21);
             PowerUp.PowerUpType type = PowerUp.PowerUpType.ScoreMultiLow;
 
             switch (rnd)
@@ -294,6 +303,14 @@ namespace SpacepiXX
 
                 case 18:
                     type = PowerUp.PowerUpType.Shield;
+                    break;
+
+                case 19:
+                    type = PowerUp.PowerUpType.Overdrive;
+                    break;
+
+                case 20:
+                    type = PowerUp.PowerUpType.Underdrive;
                     break;
             }
 
@@ -377,6 +394,10 @@ namespace SpacepiXX
                     return new Rectangle(0, 400, 25, 25);
                 case PowerUp.PowerUpType.Random:
                     return new Rectangle(0, 375, 25, 25);
+                case PowerUp.PowerUpType.Overdrive:
+                    return new Rectangle(0, 500, 25, 25);
+                case PowerUp.PowerUpType.Underdrive:
+                    return new Rectangle(0, 525, 25, 25);
                 default:
                     return new Rectangle(0, 0, 25, 25);
             }

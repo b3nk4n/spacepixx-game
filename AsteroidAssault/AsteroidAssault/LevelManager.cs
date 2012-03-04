@@ -91,6 +91,9 @@ namespace SpacepiXX
         {
             ResetLevelTimer();
 
+            this.currentLevel = 1;
+            this.lastLevel = 1;
+
             SetLevelAll(LevelManager.StartLevel);
         }
 
@@ -123,14 +126,6 @@ namespace SpacepiXX
             get
             {
                 return this.currentLevel;
-            }
-        }
-
-        public int LastLevel
-        {
-            get
-            {
-                return this.lastLevel;
             }
         }
 

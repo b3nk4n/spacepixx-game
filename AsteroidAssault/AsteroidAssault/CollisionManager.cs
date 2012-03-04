@@ -1,9 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Devices;
 
 namespace SpacepiXX
 {
@@ -18,6 +14,28 @@ namespace SpacepiXX
         private PowerUpManager powerUpManager;
         private Vector2 offScreen = new Vector2(-500, -500);
         private Vector2 shotToAsteroidImpact = new Vector2(0, -20);
+
+        private const string INFO_HEALTH25 = "+25% Repair-Kit";
+        private const string INFO_HEALTH50 = "+50% Repair-Kit";
+        private const string INFO_HEALTH100 = "+100% Repair-Kit";
+        private const string INFO_COOLINGWATER = "Cooling Water";
+        private const string INFO_EXTRASHIP = "Extra Spaceship!";
+        private const string INFO_SUPERLASER = "+1 Super-Laser";
+        private const string INFO_ROCKETS = "+2 C.A.R.L.I-Rockets";
+        private const string INFO_NUKE = "!!! N U K E !!!";
+        private const string INFO_BONUSSCORE_LOW = "+1000";
+        private const string INFO_BONUSSCORE_MEDIUM = "+2500";
+        private const string INFO_BONUSSCORE_HIGH = "+5000";
+        private const string INFO_SCOREMULTI_LOW = "+50% Score-Multiplier";
+        private const string INFO_SCOREMULTI_MEDIUM = "+75% Score-Multiplier";
+        private const string INFO_SCOREMULTI_HIGH = "+100% Score-Multiplier";
+        private const string INFO_SCOREMULTI_LOST = "Score-Multiplier Lost!";
+        private const string INFO_OUT_OF_CONTROL = "We get out of control!";
+        private const string INFO_SLOW = "Hyper Eninge damaged!";
+        private const string INFO_OVERHEAT = "Overheating Problem!";
+        private const string INFO_SHIELDS = "Activated Shields";
+        private const string INFO_OVERDRIVE = "Overdrive!";
+        private const string INFO_UNDERDRIVE = "Underdrive!";
 
         Random rand = new Random();
 
@@ -730,11 +748,6 @@ namespace SpacepiXX
                 if (boss.BossSprite.IsCircleColliding(playerManager.playerSprite.Center,
                                                         playerManager.playerSprite.CollisionRadius))
                 {
-                    boss.HitPoints -= Math.Max(boss.HitPoints, 99.0f);
-
-                    EffectManager.AddLargeExplosion(boss.BossSprite.Center,
-                                                    boss.BossSprite.Velocity / 10);
-
                     playerManager.DecreaseHitPoints(100f);
                     EffectManager.AddLargeExplosion(playerManager.playerSprite.Center,
                                                     playerManager.playerSprite.Velocity / 10);
@@ -842,43 +855,43 @@ namespace SpacepiXX
                         case PowerUp.PowerUpType.Health25:
                             playerManager.IncreaseHitPoints(25.0f);
                             SoundManager.PlayRepairSound();
-                            ZoomTextManager.ShowInfo("+25% Repair-Kit");
+                            ZoomTextManager.ShowInfo(INFO_HEALTH25);
                             break;
 
                         case PowerUp.PowerUpType.Health50:
                             playerManager.IncreaseHitPoints(50.0f);
-                            ZoomTextManager.ShowInfo("+50% Repair-Kit");
+                            ZoomTextManager.ShowInfo(INFO_HEALTH50);
                             SoundManager.PlayRepairSound();
                             break;
 
                         case PowerUp.PowerUpType.Health100:
                             playerManager.IncreaseHitPoints(100.0f);
-                            ZoomTextManager.ShowInfo("+100% Repair-Kit");
+                            ZoomTextManager.ShowInfo(INFO_HEALTH100);
                             SoundManager.PlayRepairSound();
                             break;
 
                         case PowerUp.PowerUpType.CoolWater:
                             playerManager.Overheat = 0.0f;
                             SoundManager.PlayCoolWaterSound();
-                            ZoomTextManager.ShowInfo("Cooling Water");
+                            ZoomTextManager.ShowInfo(INFO_COOLINGWATER);
                             break;
 
                         case PowerUp.PowerUpType.Life:
                             playerManager.LivesRemaining++;
                             SoundManager.PlayExtraShipSound();
-                            ZoomTextManager.ShowInfo("Extra Spaceship!");
+                            ZoomTextManager.ShowInfo(INFO_EXTRASHIP);
                             break;
 
                         case PowerUp.PowerUpType.SpecialShot:
                             playerManager.SpecialShotsRemaining++;
                             SoundManager.PlayExtraSpecialShotSound();
-                            ZoomTextManager.ShowInfo("+1 Super-Laser");
+                            ZoomTextManager.ShowInfo(INFO_SUPERLASER);
                             break;
 
                         case PowerUp.PowerUpType.BonusRockets:
                             playerManager.CarliRocketsRemaining += 3;
                             SoundManager.PlayBonusRocketSound();
-                            ZoomTextManager.ShowInfo("+2 C.A.R.L.I-Rockets");
+                            ZoomTextManager.ShowInfo(INFO_ROCKETS);
                             break;
 
                         case PowerUp.PowerUpType.KillAll:
@@ -916,73 +929,85 @@ namespace SpacepiXX
 
                             VibrationManager.Vibrate(1.0f);
                             SoundManager.PlayNukeExplosionSound();
-                            ZoomTextManager.ShowInfo("!!! N U K E !!!");
+                            ZoomTextManager.ShowInfo(INFO_NUKE);
                             break;
 
                         case PowerUp.PowerUpType.LowBonusScore:
                             playerManager.IncreasePlayerScore(1000, false);
                             SoundManager.PlayCoinSound();
-                            ZoomTextManager.ShowInfo("+1000");
+                            ZoomTextManager.ShowInfo(INFO_BONUSSCORE_LOW);
                             break;
 
                         case PowerUp.PowerUpType.MediumBonusScore:
                             playerManager.IncreasePlayerScore(2500, false);
                             SoundManager.PlayCoinSound();
-                            ZoomTextManager.ShowInfo("+2500");
+                            ZoomTextManager.ShowInfo(INFO_BONUSSCORE_MEDIUM);
                             break;
 
                         case PowerUp.PowerUpType.HighBonusScore:
                             playerManager.IncreasePlayerScore(5000, false);
                             SoundManager.PlayCoinSound();
-                            ZoomTextManager.ShowInfo("+5000");
+                            ZoomTextManager.ShowInfo(INFO_BONUSSCORE_HIGH);
                             break;
 
                         case PowerUp.PowerUpType.ScoreMultiLow:
                             playerManager.ScoreMulti += 0.5f;
                             SoundManager.PlayScoreMultiSound();
-                            ZoomTextManager.ShowInfo("+50% Score-Multiplier");
+                            ZoomTextManager.ShowInfo(INFO_SCOREMULTI_LOW);
                             break;
 
                         case PowerUp.PowerUpType.ScoreMultiMedium:
                             playerManager.ScoreMulti += 0.75f;
                             SoundManager.PlayScoreMultiSound();
-                            ZoomTextManager.ShowInfo("+75% Score-Multiplier");
+                            ZoomTextManager.ShowInfo(INFO_SCOREMULTI_MEDIUM);
                             break;
 
                         case PowerUp.PowerUpType.ScoreMultiHigh:
                             playerManager.ScoreMulti += 1.0f;
                             SoundManager.PlayScoreMultiSound();
-                            ZoomTextManager.ShowInfo("+100% Score-Multiplier");
+                            ZoomTextManager.ShowInfo(INFO_SCOREMULTI_HIGH);
                             break;
 
                         case PowerUp.PowerUpType.AntiScoreMulti:
                             playerManager.ScoreMulti = PlayerManager.MIN_SCORE_MULTI;
                             SoundManager.PlayAntiScoreMultiSound();
-                            ZoomTextManager.ShowInfo("Score-Multiplier Lost!");
+                            ZoomTextManager.ShowInfo(INFO_SCOREMULTI_LOST);
                             break;
 
                         case PowerUp.PowerUpType.OverHeat:
                             playerManager.Overheat = PlayerManager.OVERHEAT_MAX;
                             SoundManager.PlayOverheatSound();
-                            ZoomTextManager.ShowInfo("Overheating Problem!");
+                            ZoomTextManager.ShowInfo(INFO_OVERHEAT);
                             break;
 
                         case PowerUp.PowerUpType.OutOfControl:
                             playerManager.StartOutOfControl();
                             SoundManager.PlayOutOfControlSound();
-                            ZoomTextManager.ShowInfo("We get out of control!");
+                            ZoomTextManager.ShowInfo(INFO_OUT_OF_CONTROL);
                             break;
 
                         case PowerUp.PowerUpType.Slow:
                             playerManager.StartSlow();
                             SoundManager.PlaySlowSound();
-                            ZoomTextManager.ShowInfo("Hyper Eninge damaged!");
+                            ZoomTextManager.ShowInfo(INFO_SLOW);
                             break;
 
                         case PowerUp.PowerUpType.Shield:
                             playerManager.ActivateShield();
                             SoundManager.PlayShieldSound();
-                            ZoomTextManager.ShowInfo("Activated Shields");
+                            ZoomTextManager.ShowInfo(INFO_SHIELDS);
+                            break;
+
+                        case PowerUp.PowerUpType.Overdrive:
+                            playerManager.StartOverdrive();
+                            SoundManager.PlayExtraShipSound();
+                            ZoomTextManager.ShowInfo(INFO_OVERDRIVE);
+                            break;
+
+                        case PowerUp.PowerUpType.Underdrive:
+                            playerManager.StartUnderdrive();
+                            SoundManager.PlayOverheatSound();
+                            ZoomTextManager.ShowInfo(INFO_UNDERDRIVE);
                             break;
                     }
 

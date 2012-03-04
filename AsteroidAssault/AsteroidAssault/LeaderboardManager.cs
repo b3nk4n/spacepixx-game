@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using Microsoft.Phone.Info;
 using System.Xml.Linq;
 using System.IO.IsolatedStorage;
 using System.IO;
-using System.Xml;
 
 namespace SpacepiXX
 {
@@ -17,12 +15,17 @@ namespace SpacepiXX
 
         private static LeaderboardManager laderboardManager;
 
-        private List<Highscore> topScoresAll = new List<Highscore>();
-        private List<Highscore> topScoresWeek = new List<Highscore>();
+        private List<Highscore> topScoresAll = new List<Highscore>(16);
+        private List<Highscore> topScoresMonth = new List<Highscore>(16);
+        private List<Highscore> topScoresWeek = new List<Highscore>(16);
+        private List<Highscore> topScoresDay = new List<Highscore>(16);
+        private List<Highscore> topScoresMostAddictive = new List<Highscore>(16);
 
         private int topRankMe;
         private long topScoreMe;
         private int topLevelMe;
+        private long totalScoreMe;
+        private int totalLevelMe;
 
         WebClient wc = new WebClient();
 
@@ -55,6 +58,27 @@ namespace SpacepiXX
         public const string SUBMIT = "SUBMIT";
         public const string RESUBMIT = "RESUBMIT";
 
+        private const string PSEUDO_PHONE_ID = "##00000000000000000000000000000000";
+
+        private const string ANID = "ANID";
+        private const string SUBMIT_FORMAT = "http://bsautermeister.de/spacepixx/newscore.php?Method={0}&PhoneID={1}&Name={2}&Score={3}&Level={4}&Hash={5}";
+        private const string RECEIVE_FORMAT = "http://bsautermeister.de/spacepixx/requestscores.php?Method=TOP10PHONE&PhoneID={0}";
+
+        private const string XML_TOPLIST = "toplist";
+        private const string XML_RANK = "rank";
+        private const string XML_NAME = "name";
+        private const string XML_SCORE = "score";
+        private const string XML_LEVEL = "level";
+        private const string XML_S_SCORE = "sscore";
+        private const string XML_S_LEVEL = "slevel";
+        private const string XML_PLAYER = "player";
+        private const string XML_ME = "me";
+        private const string XML_ALL = "all";
+        private const string XML_MONTH = "month";
+        private const string XML_WEEK = "week";
+        private const string XML_DAY = "day";
+        private const string XML_ADDICTIVE = "addictive";
+
         #endregion
 
         #region Constructors
@@ -67,7 +91,7 @@ namespace SpacepiXX
         {
             this.loadXml();
 
-            parseXml(this.xml);
+            tryParseXml(this.xml);
 
             wc.DownloadStringCompleted += new DownloadStringCompletedEventHandler(wc_DownloadStringCompleted);
 
@@ -80,20 +104,20 @@ namespace SpacepiXX
         /// </summary>
         private void InitPhoneID()
         {
-            string phoneid;
+            string phoneid = null;
 
             try
             {
-                phoneid = UserExtendedProperties.GetValue("ANID") as string;
+                //phoneid = UserExtendedProperties.GetValue("ANID") as string;
 
                 if (phoneid == null)
                 {
-                    phoneid = "##00000000000000000000000000000000";
+                    phoneid = PSEUDO_PHONE_ID;
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                phoneid = "##00000000000000000000000000000000";
+                phoneid = PSEUDO_PHONE_ID;
             }
 
             phoneid = phoneid.Substring(2, 32);
@@ -137,7 +161,7 @@ namespace SpacepiXX
                 else
                     statusText = TEXT_START_SUBMIT;
 
-                wc.DownloadStringAsync(new Uri(string.Format("http://bensaute.cwsurf.de/spacepixx/newscore.php?Method={0}&PhoneID={1}&Name={2}&Score={3}&Level={4}&Hash={5}",
+                wc.DownloadStringAsync(new Uri(string.Format(SUBMIT_FORMAT,
                                                              method, 
                                                              phoneid, 
                                                              name, 
@@ -155,7 +179,8 @@ namespace SpacepiXX
             if (!wc.IsBusy)
             {
                 statusText = TEXT_START_REFRESH;
-                wc.DownloadStringAsync(new Uri("http://bensaute.cwsurf.de/spacepixx/requestscores.php?Method=TOP10PHONE&PhoneID=" + PHONE_ID));
+                wc.DownloadStringAsync(new Uri(string.Format(RECEIVE_FORMAT,
+                                                             PHONE_ID)));
             }
         }
 
@@ -163,55 +188,102 @@ namespace SpacepiXX
         /// Parses the top 10 xml file.
         /// </summary>
         /// <param name="xml">The downloaded xml string.</param>
-        private void parseXml(string xml)
+        private void tryParseXml(string xml)
         {
             if (!string.IsNullOrEmpty(xml))
             {
-                topScoresAll.Clear();
-
-                XDocument xmlDoc = XDocument.Parse(xml);
-
-                topScoresAll.Clear();
-                topScoresWeek.Clear();
-
-                XElement xmlToplist = xmlDoc.Element("toplist");
-
-                if (xmlToplist.HasElements)
+                try
                 {
-                    XElement xmlMe = xmlToplist.Element("me");
+                    XDocument xmlDoc = XDocument.Parse(xml);
 
-                    if (xmlMe.HasElements)
+                    topScoresAll.Clear();
+                    topScoresMonth.Clear();
+                    topScoresWeek.Clear();
+                    topScoresDay.Clear();
+                    topScoresMostAddictive.Clear();
+
+                    XElement xmlToplist = xmlDoc.Element(XML_TOPLIST);
+
+                    if (xmlToplist.HasElements)
                     {
-                        topRankMe = Int32.Parse(xmlMe.Element("rank").Value);
-                        topScoreMe = Int64.Parse(xmlMe.Element("score").Value);
-                        topLevelMe = Int32.Parse(xmlMe.Element("level").Value);
-                    }
+                        XElement xmlMe = xmlToplist.Element(XML_ME);
 
-                    XElement xmlAll = xmlToplist.Element("all");
-
-                    if (xmlAll.HasElements)
-                    {
-                        foreach (XElement xmlPlayer in xmlAll.Elements("player"))
+                        if (xmlMe != null && xmlMe.HasElements)
                         {
-                            string name = xmlPlayer.Element("name").Value;
-                            long score = Int64.Parse(xmlPlayer.Element("score").Value);
-                            int level = Int32.Parse(xmlPlayer.Element("level").Value);
-                            topScoresAll.Add(new Highscore(name, score, level));
+                            topRankMe = Int32.Parse(xmlMe.Element(XML_RANK).Value);
+                            topScoreMe = Int64.Parse(xmlMe.Element(XML_SCORE).Value);
+                            topLevelMe = Int32.Parse(xmlMe.Element(XML_LEVEL).Value);
+                            totalScoreMe = Int64.Parse(xmlMe.Element(XML_S_SCORE).Value);
+                            totalLevelMe = Int32.Parse(xmlMe.Element(XML_S_LEVEL).Value);
                         }
-                    }
-                    XElement xmlWeek = xmlToplist.Element("week");
 
-                    if (xmlWeek.HasElements)
-                    {
-                        foreach (XElement xmlPlayer in xmlWeek.Elements("player"))
+                        XElement xmlAll = xmlToplist.Element(XML_ALL);
+
+                        if (xmlAll != null && xmlAll.HasElements)
                         {
-                            string name = xmlPlayer.Element("name").Value;
-                            long score = Int64.Parse(xmlPlayer.Element("score").Value);
-                            int level = Int32.Parse(xmlPlayer.Element("level").Value);
-                            topScoresWeek.Add(new Highscore(name, score, level));
+                            foreach (XElement xmlPlayer in xmlAll.Elements(XML_PLAYER))
+                            {
+                                string name = xmlPlayer.Element(XML_NAME).Value;
+                                long score = Int64.Parse(xmlPlayer.Element(XML_SCORE).Value);
+                                int level = Int32.Parse(xmlPlayer.Element(XML_LEVEL).Value);
+                                topScoresAll.Add(new Highscore(name, score, level));
+                            }
+                        }
+
+                        XElement xmlMonth = xmlToplist.Element(XML_MONTH);
+
+                        if (xmlMonth != null && xmlMonth.HasElements)
+                        {
+                            foreach (XElement xmlPlayer in xmlMonth.Elements(XML_PLAYER))
+                            {
+                                string name = xmlPlayer.Element(XML_NAME).Value;
+                                long score = Int64.Parse(xmlPlayer.Element(XML_SCORE).Value);
+                                int level = Int32.Parse(xmlPlayer.Element(XML_LEVEL).Value);
+                                topScoresMonth.Add(new Highscore(name, score, level));
+                            }
+                        }
+
+                        XElement xmlWeek = xmlToplist.Element(XML_WEEK);
+
+                        if (xmlWeek != null && xmlWeek.HasElements)
+                        {
+                            foreach (XElement xmlPlayer in xmlWeek.Elements(XML_PLAYER))
+                            {
+                                string name = xmlPlayer.Element(XML_NAME).Value;
+                                long score = Int64.Parse(xmlPlayer.Element(XML_SCORE).Value);
+                                int level = Int32.Parse(xmlPlayer.Element(XML_LEVEL).Value);
+                                topScoresWeek.Add(new Highscore(name, score, level));
+                            }
+                        }
+
+                        XElement xmlDay = xmlToplist.Element(XML_DAY);
+
+                        if (xmlDay != null && xmlDay.HasElements)
+                        {
+                            foreach (XElement xmlPlayer in xmlDay.Elements(XML_PLAYER))
+                            {
+                                string name = xmlPlayer.Element(XML_NAME).Value;
+                                long score = Int64.Parse(xmlPlayer.Element(XML_SCORE).Value);
+                                int level = Int32.Parse(xmlPlayer.Element(XML_LEVEL).Value);
+                                topScoresDay.Add(new Highscore(name, score, level));
+                            }
+                        }
+
+                        XElement xmlMostAddictive = xmlToplist.Element(XML_ADDICTIVE);
+
+                        if (xmlMostAddictive != null && xmlMostAddictive.HasElements)
+                        {
+                            foreach (XElement xmlPlayer in xmlMostAddictive.Elements(XML_PLAYER))
+                            {
+                                string name = xmlPlayer.Element(XML_NAME).Value;
+                                long score = Int64.Parse(xmlPlayer.Element(XML_SCORE).Value);
+                                int level = Int32.Parse(xmlPlayer.Element(XML_LEVEL).Value);
+                                topScoresMostAddictive.Add(new Highscore(name, score, level));
+                            }
                         }
                     }
                 }
+                catch (Exception) { }
             }
         }
 
@@ -291,7 +363,7 @@ namespace SpacepiXX
 
                 statusText = TEXT_END_REFRESH;
 
-                parseXml(xml);
+                tryParseXml(xml);
 
                 saveXml();
             }
@@ -343,6 +415,17 @@ namespace SpacepiXX
         }
 
         /// <summary>
+        /// gets the online-month top 10.
+        /// </summary>
+        public List<Highscore> TopScoresMonth
+        {
+            get
+            {
+                return topScoresMonth;
+            }
+        }
+
+        /// <summary>
         /// gets the online-week top 10.
         /// </summary>
         public List<Highscore> TopScoresWeek
@@ -350,6 +433,28 @@ namespace SpacepiXX
             get
             {
                 return topScoresWeek;
+            }
+        }
+
+        /// <summary>
+        /// gets the online-day top 10.
+        /// </summary>
+        public List<Highscore> TopScoresDay
+        {
+            get
+            {
+                return topScoresDay;
+            }
+        }
+
+        /// <summary>
+        /// gets the most addicitve top 10.
+        /// </summary>
+        public List<Highscore> TopScoresMostAddictive
+        {
+            get
+            {
+                return topScoresMostAddictive;
             }
         }
 
@@ -383,6 +488,28 @@ namespace SpacepiXX
             get
             {
                 return topLevelMe;
+            }
+        }
+
+        /// <summary>
+        /// Gets the total score of the phones user.
+        /// </summary>
+        public long TotalScoreMe
+        {
+            get
+            {
+                return totalScoreMe;
+            }
+        }
+
+        /// <summary>
+        /// Gets the total level of the phones user.
+        /// </summary>
+        public int TotalLevelMe
+        {
+            get
+            {
+                return totalLevelMe;
             }
         }
 

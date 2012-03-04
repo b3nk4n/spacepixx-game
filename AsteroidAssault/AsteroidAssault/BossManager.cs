@@ -64,7 +64,8 @@ namespace SpacepiXX
                                                4,
                                                2,
                                                250.0f,
-                                               screenBounds);
+                                               new Rectangle(screenBounds.X - 50, screenBounds.Y - 50,
+                                                             screenBounds.Width + 100, screenBounds.Height + 100));
 
             setUpWayPoints();
 
@@ -304,6 +305,68 @@ namespace SpacepiXX
             path15.Add(new Vector2(-100, 350));
             pathWayPoints.Add(path15);
             waveSpawns.Add(15, new WaveInfo(0, EnemyType.Easy));
+
+            // Added in Version 2.5
+
+            List<Vector2> path16 = new List<Vector2>();
+            path16.Add(new Vector2(300, -100));
+            path16.Add(new Vector2(300, 50));
+            path16.Add(new Vector2(275, 100));
+            path16.Add(new Vector2(225, 175));
+            path16.Add(new Vector2(200, 200));
+            path16.Add(new Vector2(200, 250));
+            path16.Add(new Vector2(225, 275));
+            path16.Add(new Vector2(325, 300));
+            path16.Add(new Vector2(475, 300));
+            path16.Add(new Vector2(575, 275));
+            path16.Add(new Vector2(600, 250));
+            path16.Add(new Vector2(600, 200));
+            path16.Add(new Vector2(575, 175));
+            path16.Add(new Vector2(225, 175));
+            path16.Add(new Vector2(200, 200));
+            path16.Add(new Vector2(200, 250));
+            path16.Add(new Vector2(225, 275));
+            path16.Add(new Vector2(325, 300));
+            path16.Add(new Vector2(475, 300));
+            path16.Add(new Vector2(575, 275));
+            path16.Add(new Vector2(600, 250));
+            path16.Add(new Vector2(600, 200));
+            path16.Add(new Vector2(575, 175));
+            path16.Add(new Vector2(525, 100));
+            path16.Add(new Vector2(500, 50));
+            path16.Add(new Vector2(500, -100));
+            pathWayPoints.Add(path16);
+            waveSpawns.Add(16, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path17 = new List<Vector2>();
+            path17.Add(new Vector2(500, -100));
+            path17.Add(new Vector2(500, 50));
+            path17.Add(new Vector2(525, 100));
+            path17.Add(new Vector2(575, 175));
+            path17.Add(new Vector2(600, 200));
+            path17.Add(new Vector2(600, 250));
+            path17.Add(new Vector2(575, 275));
+            path17.Add(new Vector2(475, 300));
+            path17.Add(new Vector2(325, 300));
+            path17.Add(new Vector2(225, 275));
+            path17.Add(new Vector2(200, 250));
+            path17.Add(new Vector2(200, 200));
+            path17.Add(new Vector2(225, 175));
+            path17.Add(new Vector2(575, 175));
+            path17.Add(new Vector2(600, 200));
+            path17.Add(new Vector2(600, 250));
+            path17.Add(new Vector2(575, 275));
+            path17.Add(new Vector2(475, 300));
+            path17.Add(new Vector2(325, 300));
+            path17.Add(new Vector2(225, 275));
+            path17.Add(new Vector2(200, 250));
+            path17.Add(new Vector2(200, 200));
+            path17.Add(new Vector2(225, 175));
+            path17.Add(new Vector2(275, 100));
+            path17.Add(new Vector2(300, 50));
+            path17.Add(new Vector2(300, -100));
+            pathWayPoints.Add(path17);
+            waveSpawns.Add(17, new WaveInfo(0, EnemyType.Easy));
         }
 
         private void spawnBoss(int path, EnemyType type)
@@ -356,6 +419,7 @@ namespace SpacepiXX
         public void SpawnRandomBoss()
         {
             EnemyType type;
+            
             //int rnd = rand.Next(0, 5);
             int rnd = currentLevel % 5;
 
@@ -583,7 +647,8 @@ namespace SpacepiXX
         {
             this.currentLevel = lvl;
 
-            this.nextShotMinTimer = Math.Max(InitialNextShotMinTimer - ((lvl - 1) * 0.02f), 0.5f);
+            //this.nextShotMinTimer = Math.Max(InitialNextShotMinTimer - ((lvl - 1) * 0.02f), 0.5f);
+            this.nextShotMinTimer = Math.Max(InitialNextShotMinTimer - (((lvl - 1) / 5) * 0.1f), 0.5f);
         }
 
         #endregion

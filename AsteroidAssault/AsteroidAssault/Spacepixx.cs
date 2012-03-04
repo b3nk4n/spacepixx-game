@@ -1,19 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Media;
 using System.Text;
 using Microsoft.Phone.Shell;
 using System.IO.IsolatedStorage;
 using System.IO;
 using SpacepiXX.Inputs;
+using Microsoft.Advertising.Mobile.Xna;
 
 namespace SpacepiXX
 {
@@ -25,31 +21,37 @@ namespace SpacepiXX
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private readonly string HighscoreText = "Personal Highscore!";
-        private readonly string GameOverText = "GAME OVER!";
+        /// <summary>
+        /// Advertising stuff
+        /// </summary>
+        static AdGameComponent adGameComponent;
+        static DrawableAd bannerAd;
 
-        private readonly string KeyboardTitleTextVeryBad = "Are you kidding me???";
-        private readonly string KeyboardTitleTextBad = "Really?!?";
-        private readonly string KeyboardTitleTextVeryLow = "Not bad!";
-        private readonly string KeyboardTitleTextLow = "Well done!";
-        private readonly string KeyboardTitleTextMed = "Congratulation!";
-        private readonly string KeyboardTitleTextHigh = "Nice!";
-        private readonly string KeyboardTitleTextVeryHigh = "Amazing!";
-        private readonly string KeyboardTitleTextUltra = "Awesome!";
-        private readonly string KeyboardTitleTextUltraPlus = "Excellent!";
-        private readonly string KeyboardTitleTextGodlike = "God? Is it you?";
+        private const string HighscoreText = "Personal Highscore!";
+        private const string GameOverText = "GAME OVER!";
 
-        private readonly string KeyboardInLocalMessageFormatText = "You are locally ranked {0}/10!\nPlease enter your name...\n[only: A..Z, a..z, 0..9, 12 characters]";
-        private readonly string KeyboardNotInLocalMessageFormatText = "You are not locally ranked!\nPlease enter your name online submission...\n[only: A..Z, a..z, 0..9, 12 characters]";
+        private const string KeyboardTitleTextVeryBad = "Are you kidding me???";
+        private const string KeyboardTitleTextBad = "Really?!?";
+        private const string KeyboardTitleTextVeryLow = "Not bad!";
+        private const string KeyboardTitleTextLow = "Well done!";
+        private const string KeyboardTitleTextMed = "Congratulation!";
+        private const string KeyboardTitleTextHigh = "Nice!";
+        private const string KeyboardTitleTextVeryHigh = "Amazing!";
+        private const string KeyboardTitleTextUltra = "Awesome!";
+        private const string KeyboardTitleTextUltraPlus = "Excellent!";
+        private const string KeyboardTitleTextGodlike = "God? Is it you?";
+
+        private const string KeyboardInLocalMessageFormatText = "You are locally ranked {0}/10!\nPlease enter your name...\n[only: A..Z, a..z, 0..9, 12 characters]";
+        private const string KeyboardNotInLocalMessageFormatText = "You are not locally ranked!\nPlease enter your name for online submission...\n[only: A..Z, a..z, 0..9, 12 characters]";
 
         private Random rand = new Random();
-        private readonly string[] GetReadyText = { "Get Ready!", "Rock 'n' Roll!", "Rock on!", "Knock yourself out!" };
+        private static readonly string[] GetReadyText = { "Get Ready!", "Rock 'n' Roll!", "Rock on!", "Fight!", "Attack!" };
 
-        private readonly string ContinueText = "Push to continue...";
+        private const string ContinueText = "Push to continue...";
         private string VersionText;
-        private readonly string MusicByText = "Music by";
-        private readonly string MusicCreatorText = "Tscho";
-        private readonly string CreatorText = "by B. Sautermeister";
+        private const string MusicByText = "Music by";
+        private const string MusicCreatorText = "Tscho";
+        private const string CreatorText = "by B. Sautermeister";
 
         enum GameStates { TitleScreen, MainMenu, Highscores, Inscructions, Help, Settings, Playing, BossDuell, Paused, PlayerDead, GameOver, Leaderboards, Submittion };
         GameStates gameState = GameStates.TitleScreen;
@@ -117,16 +119,44 @@ namespace SpacepiXX
         GameInput gameInput = new GameInput();
         private const string TitleAction = "Title";
         private const string BackToGameAction = "BackToGame";
+        private const string BackToMainAction = "BackToMain";
+
+        private readonly Rectangle cancelSource = new Rectangle(0, 900,
+                                                                300, 50);
+        private readonly Rectangle cancelDestination = new Rectangle(450, 370,
+                                                                     300, 50);
+
+        private readonly Rectangle continueSource = new Rectangle(0, 850,
+                                                                  300, 50);
+        private readonly Rectangle continueDestination = new Rectangle(50, 370,
+                                                                       300, 50);
 
         public Spacepixx()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(graphics_PreparingDeviceSettings);
+
             Content.RootDirectory = "Content";
 
-            // Frame rate is 30 fps by default for Windows Phone.
-            TargetElapsedTime = TimeSpan.FromTicks(333333);
+#if DEBUG
+            AdGameComponent.Initialize(this, "test_client");
+#else
+            AdGameComponent.Initialize(this, "a74ff6c0-d1f8-4e5c-897e-f85f8d51e8a5");
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+#endif       
+
+            adGameComponent = AdGameComponent.Current;
+
+            // Frame rate is 60 fps
+            TargetElapsedTime = TimeSpan.FromTicks(166667);
 
             InitializaPhoneServices();
+        }
+
+        void graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
+        {
+            e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
         }
 
         /// <summary>
@@ -141,6 +171,9 @@ namespace SpacepiXX
             graphics.PreferredBackBufferHeight = 480;
             graphics.PreferredBackBufferWidth = 800;
             graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft;
+
+            // Aplly the gfx changes
+            graphics.ApplyChanges();
 
             TouchPanel.EnabledGestures = GestureType.Tap;
 
@@ -157,6 +190,14 @@ namespace SpacepiXX
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Create a banner ad for the game.
+#if DEBUG
+            bannerAd = adGameComponent.CreateAd("Image480_80", new Rectangle(160, 0, 480, 80));
+#else
+            bannerAd = adGameComponent.CreateAd("81028", new Rectangle(160, 0, 480, 80));
+#endif       
+            bannerAd.BorderEnabled = false;
 
             spriteSheet = Content.Load<Texture2D>(@"Textures\SpriteSheet");
             menuSheet = Content.Load<Texture2D>(@"Textures\MenuSheet");
@@ -282,6 +323,7 @@ namespace SpacepiXX
             helpManager = new HelpManager(menuSheet, pericles18, new Rectangle(0, 0,
                                                                                GraphicsDevice.Viewport.Width,
                                                                                GraphicsDevice.Viewport.Height));
+            HelpManager.GameInput = gameInput;
             SoundManager.PlayBackgroundSound();
 
 
@@ -298,13 +340,14 @@ namespace SpacepiXX
         {
             gameInput.AddTouchGestureInput(TitleAction, GestureType.Tap, new Rectangle(0, 0,
                                                                                    800, 480));
-            gameInput.AddTouchGestureInput(BackToGameAction, GestureType.Tap, new Rectangle(0, 0,
-                                                                                   800, 480));
+            gameInput.AddTouchGestureInput(BackToGameAction, GestureType.Tap, continueDestination);
+            gameInput.AddTouchGestureInput(BackToMainAction, GestureType.Tap, cancelDestination);
             mainMenuManager.SetupInputs();
             playerManager.SetupInputs();
             submissionManager.SetupInputs();
             highscoreManager.SetupInputs();
             settingsManager.SetupInputs();
+            helpManager.SetupInputs();
         }
 
         /// <summary>
@@ -321,6 +364,7 @@ namespace SpacepiXX
             PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(GameActivated);
             PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(GameDeactivated);
             PhoneApplicationService.Current.Closing += new EventHandler<ClosingEventArgs>(GameClosing);
+            PhoneApplicationService.Current.Launching += new EventHandler<LaunchingEventArgs>(GameLaunching);
         }
 
         /// <summary>
@@ -399,81 +443,117 @@ namespace SpacepiXX
             }
         }
 
-        /// <summary>
-        /// Occurs when the game class (and application) activated during return from tombstoned state
-        /// </summary>
+        void GameLaunching(object sender, LaunchingEventArgs e)
+        {
+            tryLoadGame();
+
+            if (gameState == GameStates.MainMenu || gameState == GameStates.Help ||
+                gameState == GameStates.Highscores || gameState == GameStates.Settings ||
+                gameState == GameStates.Submittion)
+            {
+                gameState = GameStates.TitleScreen;
+            }
+        }
+
+        ///// <summary>
+        ///// Occurs when the game class (and application) activated during return from tombstoned state
+        ///// </summary>
         void GameActivated(object sender, ActivatedEventArgs e)
         {
-            using (IsolatedStorageFile isolatedStorageFile
-                = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                if (isolatedStorageFile.FileExists("state.dat"))
-                {
-                    //If user choose to save, create a new file
-                    using (IsolatedStorageFileStream fileStream
-                        = isolatedStorageFile.OpenFile("state.dat", FileMode.Open))
-                    {
-                        using (StreamReader reader = new StreamReader(fileStream))
-                        {
-                            this.gameState = (GameStates)Enum.Parse(gameState.GetType(), reader.ReadLine(), true);
-                            this.stateBeforePaused = (GameStates)Enum.Parse(stateBeforePaused.GetType(), reader.ReadLine(), true);
-
-                            if (gameState == GameStates.Playing)
-                            {
-                                gameState = GameStates.Paused;
-                                stateBeforePaused = GameStates.Playing;
-                            }
-
-                            if (gameState == GameStates.PlayerDead)
-                            {
-                                gameState = GameStates.Paused;
-                                stateBeforePaused = GameStates.PlayerDead;
-                            }
-
-                            this.playerDeathTimer = (float)Single.Parse(reader.ReadLine());
-                            this.titleScreenTimer = (float)Single.Parse(reader.ReadLine());
-                            this.highscoreMessageShown = (bool)Boolean.Parse(reader.ReadLine());
-                            this.backButtonTimer = (float)Single.Parse(reader.ReadLine());
-
-                            this.bossBonusScore = Int64.Parse(reader.ReadLine());
-                            this.bossDirectKill = Boolean.Parse(reader.ReadLine());
-
-                            asteroidManager.Activated(reader);
-
-                            playerManager.Activated(reader);
-
-                            enemyManager.Activated(reader);
-
-                            bossManager.Activated(reader);
-
-                            EffectManager.Activated(reader);
-
-                            powerUpManager.Activated(reader);
-
-                            zoomTextManager.Activated(reader);
-
-                            levelManager.Activated(reader);
-
-                            instructionManager.Activated(reader);
-
-                            mainMenuManager.Activated(reader);
-
-                            highscoreManager.Activated(reader);
-
-                            submissionManager.Activated(reader);
-
-                            reader.Close();
-                        }
-                    }
-
-                    isolatedStorageFile.DeleteFile("state.dat");
-                }
-            }
+            tryLoadGame();
         }
 
         void GameClosing(object sender, ClosingEventArgs e)
         {
             instructionManager.SaveHasDoneInstructions();
+
+            // delete saved active-game on real exit
+            using (IsolatedStorageFile isolatedStorageFile
+                    = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                if (isolatedStorageFile.FileExists("state.dat"))
+                {
+                    isolatedStorageFile.DeleteFile("state.dat");
+                }
+            }
+        }
+
+        private void tryLoadGame()
+        {
+            try
+            {
+                using (IsolatedStorageFile isolatedStorageFile
+                    = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    if (isolatedStorageFile.FileExists("state.dat"))
+                    {
+                        //If user choose to save, create a new file
+                        using (IsolatedStorageFileStream fileStream
+                            = isolatedStorageFile.OpenFile("state.dat", FileMode.Open))
+                        {
+                            using (StreamReader reader = new StreamReader(fileStream))
+                            {
+                                this.gameState = (GameStates)Enum.Parse(gameState.GetType(), reader.ReadLine(), true);
+                                this.stateBeforePaused = (GameStates)Enum.Parse(stateBeforePaused.GetType(), reader.ReadLine(), true);
+
+                                if (gameState == GameStates.Playing)
+                                {
+                                    gameState = GameStates.Paused;
+                                    stateBeforePaused = GameStates.Playing;
+                                }
+
+                                if (gameState == GameStates.PlayerDead)
+                                {
+                                    gameState = GameStates.Paused;
+                                    stateBeforePaused = GameStates.PlayerDead;
+                                }
+
+                                this.playerDeathTimer = (float)Single.Parse(reader.ReadLine());
+                                this.titleScreenTimer = (float)Single.Parse(reader.ReadLine());
+                                this.highscoreMessageShown = (bool)Boolean.Parse(reader.ReadLine());
+                                this.backButtonTimer = (float)Single.Parse(reader.ReadLine());
+
+                                this.bossBonusScore = Int64.Parse(reader.ReadLine());
+                                this.bossDirectKill = Boolean.Parse(reader.ReadLine());
+
+                                asteroidManager.Activated(reader);
+
+                                playerManager.Activated(reader);
+
+                                enemyManager.Activated(reader);
+
+                                bossManager.Activated(reader);
+
+                                EffectManager.Activated(reader);
+
+                                powerUpManager.Activated(reader);
+
+                                zoomTextManager.Activated(reader);
+
+                                levelManager.Activated(reader);
+
+                                instructionManager.Activated(reader);
+
+                                mainMenuManager.Activated(reader);
+
+                                highscoreManager.Activated(reader);
+
+                                submissionManager.Activated(reader);
+
+                                reader.Close();
+                            }
+                        }
+
+                        isolatedStorageFile.DeleteFile("state.dat");
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                // catch end restore in case of incompatible active/deactivate dat-files
+                this.resetGame();
+                this.gameState = GameStates.TitleScreen;
+            }
         }
 
         /// <summary>
@@ -484,6 +564,17 @@ namespace SpacepiXX
         protected override void Update(GameTime gameTime)
         {
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Advertisment stuff
+            if (gameState == GameStates.Help ||
+                gameState == GameStates.MainMenu ||
+                gameState == GameStates.Paused ||
+                gameState == GameStates.Settings ||
+                gameState == GameStates.TitleScreen ||
+                gameState == GameStates.Submittion)
+            {
+                adGameComponent.Update(gameTime);
+            }
 
             gameInput.BeginUpdate();
 
@@ -510,16 +601,6 @@ namespace SpacepiXX
 
                     if (titleScreenTimer >= titleScreenDelayTime)
                     {
-                        //if (TouchPanel.IsGestureAvailable)
-                        //{
-                        //    GestureSample gs = TouchPanel.ReadGesture();
-
-                        //    if (gs.GestureType == GestureType.Tap)
-                        //    {
-                        //        gameState = GameStates.MainMenu;
-                        //    }
-                            
-                        //}
                         if (gameInput.IsPressed(TitleAction))
                         {
                             gameState = GameStates.MainMenu;
@@ -626,13 +707,11 @@ namespace SpacepiXX
 
                 case GameStates.Inscructions:
 
-                    //updateBackground(gameTime);
                     starFieldManager1.Update(gameTime);
                     starFieldManager2.Update(gameTime);
                     starFieldManager3.Update(gameTime);
 
                     instructionManager.Update(gameTime);
-                    //playerManager.Update(gameTime);
                     collisionManager.Update();
                     EffectManager.Update(gameTime);
                     hud.Update(playerManager.PlayerScore,
@@ -714,11 +793,8 @@ namespace SpacepiXX
                                playerManager.ScoreMulti,
                                levelManager.CurrentLevel);
 
-                    //levelManager.Update(gameTime);
-
                     if (levelManager.HasChanged)
                     {
-                        //zoomTextManager.ShowText("Level " + levelManager.CurrentLevel);
                         enemyManager.IsActive = false;
 
                         if (enemyManager.Enemies.Count == 0)
@@ -745,7 +821,7 @@ namespace SpacepiXX
 
                         if (playerManager.LivesRemaining < 0)
                         {
-                            levelManager.Reset();
+                            levelManager.ResetLevelTimer();
                             gameState = GameStates.GameOver;
                             zoomTextManager.ShowText(GameOverText);
                         }
@@ -843,7 +919,7 @@ namespace SpacepiXX
 
                         if (playerManager.LivesRemaining < 0)
                         {
-                            levelManager.Reset();
+                            levelManager.Reset();                                   // XXXXXXXXXXXXXXXXXXXXX BUG HERE !?!?!?!?
                             gameState = GameStates.GameOver;
                             zoomTextManager.ShowText(GameOverText);
                         }
@@ -857,7 +933,7 @@ namespace SpacepiXX
 
                     if (backButtonPressed)
                     {
-                        stateBeforePaused = GameStates.Playing;
+                        stateBeforePaused = GameStates.BossDuell;
                         gameState = GameStates.Paused;
                     }
 
@@ -865,27 +941,17 @@ namespace SpacepiXX
 
                 case GameStates.Paused:
 
-                    //if (TouchPanel.IsGestureAvailable)
-                    //{
-                    //    GestureSample gs = TouchPanel.ReadGesture();
-
-                    //    if (gs.GestureType == GestureType.Tap)
-                    //    {
-                    //        gameState = stateBeforePaused;
-                    //    }
-                    //}
-                    if (gameInput.IsPressed(BackToGameAction))
+                    if (gameInput.IsPressed(BackToGameAction) || backButtonPressed)
                     {
                         gameState = stateBeforePaused;
                     }
 
-                    if (backButtonPressed)
+                    if (gameInput.IsPressed(BackToMainAction))
                     {
                         if (!Guide.IsVisible && playerManager.PlayerScore > 0)
                         {
                             showGuid();
                         }
-                        //gameState = GameStates.MainMenu;
 
                         if (playerManager.PlayerScore > 0)
                         {
@@ -896,7 +962,6 @@ namespace SpacepiXX
                         {
                             gameState = GameStates.MainMenu;
                         }
-
                     }
 
                     break;
@@ -1052,7 +1117,7 @@ namespace SpacepiXX
                                        ContinueText,
                                        new Vector2(this.GraphicsDevice.Viewport.Width / 2 - pericles18.MeasureString(ContinueText).X / 2,
                                                    275),
-                                       Color.Red  * (float)Math.Pow(Math.Sin(gameTime.TotalGameTime.TotalSeconds), 2.0f));
+                                       Color.Red * (0.25f + (float)(Math.Pow(Math.Sin(gameTime.TotalGameTime.TotalSeconds), 2.0f)) * 0.75f));
 
                 spriteBatch.DrawString(pericles16,
                                        MusicByText,
@@ -1105,8 +1170,6 @@ namespace SpacepiXX
                 starFieldManager2.Draw(spriteBatch);
                 starFieldManager3.Draw(spriteBatch);
  
-                //playerManager.Draw(spriteBatch);
-                
                 instructionManager.Draw(spriteBatch);
                 
                 EffectManager.Draw(spriteBatch);
@@ -1142,18 +1205,29 @@ namespace SpacepiXX
 
                 EffectManager.Draw(spriteBatch);
 
+                // Pause title
+
+                spriteBatch.Draw(spriteSheet,
+                                 new Rectangle(0, 0, 800, 480),
+                                 new Rectangle(0, 350, 1, 1),
+                                 new Color(0, 0, 0, 150));
+
                 spriteBatch.Draw(menuSheet,
                                  new Vector2(150.0f, 150.0f),
                                  new Rectangle(0, 100,
                                                500,
                                                100),
-                                 Color.White);
+                                 Color.White * (0.25f + (float)(Math.Pow(Math.Sin(gameTime.TotalGameTime.TotalSeconds), 2.0f)) * 0.75f));
 
-                spriteBatch.DrawString(pericles18,
-                                       ContinueText,
-                                       new Vector2(this.GraphicsDevice.Viewport.Width / 2 - pericles18.MeasureString(ContinueText).X / 2,
-                                                   275),
-                                       Color.Red * (float)Math.Pow(Math.Sin(gameTime.TotalGameTime.TotalSeconds), 2.0f));
+                spriteBatch.Draw(menuSheet,
+                                 cancelDestination,
+                                 cancelSource,
+                                 Color.Red);
+
+                spriteBatch.Draw(menuSheet,
+                                 continueDestination,
+                                 continueSource,
+                                 Color.Red);
             }
 
             if (gameState == GameStates.Playing ||
@@ -1176,6 +1250,17 @@ namespace SpacepiXX
                 zoomTextManager.Draw(spriteBatch);
 
                 hud.Draw(spriteBatch);
+            }
+
+            // Advertisment stuff
+            if (gameState == GameStates.Help ||
+                gameState == GameStates.MainMenu ||
+                gameState == GameStates.Paused ||
+                gameState == GameStates.Settings ||
+                gameState == GameStates.TitleScreen ||
+                gameState == GameStates.Submittion)
+            {
+                adGameComponent.Draw(gameTime);
             }
 
             spriteBatch.End();
@@ -1244,13 +1329,13 @@ namespace SpacepiXX
             {
                 submissionManager.SetUp(name,
                                         playerManager.PlayerScore,
-                                        levelManager.LastLevel);
+                                        levelManager.CurrentLevel);
 
                 if (highscoreManager.IsInScoreboard(playerManager.PlayerScore))
                 {
                     highscoreManager.SaveHighScore(name,
                                                    playerManager.PlayerScore,
-                                                   levelManager.LastLevel);
+                                                   levelManager.CurrentLevel);
                 }
             }
             else

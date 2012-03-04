@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -12,11 +11,11 @@ namespace SpacepiXX
     {
         #region Members
 
-        private Queue<ZoomText> zoomTexts = new Queue<ZoomText>();
+        private Queue<ZoomText> zoomTexts = new Queue<ZoomText>(8);
         private Vector2 location;
         private SpriteFont font;
 
-        private static Queue<ZoomText> infoTexts = new Queue<ZoomText>();
+        private static Queue<ZoomText> infoTexts = new Queue<ZoomText>(8);
 
         #endregion
 
@@ -36,7 +35,7 @@ namespace SpacepiXX
         {
             zoomTexts.Enqueue(new ZoomText(text,
                                            Color.Red,
-                                           60,
+                                           100,
                                            0.10f));
         }
 
@@ -44,7 +43,7 @@ namespace SpacepiXX
         {
             infoTexts.Enqueue(new ZoomText(text,
                                        Color.White,
-                                       55,
+                                       90,
                                        0.05f));
         }
 

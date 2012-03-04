@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -87,68 +85,6 @@ namespace SpacepiXX
                 }
             }
         }
-
-        //public void FireCarliRocket(Vector2 location, Vector2 velocity, bool playerFired, Color tintColor, bool sound)
-        //{
-        //    Sprite newShot = new Sprite(location,
-        //                                ShotManager.Texture,
-        //                                ShotManager.InitialRocketFrame,
-        //                                velocity);
-
-        //    newShot.TintColor = tintColor;
-
-        //    if (newShot.Velocity != Vector2.Zero)
-        //        newShot.Velocity.Normalize();
-
-        //    newShot.Velocity *= rocketSpeed;
-        //    newShot.RotateTo(velocity);
-
-        //    for (int x = 0; x < ShotManager.RocketFrameCount; x++)
-        //    {
-        //        newShot.AddFrame(new Rectangle(ShotManager.InitialRocketFrame.X + (x * ShotManager.InitialRocketFrame.Width),
-        //                                       ShotManager.InitialRocketFrame.Y,
-        //                                       ShotManager.InitialRocketFrame.Width,
-        //                                       ShotManager.InitialRocketFrame.Height));
-        //    }
-        //    newShot.CollisionRadius = ShotManager.RocketCollisionRadius;
-        //    Rockets.Add(newShot);
-
-        //    if (sound)
-        //    {
-        //        SoundManager.PlayRocketSound();
-        //    }
-        //}
-
-        //public void FireSoftRocket(Vector2 location, Vector2 velocity, bool playerFired, Color tintColor, bool sound)
-        //{
-        //    Sprite newShot = new Sprite(location,
-        //                                ShotManager.Texture,
-        //                                ShotManager.InitialRocketFrame,
-        //                                velocity);
-
-        //    newShot.TintColor = tintColor;
-
-        //    if (newShot.Velocity != Vector2.Zero)
-        //        newShot.Velocity.Normalize();
-
-        //    newShot.Velocity *= softRocketSpeed;
-        //    newShot.RotateTo(velocity);
-
-        //    for (int x = 0; x < ShotManager.RocketFrameCount; x++)
-        //    {
-        //        newShot.AddFrame(new Rectangle(ShotManager.InitialRocketFrame.X + (x * ShotManager.InitialRocketFrame.Width),
-        //                                       ShotManager.InitialRocketFrame.Y,
-        //                                       ShotManager.InitialRocketFrame.Width,
-        //                                       ShotManager.InitialRocketFrame.Height));
-        //    }
-        //    newShot.CollisionRadius = ShotManager.RocketCollisionRadius;
-        //    Rockets.Add(newShot);
-
-        //    if (sound)
-        //    {
-        //        SoundManager.PlayEnemyRocketSound();
-        //    }
-        //}
 
         public void FireRocket(Vector2 location, Vector2 direction, bool playerFired, Color tintColor, bool sound)
         {

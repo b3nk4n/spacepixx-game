@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO.IsolatedStorage;
 using System.IO;
 using Microsoft.Xna.Framework;
@@ -18,7 +16,7 @@ namespace SpacepiXX
 
         LeaderboardManager leaderboardManager;
 
-        public enum ScoreState { Local, OnlineAll, OnlineWeek, OnlineMe };
+        public enum ScoreState { Local, OnlineAll, OnlineWeek, OnlineMe, OnlineDay, OnlineMonth, MostAddictive };
 
         private ScoreState scoreState = ScoreState.Local;
 
@@ -58,7 +56,13 @@ namespace SpacepiXX
                                                                         300, 50);
         private readonly Rectangle OnlineAllTitleSource = new Rectangle(0, 500,
                                                                         300, 50);
+        private readonly Rectangle OnlineMonthTitleSource = new Rectangle(0, 1000,
+                                                                        300, 50);
         private readonly Rectangle OnlineWeekTitleSource = new Rectangle(0, 550,
+                                                                        300, 50);
+        private readonly Rectangle OnlineDayTitleSource = new Rectangle(0, 950,
+                                                                        300, 50);
+        private readonly Rectangle MostAddictiveTitleSource = new Rectangle(0, 1050,
                                                                         300, 50);
         private readonly Rectangle OnlineMeTitleSource = new Rectangle(0, 800,
                                                                         300, 50);
@@ -74,12 +78,14 @@ namespace SpacepiXX
         private bool isActive = false;
 
         private WebBrowserTask browser;
-        private const string BROWSER_URL = "http://bensaute.cwsurf.de/spacepixx/requestscores.php?Method=TOP100WEB";
+        private const string BROWSER_URL = "http://bsautermeister.de/spacepixx/requestscores.php?Method=TOP100WEB";
 
         private const string TEXT_ME = "Your best personal online achievements:";
         private const string TEXT_RANK = "Best Rank:";
         private const string TEXT_SCORE = "Best Score:";
         private const string TEXT_LEVEL = "Best Level:";
+        private const string TEXT_TOTAL_SCORE = "Addiction Score:";
+        private const string TEXT_TOTAL_LEVEL = "Addiction Level:";
 
         public static GameInput GameInput;
         private const string RefreshAction = "Refresh";
@@ -91,6 +97,17 @@ namespace SpacepiXX
         private float switchPageTimer = 0.0f;
         private const float SwitchPageMinTimer = 0.25f;
 
+        private const int NamePositionX = 110;
+        private const int ScorePositionX = 410;
+        private const int LevelPositionX = 600;
+
+        private const string USERDATA_FILE = "user.txt";
+
+        private const string DOTS3 = ". . . ";
+        private const string DOTS6 = ". . . . . . ";
+        private const string DOTS12 = ". . . . . . . . . . . . ";
+        private const string DOTS21 = ". . . . . . . . . . . . . . . . . . . . . ";
+
         #endregion
 
         #region Constructors
@@ -100,7 +117,7 @@ namespace SpacepiXX
             leaderboardManager = LeaderboardManager.GetInstance();
 
             browser = new WebBrowserTask();
-            browser.URL = BROWSER_URL;
+            browser.Uri = new Uri(BROWSER_URL);
 
             this.LoadHighScore();
 
@@ -130,10 +147,10 @@ namespace SpacepiXX
                                            resubmitDestination);
 
             GameInput.AddTouchSlideInput(GoLeftAction,
-                                         Input.Direction.Left,
+                                         Input.Direction.Right,
                                          50.0f);
             GameInput.AddTouchSlideInput(GoRightAction,
-                                         Input.Direction.Right,
+                                         Input.Direction.Left,
                                          50.0f);
         }
 
@@ -149,66 +166,6 @@ namespace SpacepiXX
 
         private void handleTouchInputs()
         {
-            //if (TouchPanel.IsGestureAvailable)
-            //{
-            //    GestureSample gs = TouchPanel.ReadGesture();
-
-            //    if (gs.GestureType == GestureType.Tap)
-            //    {
-            //        // Switcher right
-            //        if (switcherRightDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (scoreState == ScoreState.Local)
-            //                scoreState = ScoreState.OnlineAll;
-            //            else if (scoreState == ScoreState.OnlineAll)
-            //                scoreState = ScoreState.OnlineWeek;
-            //            else if (scoreState == ScoreState.OnlineWeek)
-            //                scoreState = ScoreState.OnlineMe;
-            //            else
-            //                scoreState = ScoreState.Local;
-            //        }
-            //        // Switcher left
-            //        if (switcherLeftDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (scoreState == ScoreState.Local)
-            //                scoreState = ScoreState.OnlineMe;
-            //            else if (scoreState == ScoreState.OnlineMe)
-            //                scoreState = ScoreState.OnlineWeek;
-            //            else if (scoreState == ScoreState.OnlineWeek)
-            //                scoreState = ScoreState.OnlineAll;
-            //            else
-            //                scoreState = ScoreState.Local;
-            //        }
-            //        // Resubmit
-            //        if (resubmitDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (scoreState == ScoreState.Local && topScores.Count > 0 && topScores[0].Score > 0)
-            //            {
-            //                leaderboardManager.Submit(LeaderboardManager.RESUBMIT,
-            //                                          topScores[0].Name,
-            //                                          topScores[0].Score,
-            //                                          topScores[0].Level);
-            //            }
-            //        }
-            //        // Browser - TOP100
-            //        if (browserDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (scoreState == ScoreState.OnlineAll || scoreState == ScoreState.OnlineWeek || scoreState == ScoreState.OnlineMe)
-            //            {
-            //                browser.Show();
-            //            }
-            //        }
-            //        // Refresh
-            //        if (refreshDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            if (scoreState == ScoreState.OnlineAll || scoreState == ScoreState.OnlineWeek || scoreState == ScoreState.OnlineMe)
-            //            {
-            //                leaderboardManager.Receive();
-            //            }
-            //        }
-            //    }
-            //}
-
             // Switcher right
             if (GameInput.IsPressed(GoRightAction) && switchPageTimer > SwitchPageMinTimer)
             {
@@ -217,9 +174,15 @@ namespace SpacepiXX
                 if (scoreState == ScoreState.Local)
                     scoreState = ScoreState.OnlineAll;
                 else if (scoreState == ScoreState.OnlineAll)
+                    scoreState = ScoreState.OnlineMonth;
+                else if (scoreState == ScoreState.OnlineMonth)
                     scoreState = ScoreState.OnlineWeek;
                 else if (scoreState == ScoreState.OnlineWeek)
+                    scoreState = ScoreState.OnlineDay;
+                else if (scoreState == ScoreState.OnlineDay)
                     scoreState = ScoreState.OnlineMe;
+                else if (scoreState == ScoreState.OnlineMe)
+                    scoreState = ScoreState.MostAddictive;
                 else
                     scoreState = ScoreState.Local;
             }
@@ -229,10 +192,16 @@ namespace SpacepiXX
                 switchPageTimer = 0.0f;
 
                 if (scoreState == ScoreState.Local)
+                    scoreState = ScoreState.MostAddictive;
+                else if (scoreState == ScoreState.MostAddictive)
                     scoreState = ScoreState.OnlineMe;
                 else if (scoreState == ScoreState.OnlineMe)
+                    scoreState = ScoreState.OnlineDay;
+                else if (scoreState == ScoreState.OnlineDay)
                     scoreState = ScoreState.OnlineWeek;
                 else if (scoreState == ScoreState.OnlineWeek)
+                    scoreState = ScoreState.OnlineMonth;
+                else if (scoreState == ScoreState.OnlineMonth)
                     scoreState = ScoreState.OnlineAll;
                 else
                     scoreState = ScoreState.Local;
@@ -251,7 +220,7 @@ namespace SpacepiXX
             // Browser - Top100
             if (GameInput.IsPressed(BrowserAction))
             {
-                if (scoreState == ScoreState.OnlineAll || scoreState == ScoreState.OnlineWeek || scoreState == ScoreState.OnlineMe)
+                if (scoreState != ScoreState.Local)
                 {
                     browser.Show();
                 }
@@ -259,7 +228,7 @@ namespace SpacepiXX
             // Refresh
             if (GameInput.IsPressed(RefreshAction))
             {
-                if (scoreState == ScoreState.OnlineAll || scoreState == ScoreState.OnlineWeek || scoreState == ScoreState.OnlineMe)
+                if (scoreState != ScoreState.Local)
                 {
                     leaderboardManager.Receive();
                 }
@@ -334,9 +303,9 @@ namespace SpacepiXX
                     }
                     else
                     {
-                        scoreText = ". . . . . . . . . . . . ";
-                        nameText = ". . . . . . . . . . . . . . . . . . . . . ";
-                        levelText = ". . . ";
+                        scoreText = DOTS12;
+                        nameText = DOTS21;
+                        levelText = DOTS3;
                     }
 
                     spriteBatch.DrawString(Font,
@@ -346,17 +315,17 @@ namespace SpacepiXX
 
                     spriteBatch.DrawString(Font,
                                            nameText,
-                                           new Vector2(130, 100 + (i * 33)),
+                                           new Vector2(NamePositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
 
                     spriteBatch.DrawString(Font,
                                            scoreText,
-                                           new Vector2(440, 100 + (i * 33)),
+                                           new Vector2(ScorePositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
 
                     spriteBatch.DrawString(Font,
                                            levelText,
-                                           new Vector2(620, 100 + (i * 33)),
+                                           new Vector2(LevelPositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
                 }
             }
@@ -394,9 +363,9 @@ namespace SpacepiXX
                     }
                     else
                     {
-                        scoreText = ". . . . . . . . . . . . ";
-                        nameText = ". . . . . . . . . . . . . . . . . . . . . ";
-                        levelText = ". . . ";
+                        scoreText = DOTS12;
+                        nameText = DOTS21;
+                        levelText = DOTS3;
                     }
 
                     spriteBatch.DrawString(Font,
@@ -406,17 +375,77 @@ namespace SpacepiXX
 
                     spriteBatch.DrawString(Font,
                                            nameText,
-                                           new Vector2(130, 100 + (i * 33)),
+                                           new Vector2(NamePositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
 
                     spriteBatch.DrawString(Font,
                                            scoreText,
-                                           new Vector2(440, 100 + (i * 33)),
+                                           new Vector2(ScorePositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
 
                     spriteBatch.DrawString(Font,
                                            levelText,
-                                           new Vector2(620, 100 + (i * 33)),
+                                           new Vector2(LevelPositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+                }
+            }
+
+            if (scoreState == ScoreState.OnlineMonth)
+            {
+                spriteBatch.Draw(Texture,
+                                 TitlePosition,
+                                 OnlineMonthTitleSource,
+                                 Color.White * opacity);
+
+                spriteBatch.Draw(Texture,
+                                 browserDestination,
+                                 browserSource,
+                                 Color.Red * opacity);
+
+                spriteBatch.Draw(Texture,
+                                 refreshDestination,
+                                 refreshSource,
+                                 Color.Red * opacity);
+
+                for (int i = 0; i < MaxScores; i++)
+                {
+                    string scoreText;
+                    string nameText;
+                    string levelText;
+
+                    if (leaderboardManager.TopScoresMonth.Count > i)
+                    {
+                        Highscore h = new Highscore(leaderboardManager.TopScoresMonth[i].Name, leaderboardManager.TopScoresMonth[i].Score, leaderboardManager.TopScoresMonth[i].Level);
+
+                        scoreText = h.ScoreText;
+                        nameText = h.Name;
+                        levelText = h.LevelText;
+                    }
+                    else
+                    {
+                        scoreText = DOTS12;
+                        nameText = DOTS21;
+                        levelText = DOTS3;
+                    }
+
+                    spriteBatch.DrawString(Font,
+                           string.Format("{0:d}.", i + 1),
+                           new Vector2(50, 100 + (i * 33)),
+                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           nameText,
+                                           new Vector2(NamePositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           scoreText,
+                                           new Vector2(ScorePositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           levelText,
+                                           new Vector2(LevelPositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
                 }
             }
@@ -454,9 +483,9 @@ namespace SpacepiXX
                     }
                     else
                     {
-                        scoreText = ". . . . . . . . . . . . ";
-                        nameText = ". . . . . . . . . . . . . . . . . . . . . ";
-                        levelText = ". . . ";
+                        scoreText = DOTS12;
+                        nameText = DOTS21;
+                        levelText = DOTS3;
                     }
 
                     spriteBatch.DrawString(Font,
@@ -466,17 +495,137 @@ namespace SpacepiXX
 
                     spriteBatch.DrawString(Font,
                                            nameText,
-                                           new Vector2(130, 100 + (i * 33)),
+                                           new Vector2(NamePositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
 
                     spriteBatch.DrawString(Font,
                                            scoreText,
-                                           new Vector2(440, 100 + (i * 33)),
+                                           new Vector2(ScorePositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
 
                     spriteBatch.DrawString(Font,
                                            levelText,
-                                           new Vector2(620, 100 + (i * 33)),
+                                           new Vector2(LevelPositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+                }
+            }
+
+            if (scoreState == ScoreState.OnlineDay)
+            {
+                spriteBatch.Draw(Texture,
+                                 TitlePosition,
+                                 OnlineDayTitleSource,
+                                 Color.White * opacity);
+
+                spriteBatch.Draw(Texture,
+                                 browserDestination,
+                                 browserSource,
+                                 Color.Red * opacity);
+
+                spriteBatch.Draw(Texture,
+                                 refreshDestination,
+                                 refreshSource,
+                                 Color.Red * opacity);
+
+                for (int i = 0; i < MaxScores; i++)
+                {
+                    string scoreText;
+                    string nameText;
+                    string levelText;
+
+                    if (leaderboardManager.TopScoresDay.Count > i)
+                    {
+                        Highscore h = new Highscore(leaderboardManager.TopScoresDay[i].Name, leaderboardManager.TopScoresDay[i].Score, leaderboardManager.TopScoresDay[i].Level);
+
+                        scoreText = h.ScoreText;
+                        nameText = h.Name;
+                        levelText = h.LevelText;
+                    }
+                    else
+                    {
+                        scoreText = DOTS12;
+                        nameText = DOTS21;
+                        levelText = DOTS3;
+                    }
+
+                    spriteBatch.DrawString(Font,
+                           string.Format("{0:d}.", i + 1),
+                           new Vector2(50, 100 + (i * 33)),
+                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           nameText,
+                                           new Vector2(NamePositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           scoreText,
+                                           new Vector2(ScorePositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           levelText,
+                                           new Vector2(LevelPositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+                }
+            }
+
+            if (scoreState == ScoreState.MostAddictive)
+            {
+                spriteBatch.Draw(Texture,
+                                 TitlePosition,
+                                 MostAddictiveTitleSource,
+                                 Color.White * opacity);
+
+                spriteBatch.Draw(Texture,
+                                 browserDestination,
+                                 browserSource,
+                                 Color.Red * opacity);
+
+                spriteBatch.Draw(Texture,
+                                 refreshDestination,
+                                 refreshSource,
+                                 Color.Red * opacity);
+
+                for (int i = 0; i < MaxScores; i++)
+                {
+                    string scoreText;
+                    string nameText;
+                    string levelText;
+
+                    if (leaderboardManager.TopScoresMostAddictive.Count > i)
+                    {
+                        Highscore h = new Highscore(leaderboardManager.TopScoresMostAddictive[i].Name, leaderboardManager.TopScoresMostAddictive[i].Score, leaderboardManager.TopScoresMostAddictive[i].Level);
+
+                        scoreText = h.ScoreText;
+                        nameText = h.Name;
+                        levelText = string.Format("{0:0000}",h.Level);
+                    }
+                    else
+                    {
+                        scoreText = DOTS12;
+                        nameText = DOTS21;
+                        levelText = DOTS3;
+                    }
+
+                    spriteBatch.DrawString(Font,
+                           string.Format("{0:d}.", i + 1),
+                           new Vector2(50, 100 + (i * 33)),
+                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           nameText,
+                                           new Vector2(NamePositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           scoreText,
+                                           new Vector2(ScorePositionX, 100 + (i * 33)),
+                                           Color.Red * opacity);
+
+                    spriteBatch.DrawString(Font,
+                                           levelText,
+                                           new Vector2(LevelPositionX, 100 + (i * 33)),
                                            Color.Red * opacity);
                 }
             }
@@ -501,68 +650,106 @@ namespace SpacepiXX
                 spriteBatch.DrawString(Font,
                                    TEXT_ME,
                                    new Vector2(800 / 2 - Font.MeasureString(TEXT_ME).X / 2,
-                                               150),
+                                               140),
                                    Color.Red * opacity);
 
                 // Title:
                 spriteBatch.DrawString(Font,
                                        TEXT_RANK,
-                                       new Vector2(250,
-                                                   225),
+                                       new Vector2(200,
+                                                   210),
                                        Color.Red * opacity);
 
                 spriteBatch.DrawString(Font,
                                        TEXT_SCORE,
-                                       new Vector2(250,
-                                                   275),
+                                       new Vector2(200,
+                                                   250),
                                        Color.Red * opacity);
 
                 spriteBatch.DrawString(Font,
                                        TEXT_LEVEL,
-                                       new Vector2(250,
-                                                   325),
+                                       new Vector2(200,
+                                                   290),
                                        Color.Red * opacity);
+
+                spriteBatch.DrawString(Font,
+                                       TEXT_TOTAL_SCORE,
+                                       new Vector2(200,
+                                                   330),
+                                       Color.Red * opacity);
+
+                spriteBatch.DrawString(Font,
+                                       TEXT_TOTAL_LEVEL,
+                                       new Vector2(200,
+                                                   370),
+                                       Color.Red * opacity);
+
 
                 // Content:
                 int topRank = leaderboardManager.TopRankMe;
                 long topScore = leaderboardManager.TopScoreMe;
                 int topLevel = leaderboardManager.TopLevelMe;
+                long totalScore = leaderboardManager.TotalScoreMe;
+                int totalLevel = leaderboardManager.TotalLevelMe;
                 string topRankText;
                 string topScoreText;
                 string topLevelText;
+                string totalScoreText;
+                string totalLevelText;
 
                 if (topRank == 0)
-                    topRankText = ". . . . . . ";
+                    topRankText = DOTS6;
                 else
                     topRankText = string.Format("{0:00000}", leaderboardManager.TopRankMe);
 
                 if (topScore == 0)
-                    topScoreText = ". . . . . . . . . . . . ";
+                    topScoreText = DOTS12;
                 else
-                    topScoreText = string.Format("{0:00000000000}", leaderboardManager.TopScoreMe);
+                    topScoreText = string.Format("{0:000000000000}", leaderboardManager.TopScoreMe);
 
                 if (topLevel == 0)
-                    topLevelText = ". . . ";
+                    topLevelText = DOTS3;
                 else
                     topLevelText = string.Format("{0:00}", leaderboardManager.TopLevelMe);
 
+                if (totalScore == 0)
+                    totalScoreText = DOTS12;
+                else
+                    totalScoreText = string.Format("{0:000000000000}", leaderboardManager.TotalScoreMe);
+
+                if (totalLevel == 0)
+                    totalLevelText = DOTS3;
+                else
+                    totalLevelText = string.Format("{0:00}", leaderboardManager.TotalLevelMe);
 
                 spriteBatch.DrawString(Font,
                                        topRankText,
-                                       new Vector2(550 - Font.MeasureString(topRankText).X,
-                                                   225),
+                                       new Vector2(600 - Font.MeasureString(topRankText).X,
+                                                   210),
                                        Color.Red * opacity);
 
                 spriteBatch.DrawString(Font,
                                        topScoreText,
-                                       new Vector2(550 - Font.MeasureString(topScoreText).X,
-                                                   275),
+                                       new Vector2(600 - Font.MeasureString(topScoreText).X,
+                                                   250),
                                        Color.Red * opacity);
 
                 spriteBatch.DrawString(Font,
                                        topLevelText,
-                                       new Vector2(550 - Font.MeasureString(topLevelText).X,
-                                                   325),
+                                       new Vector2(600 - Font.MeasureString(topLevelText).X,
+                                                   290),
+                                       Color.Red * opacity);
+
+                spriteBatch.DrawString(Font,
+                                       totalScoreText,
+                                       new Vector2(600 - Font.MeasureString(totalScoreText).X,
+                                                   330),
+                                       Color.Red * opacity);
+
+                spriteBatch.DrawString(Font,
+                                       totalLevelText,
+                                       new Vector2(600 - Font.MeasureString(totalLevelText).X,
+                                                   370),
                                        Color.Red * opacity);
             }
         }
@@ -650,7 +837,7 @@ namespace SpacepiXX
 
                             this.currentHighScore = 0;
                         }
-                    }  
+                    }
                 }
 
                 // Delete the old file
@@ -729,7 +916,7 @@ namespace SpacepiXX
 
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream("user.txt", FileMode.Create, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(USERDATA_FILE, FileMode.Create, isf))
                 {
                     using (StreamWriter sw = new StreamWriter(isfs))
                     {
@@ -746,9 +933,9 @@ namespace SpacepiXX
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                bool hasExisted = isf.FileExists(@"user.txt");
+                bool hasExisted = isf.FileExists(USERDATA_FILE);
 
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(@"user.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(USERDATA_FILE, FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
                 {
                     if (hasExisted)
                     {

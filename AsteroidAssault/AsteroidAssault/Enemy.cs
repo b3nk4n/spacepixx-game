@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -14,7 +12,7 @@ namespace SpacepiXX
 
         private Sprite enemySprite;
         private Vector2 gunOffset = new Vector2(25, 25);
-        private Queue<Vector2> wayPoints = new Queue<Vector2>();
+        private Queue<Vector2> wayPoints = new Queue<Vector2>(32);
         private Vector2 currentWayPoint = Vector2.Zero;
 
         private float speed;

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -14,7 +12,7 @@ namespace SpacepiXX
 
         public Texture2D Texture;
 
-        protected List<Rectangle> frames = new List<Rectangle>();
+        protected List<Rectangle> frames = new List<Rectangle>(16);
         private int frameWidth;
         private int frameHeight;
         private int currentFrame;

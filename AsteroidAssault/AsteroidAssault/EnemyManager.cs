@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
@@ -17,7 +15,7 @@ namespace SpacepiXX
 
         private Texture2D texture;
 
-        public List<Enemy> Enemies = new List<Enemy>();
+        public List<Enemy> Enemies = new List<Enemy>(64);
 
         public ShotManager EnemyShotManager;
         private PlayerManager playerManager;
@@ -38,9 +36,9 @@ namespace SpacepiXX
         private float shipSpawnTimer = 0.0f;
         private float shipSpawnWaitTimer = 0.5f;
 
-        private List<List<Vector2>> pathWayPoints = new List<List<Vector2>>();
+        private List<List<Vector2>> pathWayPoints = new List<List<Vector2>>(32);
 
-        private Dictionary<int, WaveInfo> waveSpawns = new Dictionary<int, WaveInfo>();
+        private Dictionary<int, WaveInfo> waveSpawns = new Dictionary<int, WaveInfo>(16);
 
         public bool IsActive = false;
 
@@ -307,6 +305,72 @@ namespace SpacepiXX
             pathWayPoints.Add(path26);
             waveSpawns.Add(26, new WaveInfo(0, EnemyType.Easy));
 
+            // Added in Version 2.5
+            List<Vector2> path27 = new List<Vector2>();
+            path27.Add(new Vector2(300, -50));
+            path27.Add(new Vector2(300, 50));
+            path27.Add(new Vector2(275, 100));
+            path27.Add(new Vector2(225, 175));
+            path27.Add(new Vector2(200, 200));
+            path27.Add(new Vector2(200, 250));
+            path27.Add(new Vector2(225, 275));
+            path27.Add(new Vector2(325, 300));
+            path27.Add(new Vector2(475, 300));
+            path27.Add(new Vector2(575, 275));
+            path27.Add(new Vector2(600, 250));
+            path27.Add(new Vector2(600, 200));
+            path27.Add(new Vector2(575, 175));
+            path27.Add(new Vector2(525, 100));
+            path27.Add(new Vector2(500, 50));
+            path27.Add(new Vector2(500, -50));
+            pathWayPoints.Add(path27);
+            waveSpawns.Add(27, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path28 = new List<Vector2>();
+            path28.Add(new Vector2(250, -50));
+            path28.Add(new Vector2(250, 50));
+            path28.Add(new Vector2(225, 100));
+            path28.Add(new Vector2(175, 175));
+            path28.Add(new Vector2(150, 200));
+            path28.Add(new Vector2(150, 300));
+            path28.Add(new Vector2(175, 325));
+            path28.Add(new Vector2(275, 350));
+            path28.Add(new Vector2(850, 350));
+            pathWayPoints.Add(path28);
+            waveSpawns.Add(28, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path29 = new List<Vector2>();
+            path29.Add(new Vector2(550, -50));
+            path29.Add(new Vector2(550, 50));
+            path29.Add(new Vector2(575, 100));
+            path29.Add(new Vector2(625, 175));
+            path29.Add(new Vector2(650, 200));
+            path29.Add(new Vector2(650, 300));
+            path29.Add(new Vector2(625, 325));
+            path29.Add(new Vector2(525, 350));
+            path29.Add(new Vector2(-50, 350));
+            pathWayPoints.Add(path29);
+            waveSpawns.Add(29, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path30 = new List<Vector2>();
+            path30.Add(new Vector2(500, -50));
+            path30.Add(new Vector2(500, 50));
+            path30.Add(new Vector2(525, 100));
+            path30.Add(new Vector2(575, 175));
+            path30.Add(new Vector2(600, 200));
+            path30.Add(new Vector2(600, 250));
+            path30.Add(new Vector2(575, 275));
+            path30.Add(new Vector2(475, 300));
+            path30.Add(new Vector2(325, 300));
+            path30.Add(new Vector2(225, 275));
+            path30.Add(new Vector2(200, 250));
+            path30.Add(new Vector2(200, 200));
+            path30.Add(new Vector2(225, 175));
+            path30.Add(new Vector2(275, 100));
+            path30.Add(new Vector2(300, 50));
+            path30.Add(new Vector2(300, -50));
+            pathWayPoints.Add(path30);
+            waveSpawns.Add(30, new WaveInfo(0, EnemyType.Easy));
         }
 
         public void SpawnEnemy(int path, EnemyType type)
@@ -442,7 +506,7 @@ namespace SpacepiXX
                 }
                 else
                 {
-                    if ((float)rand.Next(0, 1000) / 10 <= Enemies[x].ShotChance &&
+                    if ((float)rand.Next(0, 2000) / 10 <= Enemies[x].ShotChance &&
                         !playerManager.IsDestroyed &&
                          screen.Contains((int)Enemies[x].EnemySprite.Center.X,
                                          (int)Enemies[x].EnemySprite.Center.Y))

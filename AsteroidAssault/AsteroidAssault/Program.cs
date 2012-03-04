@@ -10,7 +10,7 @@ namespace SpacepiXX
         /// </summary>
         static void Main(string[] args)
         {
-            using (Game1 game = new Game1())
+            using (Spacepixx game = new Spacepixx())
             {
                 game.Run();
             }

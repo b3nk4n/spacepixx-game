@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -11,7 +9,7 @@ namespace SpacepiXX
     {
         #region Members
 
-        private List<Sprite> stars = new List<Sprite>();
+        private List<Sprite> stars;
         private int screenWidth = 800;
         private int screenHeight = 480;
         private Random rand = new Random();
@@ -32,6 +30,8 @@ namespace SpacepiXX
         {
             this.screenWidth = screenWidth;
             this.screenHeight = screenHeight;
+
+            stars = new List<Sprite>(starCount + 1);
 
             for (int x = 0; x < starCount; x++)
             {

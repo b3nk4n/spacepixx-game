@@ -1,13 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SpacepiXX.Inputs;
+using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Phone.Tasks;
 
 namespace SpacepiXX
 {
-    public class HelpManager
+    class HelpManager
     {
         #region Members
 
@@ -15,14 +15,15 @@ namespace SpacepiXX
         private SpriteFont font;
         private readonly Rectangle HelpTitleSource = new Rectangle(0, 350,
                                                                    300, 50);
-        private readonly Vector2 TitlePosition = new Vector2(250.0f, 40.0f);
+        private readonly Vector2 TitlePosition = new Vector2(250.0f, 100.0f);
 
-        private readonly string[] Content = {"If you have any further questions,",
+        private static readonly string[] Content = {"If you have any further questions,",
                                             "ideas or problems with SpacepiXX,",
                                             "please do not hesitate to contact us."};
 
-        private readonly string Email = "bsautermeister@live.de";
-        private readonly string Blog = "bsautermeister.blogspot.com";
+        private const string Email = "apps@bsautermeister.de";
+        private const string EmailSubject = "SpacepiXX - Support";
+        private const string Blog = "bsautermeister.de/blog";
 
         private readonly Rectangle screenBounds;
 
@@ -33,12 +34,27 @@ namespace SpacepiXX
 
         private bool isActive = false;
 
+        private WebBrowserTask browser;
+        private const string BROWSER_URL = "http://bsautermeister.de/blog";
+
+        private readonly Rectangle EmailDestination = new Rectangle(250,330,
+                                                                    300,50);
+        private readonly Rectangle BlogDestination = new Rectangle(250, 380,
+                                                                    300, 50);
+
+        public static GameInput GameInput;
+        private const string EmailAction = "Email";
+        private const string BlogAction = "Blog";
+
         #endregion
 
         #region Constructors
 
         public HelpManager(Texture2D tex, SpriteFont font, Rectangle screenBounds)
         {
+            this.browser = new WebBrowserTask();
+            this.browser.Uri = new Uri(BROWSER_URL);
+
             this.texture = tex;
             this.font = font;
             this.screenBounds = screenBounds;
@@ -48,6 +64,33 @@ namespace SpacepiXX
 
         #region Methods
 
+        public void SetupInputs()
+        {
+            GameInput.AddTouchGestureInput(EmailAction,
+                                           GestureType.Tap,
+                                           EmailDestination);
+            GameInput.AddTouchGestureInput(BlogAction,
+                                           GestureType.Tap,
+                                           BlogDestination);
+        }
+
+        private void handleTouchInputs()
+        {
+            // Email
+            if (GameInput.IsPressed(EmailAction))
+            {
+                EmailComposeTask emailTask = new EmailComposeTask();
+                emailTask.To = Email;
+                emailTask.Subject = EmailSubject;
+                emailTask.Show();
+            }
+            // Blog
+            if (GameInput.IsPressed(BlogAction))
+            {
+                browser.Show();
+            }
+        }
+
         public void Update(GameTime gameTime)
         {
             if (isActive)
@@ -55,6 +98,8 @@ namespace SpacepiXX
                 if (this.opacity < OpacityMax)
                     this.opacity += OpacityChangeRate;
             }
+
+            handleTouchInputs();
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -69,20 +114,20 @@ namespace SpacepiXX
                 spriteBatch.DrawString(font,
                        Content[i],
                        new Vector2((screenBounds.Width - font.MeasureString(Content[i]).X) / 2,
-                                   150 + (i * 35)),
+                                   190 + (i * 35)),
                        Color.Red * opacity);
             }
 
             spriteBatch.DrawString(font,
                        Email,
                        new Vector2((screenBounds.Width - font.MeasureString(Email).X) / 2,
-                                   325),
+                                   340),
                        Color.Red * opacity);
 
             spriteBatch.DrawString(font,
                        Blog,
                        new Vector2((screenBounds.Width - font.MeasureString(Blog).X) / 2,
-                                   360),
+                                   390),
                        Color.Red * opacity);
         }
 

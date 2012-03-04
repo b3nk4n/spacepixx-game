@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Text;
+using SpacepiXX.Extensions;
 
 namespace SpacepiXX
 {
@@ -29,7 +27,7 @@ namespace SpacepiXX
         private Texture2D texture;
         private SpriteFont font;
 
-        private Vector2 scoreLocation = new Vector2(5, 5);
+        private Vector2 scoreLocation = new Vector2(5, 3);
         private Vector2 livesLocation = new Vector2(5, 35);
         private Vector2 hitPointLocation = new Vector2(645, 10);
         private Vector2 shieldPointLocation = new Vector2(645, 30);
@@ -57,6 +55,10 @@ namespace SpacepiXX
         private Vector2 bossHitPointSymbolLocation = new Vector2(325, 38);
 
         Vector2 barOverlayStart = new Vector2(0, 350);
+
+        private int lastLevel = -1;
+        private StringBuilder currentLevelText = new StringBuilder(16);
+        private const string LEVEL_PRE_TEXT = "Level: ";
 
         #endregion
 
@@ -145,10 +147,11 @@ namespace SpacepiXX
 
         private void drawScore(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(font,
-                                   string.Format("{0:00000000000}", score),
-                                   scoreLocation,
-                                   Color.White * 0.8f);
+            spriteBatch.DrawInt64WithZeros(font,
+                                  score,
+                                  scoreLocation,
+                                  Color.White * 0.8f,
+                                  11);
         }
 
         private void drawSpecialShots(SpriteBatch spriteBatch)
@@ -342,10 +345,21 @@ namespace SpacepiXX
 
         private void drawLevel(SpriteBatch spriteBatch)
         {
-            string lvlText = "Level: " + level;
+            if (lastLevel != level || currentLevelText.Length == 0)
+            {
+                if (currentLevelText.Length != 0)
+                    currentLevelText.Clear();
+
+                lastLevel = level;
+
+                currentLevelText.Append(LEVEL_PRE_TEXT)
+                                .Append(level);
+            }
+
+
             spriteBatch.DrawString(font,
-                                   lvlText,
-                                   new Vector2(screenBounds.Width / 2 - (font.MeasureString(lvlText).Y / 2),
+                                   currentLevelText,
+                                   new Vector2(screenBounds.Width / 2 - (font.MeasureString(currentLevelText).Y / 2),
                                                5),
                                    Color.White * 0.8f);
         }

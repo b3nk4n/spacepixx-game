@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
@@ -23,38 +20,38 @@ namespace SpacepiXX
 
         private Rectangle spacepixxSource = new Rectangle(0, 0,
                                                           500, 100);
-        private Rectangle spacepixxDestination = new Rectangle(150, 20,
+        private Rectangle spacepixxDestination = new Rectangle(150, 80,
                                                                500, 100);
 
         private Rectangle startSource = new Rectangle(0, 200,
                                                       300, 50);
-        private Rectangle startDestination = new Rectangle(250, 130,
+        private Rectangle startDestination = new Rectangle(250, 200,
                                                            300, 50);
-
-        private Rectangle highscoresSource = new Rectangle(0, 250,
-                                                           300, 50);
-        private Rectangle highscoresDestination = new Rectangle(250, 270,
-                                                                300, 50);
 
         private Rectangle instructionsSource = new Rectangle(0, 300,
                                                              300, 50);
-        private Rectangle instructionsDestination = new Rectangle(250, 200,
+        private Rectangle instructionsDestination = new Rectangle(250, 270,
                                                                   300, 50);
-
-        private Rectangle helpSource = new Rectangle(0, 350,
-                                                     300, 50);
-        private Rectangle helpDestination = new Rectangle(250, 410,
-                                                          300, 50);
+        
+        private Rectangle highscoresSource = new Rectangle(0, 250,
+                                                           300, 50);
+        private Rectangle highscoresDestination = new Rectangle(250, 340,
+                                                                300, 50);
 
         private Rectangle settingsSource = new Rectangle(0, 400,
                                                      300, 50);
-        private Rectangle settingsDestination = new Rectangle(250, 340,
+        private Rectangle settingsDestination = new Rectangle(250, 410,
                                                           300, 50);
 
-        private Rectangle reviewSource = new Rectangle(400, 800,
+        private Rectangle moreGamesSource = new Rectangle(400, 900,
                                                        100, 100);
-        private Rectangle reviewDestination = new Rectangle(10, 380,
+        private Rectangle moreGamesDestination = new Rectangle(10, 380,
                                                             100, 100);
+
+        private Rectangle helpSource = new Rectangle(300, 800,
+                                                     100, 100);
+        private Rectangle helpDestination = new Rectangle(690, 380,
+                                                          100, 100);
 
         private float opacity = 0.0f;
         private const float OpacityMax = 1.0f;
@@ -73,7 +70,9 @@ namespace SpacepiXX
         private const string HelpAction = "Help";
         private const string ReviewAction = "Review";
 
-        private MarketplaceReviewTask reviewTask = new MarketplaceReviewTask();
+        private MarketplaceSearchTask searchTask = new MarketplaceSearchTask();
+
+        private const string SEARCH_TERM = "Benjamin Sautermeister";
 
         #endregion
 
@@ -109,7 +108,7 @@ namespace SpacepiXX
 
             gameInput.AddTouchGestureInput(ReviewAction,
                                            GestureType.Tap,
-                                           reviewDestination);
+                                           moreGamesDestination);
         }
 
         public void Update(GameTime gameTime)
@@ -154,7 +153,7 @@ namespace SpacepiXX
                 spriteBatch.Draw(texture,
                                  instructionsDestination,
                                  instructionsSource,
-                                 Color.Red * opacity * (float)Math.Pow(Math.Sin(time), 2.0f));
+                                 Color.Red * opacity * (0.25f + (float)(Math.Pow(Math.Sin(time), 2.0f)) * 0.75f));
             }
 
             spriteBatch.Draw(texture,
@@ -168,55 +167,13 @@ namespace SpacepiXX
                              Color.Red * opacity);
 
             spriteBatch.Draw(texture,
-                             reviewDestination,
-                             reviewSource,
+                             moreGamesDestination,
+                             moreGamesSource,
                              Color.Red * opacity);
         }
 
         private void handleTouchInputs()
         {
-            //if (TouchPanel.IsGestureAvailable)
-            //{
-            //    GestureSample gs = TouchPanel.ReadGesture();
-
-            //    if (gs.GestureType == GestureType.Tap)
-            //    {
-            //        // Start
-            //        if (startDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            this.lastPressedMenuItem = MenuItems.Start;
-            //        }
-            //        // Highscores
-            //        else if (highscoresDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            this.lastPressedMenuItem = MenuItems.Highscores;
-            //        }
-            //        // Instructions
-            //        else if (instructionsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            this.lastPressedMenuItem = MenuItems.Instructions;
-            //        }
-            //        // Help
-            //        else if (helpDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            this.lastPressedMenuItem = MenuItems.Help;
-            //        }
-            //        // Settings
-            //        else if (settingsDestination.Contains((int)gs.Position.X, (int)gs.Position.Y))
-            //        {
-            //            this.lastPressedMenuItem = MenuItems.Settings;
-            //        }
-            //        else
-            //        {
-            //            this.lastPressedMenuItem = MenuItems.None;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    this.lastPressedMenuItem = MenuItems.None;
-            //}
-
             // Start
             if (gameInput.IsPressed(StartAction))
             {
@@ -245,7 +202,8 @@ namespace SpacepiXX
             // Settings
             else if (gameInput.IsPressed(ReviewAction))
             {
-                reviewTask.Show();
+                searchTask.SearchTerms = SEARCH_TERM;
+                searchTask.Show();
             }
             else
             {
