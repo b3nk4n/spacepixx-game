@@ -24,10 +24,10 @@ namespace SpacepiXX
         private readonly Rectangle cancelDestination = new Rectangle(450, 370,
                                                                      300, 50);
 
-        private readonly Rectangle continueSource = new Rectangle(0, 850,
+        private readonly Rectangle retrySource = new Rectangle(0, 1100,
                                                                   300, 50);
-        private readonly Rectangle continueDestination = new Rectangle(250, 370,
-                                                                       300, 50);
+        private readonly Rectangle retryDestination = new Rectangle(50, 370,
+                                                                    300, 50);
 
         private static SubmissionManager submissionManager;
 
@@ -51,7 +51,7 @@ namespace SpacepiXX
         private int level;
 
         private bool cancelClicked = false;
-        private bool continueClicked = false;
+        private bool retryClicked = false;
 
 
         private const string TEXT_SUBMIT = "You have now the ability to submit your score!";
@@ -65,7 +65,7 @@ namespace SpacepiXX
         public static GameInput GameInput;
         private const string SubmitAction = "Submit";
         private const string CancelAction = "Cancel";
-        private const string ContinueAction = "Continue";
+        private const string RetryAction = "Retry";
 
         #endregion
 
@@ -88,9 +88,9 @@ namespace SpacepiXX
             GameInput.AddTouchGestureInput(CancelAction,
                                            GestureType.Tap,
                                            cancelDestination);
-            GameInput.AddTouchGestureInput(ContinueAction,
+            GameInput.AddTouchGestureInput(RetryAction,
                                            GestureType.Tap,
-                                           continueDestination);
+                                           retryDestination);
         }
 
         public static SubmissionManager GetInstance()
@@ -105,10 +105,10 @@ namespace SpacepiXX
 
         private void handleTouchInputs()
         {
-            // Submit
-            if (GameInput.IsPressed(SubmitAction))
+            if (submitState == SubmitState.Submit)
             {
-                if (submitState == SubmitState.Submit)
+                // Submit
+                if (GameInput.IsPressed(SubmitAction))
                 {
                     leaderboardManager.Submit(LeaderboardManager.SUBMIT,
                                               name,
@@ -117,22 +117,22 @@ namespace SpacepiXX
                     submitState = SubmitState.Submitted;
                 }
             }
-            // Cancel
-            if (GameInput.IsPressed(CancelAction))
+            else
             {
-                if (submitState == SubmitState.Submit)
+                // Retry
+                if (GameInput.IsPressed(RetryAction))
                 {
-                    leaderboardManager.StatusText = LeaderboardManager.TEXT_NONE;
-                    cancelClicked = true;
+                    if (submitState == SubmitState.Submitted)
+                    {
+                        retryClicked = true;
+                    }
                 }
             }
-            // Cancel
-            if (GameInput.IsPressed(ContinueAction))
+            
+            if (GameInput.IsPressed(CancelAction))
             {
-                if (submitState == SubmitState.Submitted)
-                {
-                    cancelClicked = true;
-                }
+                leaderboardManager.StatusText = LeaderboardManager.TEXT_NONE;
+                cancelClicked = true;
             }
         }
 
@@ -156,23 +156,23 @@ namespace SpacepiXX
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            spriteBatch.Draw(Texture,
+                                 cancelDestination,
+                                 cancelSource,
+                                 Color.Red * opacity);
+
             if (submitState == SubmitState.Submit)
             {
                 spriteBatch.Draw(Texture,
                                  submitDestination,
                                  submitSource,
                                  Color.Red * opacity);
-
-                spriteBatch.Draw(Texture,
-                                 cancelDestination,
-                                 cancelSource,
-                                 Color.Red * opacity);
             }
             else if (submitState == SubmitState.Submitted)
             {
                 spriteBatch.Draw(Texture,
-                                 continueDestination,
-                                 continueSource,
+                                 retryDestination,
+                                 retrySource,
                                  Color.Red * opacity);
 
                 spriteBatch.DrawString(Font,
@@ -274,7 +274,7 @@ namespace SpacepiXX
                 if (isActive == false)
                 {
                     this.opacity = OpacityMin;
-                    this.continueClicked = false;
+                    this.retryClicked = false;
                     this.cancelClicked = false;
                     this.submitState = SubmitState.Submit;
                 }
@@ -289,11 +289,11 @@ namespace SpacepiXX
             }
         }
 
-        public bool ContinueClicked
+        public bool RetryClicked
         {
             get
             {
-                return this.continueClicked;
+                return this.retryClicked;
             }
         }
 

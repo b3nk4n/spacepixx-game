@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using System.Xml.Linq;
 using System.IO.IsolatedStorage;
 using System.IO;
+using Microsoft.Phone.Info;
 
 namespace SpacepiXX
 {
@@ -108,7 +109,7 @@ namespace SpacepiXX
 
             try
             {
-                //phoneid = UserExtendedProperties.GetValue("ANID") as string;
+                phoneid = UserExtendedProperties.GetValue("ANID") as string;
 
                 if (phoneid == null)
                 {
@@ -153,7 +154,7 @@ namespace SpacepiXX
         {
             string phoneid = PHONE_ID;
 
-            string hash = MD5Core.GetHashString(phoneid + name + score + level).ToLower();
+            string hash = MD5Core.GetHashString(phoneid + name + score + level + pw).ToLower();
             if (!wc.IsBusy)
             {
                 if (method.Equals(RESUBMIT))

@@ -141,7 +141,7 @@ namespace SpacepiXX
 #if DEBUG
             AdGameComponent.Initialize(this, "test_client");
 #else
-            AdGameComponent.Initialize(this, "a74ff6c0-d1f8-4e5c-897e-f85f8d51e8a5");
+            AdGameComponent.Initialize(this, "3e0d3faa-d78e-4052-b9d3-2cefd90f50f2");
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
             System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
 #endif       
@@ -195,7 +195,7 @@ namespace SpacepiXX
 #if DEBUG
             bannerAd = adGameComponent.CreateAd("Image480_80", new Rectangle(160, 0, 480, 80));
 #else
-            bannerAd = adGameComponent.CreateAd("81028", new Rectangle(160, 0, 480, 80));
+            bannerAd = adGameComponent.CreateAd("92277", new Rectangle(160, 0, 480, 80));
 #endif       
             bannerAd.BorderEnabled = false;
 
@@ -554,6 +554,8 @@ namespace SpacepiXX
                 this.resetGame();
                 this.gameState = GameStates.TitleScreen;
             }
+
+            GC.Collect();
         }
 
         /// <summary>
@@ -575,6 +577,8 @@ namespace SpacepiXX
             {
                 adGameComponent.Update(gameTime);
             }
+
+            SoundManager.Update(gameTime);
 
             gameInput.BeginUpdate();
 
@@ -697,10 +701,25 @@ namespace SpacepiXX
                     submissionManager.IsActive = true;
                     submissionManager.Update(gameTime);
 
-                    if (submissionManager.ContinueClicked || submissionManager.CancelClicked || backButtonPressed)
+                    if (submissionManager.CancelClicked || backButtonPressed)
                     {
                         submissionManager.IsActive = false;
                         gameState = GameStates.MainMenu;
+                    }
+                    else if (submissionManager.RetryClicked)
+                    {
+                        submissionManager.IsActive = false;
+                        resetGame();
+                        hud.Update(playerManager.PlayerScore,
+                                   playerManager.LivesRemaining,
+                                   playerManager.Overheat,
+                                   playerManager.HitPoints,
+                                   playerManager.ShieldPoints,
+                                   playerManager.SpecialShotsRemaining,
+                                   playerManager.CarliRocketsRemaining,
+                                   playerManager.ScoreMulti,
+                                   levelManager.CurrentLevel);
+                        gameState = GameStates.Playing;
                     }
 
                     break;
@@ -919,16 +938,16 @@ namespace SpacepiXX
 
                         if (playerManager.LivesRemaining < 0)
                         {
-                            levelManager.Reset();                                   // XXXXXXXXXXXXXXXXXXXXX BUG HERE !?!?!?!?
                             gameState = GameStates.GameOver;
                             zoomTextManager.ShowText(GameOverText);
                         }
                         else
                         {
-                            levelManager.ResetLevelTimer();
                             gameState = GameStates.PlayerDead;
                             bossDirectKill = false;
                         }
+                        
+                        levelManager.ResetLevelTimer();
                     }
 
                     if (backButtonPressed)
@@ -1317,6 +1336,8 @@ namespace SpacepiXX
 
             bossDirectKill = true;
             bossBonusScore = InitialBossBonusScore;
+
+            GC.Collect();
         }
 
         private void keyboardCallback(IAsyncResult result)
@@ -1331,12 +1352,11 @@ namespace SpacepiXX
                                         playerManager.PlayerScore,
                                         levelManager.CurrentLevel);
 
-                if (highscoreManager.IsInScoreboard(playerManager.PlayerScore))
-                {
-                    highscoreManager.SaveHighScore(name,
-                                                   playerManager.PlayerScore,
-                                                   levelManager.CurrentLevel);
-                }
+                
+                highscoreManager.SaveHighScore(name,
+                                               playerManager.PlayerScore,
+                                               levelManager.CurrentLevel);
+                
             }
             else
             {

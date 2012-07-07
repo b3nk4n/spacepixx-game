@@ -36,6 +36,8 @@ namespace SpacepiXX
         private const string INFO_SHIELDS = "Activated Shields";
         private const string INFO_OVERDRIVE = "Overdrive!";
         private const string INFO_UNDERDRIVE = "Underdrive!";
+        private const string INFO_FRIENDLY = "Almost friendly!";
+        private const string INFO_ANGRY = "Rage!";
 
         Random rand = new Random();
 
@@ -77,8 +79,11 @@ namespace SpacepiXX
                         velocity = shot.Velocity;
 
                         shot.Location = offScreen;
+                        
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
+
                 if (location != Vector2.Zero)
                 {
                     if (enemy.IsDestroyed)
@@ -126,8 +131,11 @@ namespace SpacepiXX
                         velocity = shot.Velocity;
 
                         shot.Location = offScreen;
-                    }
+                        
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
+                    }    
                 }
+
                 if (location != Vector2.Zero)
                 {
                     if (boss.IsDestroyed)
@@ -214,6 +222,8 @@ namespace SpacepiXX
                         }
 
                         rocket.Location = offScreen;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -306,7 +316,6 @@ namespace SpacepiXX
                         EffectManager.AddRocketExplosion(asteroid.Center,
                                                          asteroid.Velocity / 10);
 
-
                         foreach (var otherEnemy in enemyManager.Enemies)
                         {
                             float distance = Math.Abs((rocket.Center - otherEnemy.EnemySprite.Center).Length());
@@ -377,6 +386,8 @@ namespace SpacepiXX
 
                         rocket.Location = offScreen;
                         asteroid.Location = offScreen;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -522,6 +533,8 @@ namespace SpacepiXX
 
                         rocket.Location = offScreen;
                         asteroid.Location = offScreen;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -583,6 +596,8 @@ namespace SpacepiXX
 
                         rocket.Location = offScreen;
                         asteroid.Location = offScreen;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -607,6 +622,8 @@ namespace SpacepiXX
                         direction.Normalize();
                         direction *= 20;
                         asteroid.Velocity += direction;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -631,6 +648,8 @@ namespace SpacepiXX
                         direction.Normalize();
                         direction *= 20;
                         asteroid.Velocity += direction;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -655,6 +674,8 @@ namespace SpacepiXX
                         direction.Normalize();
                         direction *= 20;
                         asteroid.Velocity += direction;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -809,6 +830,8 @@ namespace SpacepiXX
                                                         enemy.EnemySprite.Velocity / 10);
                         
                         asteroid.Location = offScreen;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -835,6 +858,8 @@ namespace SpacepiXX
                         }
 
                         asteroid.Location = offScreen;
+
+                        break; // Skip next comparisons, because they are probably neccessary or will be checked in the next try
                     }
                 }
             }
@@ -1008,6 +1033,18 @@ namespace SpacepiXX
                             playerManager.StartUnderdrive();
                             SoundManager.PlayOverheatSound();
                             ZoomTextManager.ShowInfo(INFO_UNDERDRIVE);
+                            break;
+
+                        case PowerUp.PowerUpType.Friendly:
+                            enemyManager.StartFriendly();
+                            SoundManager.PlayFriendlySound();
+                            ZoomTextManager.ShowInfo(INFO_FRIENDLY);
+                            break;
+
+                        case PowerUp.PowerUpType.Angry:
+                            enemyManager.StartAngry();
+                            SoundManager.PlayAngrySound();
+                            ZoomTextManager.ShowInfo(INFO_ANGRY);
                             break;
                     }
 

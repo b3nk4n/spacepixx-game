@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework;
 
 namespace SpacepiXX
 {
@@ -41,6 +42,9 @@ namespace SpacepiXX
         private static SoundEffect bossSpeederSound;
         private static SoundEffect bossTankSound;
 
+        private static SoundEffect angrySound;
+        private static SoundEffect friendlySound;
+
         private static List<SoundEffect> hitSounds = new List<SoundEffect>();
         private static int hitSoundsCount = 6;
 
@@ -51,6 +55,14 @@ namespace SpacepiXX
 
         private static Song backgroundSound;
         //private static SoundEffectInstance backgroundSound;
+
+        // performance improvements
+        public const float MinTimeBetweenHitSound = 0.2f;
+        private static float hitTimer = 0.0f;
+        private static float asteroidHitTimer = 0.0f;
+
+        public const float MinTimeBetweenExplosionSound = 0.1f;
+        private static float explosionTimer = 0.0f;
 
         #endregion
 
@@ -87,6 +99,9 @@ namespace SpacepiXX
                 bossSpeederSound = content.Load<SoundEffect>(@"Sounds\boss_speeder");
                 bossTankSound = content.Load<SoundEffect>(@"Sounds\boss_tank");
 
+                angrySound = content.Load<SoundEffect>(@"Sounds\angry");
+                friendlySound = content.Load<SoundEffect>(@"Sounds\friendly");
+
                 for (int x = 1; x <= explosionsCount; x++)
                 {
                     explosions.Add(content.Load<SoundEffect>(@"Sounds\Explosion"
@@ -113,17 +128,31 @@ namespace SpacepiXX
             }
         }
 
+        public static void Update(GameTime gameTime)
+        {
+            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            SoundManager.hitTimer += elapsed;
+            SoundManager.asteroidHitTimer += elapsed;
+            SoundManager.explosionTimer += elapsed;
+        }
+
         public static void PlayExplosion()
         {
-            try
+            if (SoundManager.explosionTimer > SoundManager.MinTimeBetweenExplosionSound)
             {
-                SoundEffectInstance s = explosions[rand.Next(0, explosionsCount)].CreateInstance();
-                s.Volume = settings.GetSfxValue();
-                s.Play();
-            }
-            catch
-            {
-                Debug.WriteLine("SoundManager: Play explosion failed.");
+                try
+                {
+                    SoundEffectInstance s = explosions[rand.Next(0, explosionsCount)].CreateInstance();
+                    s.Volume = settings.GetSfxValue();
+                    s.Play();
+                }
+                catch
+                {
+                    Debug.WriteLine("SoundManager: Play explosion failed.");
+                }
+
+                SoundManager.explosionTimer = 0.0f;
             }
         }
 
@@ -227,29 +256,39 @@ namespace SpacepiXX
 
         public static void PlayHitSound()
         {
-            try
+            if (SoundManager.hitTimer > SoundManager.MinTimeBetweenHitSound)
             {
-                SoundEffectInstance s = hitSounds[rand.Next(0, hitSoundsCount)].CreateInstance();
-                s.Volume = settings.GetSfxValue();
-                s.Play();
-            }
-            catch
-            {
-                Debug.WriteLine("SoundManager: Play explosion failed.");
+                try
+                {
+                    SoundEffectInstance s = hitSounds[rand.Next(0, hitSoundsCount)].CreateInstance();
+                    s.Volume = settings.GetSfxValue();
+                    s.Play();
+                }
+                catch
+                {
+                    Debug.WriteLine("SoundManager: Play explosion failed.");
+                }
+
+                SoundManager.hitTimer = 0.0f;
             }
         }
 
         public static void PlayAsteroidHitSound()
         {
-            try
+            if (SoundManager.asteroidHitTimer > SoundManager.MinTimeBetweenHitSound)
             {
-                SoundEffectInstance s = asteroidHitSounds[rand.Next(0, asteroidHitSoundsCount)].CreateInstance();
-                s.Volume = settings.GetSfxValue();
-                s.Play();
-            }
-            catch
-            {
-                Debug.WriteLine("SoundManager: Play explosion failed.");
+                try
+                {
+                    SoundEffectInstance s = asteroidHitSounds[rand.Next(0, asteroidHitSoundsCount)].CreateInstance();
+                    s.Volume = settings.GetSfxValue();
+                    s.Play();
+                }
+                catch
+                {
+                    Debug.WriteLine("SoundManager: Play explosion failed.");
+                }
+
+                SoundManager.asteroidHitTimer = 0.0f;
             }
         }
 
@@ -460,6 +499,34 @@ namespace SpacepiXX
             catch
             {
                 Debug.WriteLine("SoundManager: Play boss sound failed.");
+            }
+        }
+
+        public static void PlayAngrySound()
+        {
+            try
+            {
+                SoundEffectInstance s = angrySound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play angry sound failed.");
+            }
+        }
+
+        public static void PlayFriendlySound()
+        {
+            try
+            {
+                SoundEffectInstance s = friendlySound.CreateInstance();
+                s.Volume = settings.GetSfxValue();
+                s.Play();
+            }
+            catch
+            {
+                Debug.WriteLine("SoundManager: Play friendly sound failed.");
             }
         }
 

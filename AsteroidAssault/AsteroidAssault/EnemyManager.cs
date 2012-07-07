@@ -48,6 +48,14 @@ namespace SpacepiXX
 
         private readonly Rectangle screen = new Rectangle(0, 0, 800, 480);
 
+        // Angry/Friendly
+        private float sentimentTimer = 0.0f;
+        public const float SENTIMENT_DURATION = 20.0f;
+        private float sentimentFactor = SENTIMENT_NORMAL_FACTOR;
+        public const float FRIENDLY_FACTOR = 3.0f;
+        public const float SENTIMENT_NORMAL_FACTOR = 1.0f;
+        public const float ANGRY_FACTOR = 0.5f;
+
         #endregion
 
         #region Constructors
@@ -371,6 +379,234 @@ namespace SpacepiXX
             path30.Add(new Vector2(300, -50));
             pathWayPoints.Add(path30);
             waveSpawns.Add(30, new WaveInfo(0, EnemyType.Easy));
+
+            // added in version 2.7:
+            List<Vector2> path31 = new List<Vector2>();
+            path31.Add(new Vector2(-50, -50));
+            path31.Add(new Vector2(850, 300));
+            pathWayPoints.Add(path31);
+            waveSpawns.Add(31, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path32 = new List<Vector2>();
+            path32.Add(new Vector2(850, -50));
+            path32.Add(new Vector2(-50, 300));
+            pathWayPoints.Add(path32);
+            waveSpawns.Add(32, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path33 = new List<Vector2>();
+            path33.Add(new Vector2(-50, 0));
+            path33.Add(new Vector2(850, 350));
+            pathWayPoints.Add(path33);
+            waveSpawns.Add(33, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path34 = new List<Vector2>();
+            path34.Add(new Vector2(850, 0));
+            path34.Add(new Vector2(-50, 350));
+            pathWayPoints.Add(path34);
+            waveSpawns.Add(34, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path35 = new List<Vector2>();
+            path35.Add(new Vector2(450, -50));
+            path35.Add(new Vector2(500, 25));
+            path35.Add(new Vector2(600, 75));
+            path35.Add(new Vector2(650, 125));
+            path35.Add(new Vector2(675, 150));
+            path35.Add(new Vector2(700, 180));
+            path35.Add(new Vector2(700, 200));
+            path35.Add(new Vector2(675, 225));
+            path35.Add(new Vector2(650, 250));
+            path35.Add(new Vector2(550, 300));
+            path35.Add(new Vector2(400, 350));
+            path35.Add(new Vector2(-50, 350));
+            pathWayPoints.Add(path35);
+            waveSpawns.Add(35, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path36 = new List<Vector2>();
+            path36.Add(new Vector2(450, -50));
+            path36.Add(new Vector2(500, 25));
+            path36.Add(new Vector2(600, 75));
+            path36.Add(new Vector2(650, 125));
+            path36.Add(new Vector2(675, 150));
+            path36.Add(new Vector2(700, 180));
+            path36.Add(new Vector2(700, 200));
+            path36.Add(new Vector2(675, 225));
+            path36.Add(new Vector2(650, 250));
+            path36.Add(new Vector2(550, 300));
+            path36.Add(new Vector2(400, 350));
+            path36.Add(new Vector2(300, 325));
+            path36.Add(new Vector2(200, 275));
+            path36.Add(new Vector2(100, 200));
+            path36.Add(new Vector2(-50, 100));
+            pathWayPoints.Add(path36);
+            waveSpawns.Add(36, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path37 = new List<Vector2>();
+            path37.Add(new Vector2(350, -50));
+            path37.Add(new Vector2(300, 25));
+            path37.Add(new Vector2(200, 75));
+            path37.Add(new Vector2(150, 125));
+            path37.Add(new Vector2(125, 150));
+            path37.Add(new Vector2(100, 180));
+            path37.Add(new Vector2(100, 200));
+            path37.Add(new Vector2(125, 225));
+            path37.Add(new Vector2(150, 250));
+            path37.Add(new Vector2(250, 300));
+            path37.Add(new Vector2(400, 350));
+            path37.Add(new Vector2(850, 350));
+            pathWayPoints.Add(path37);
+            waveSpawns.Add(37, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path38 = new List<Vector2>();
+            path38.Add(new Vector2(350, -50));
+            path38.Add(new Vector2(300, 25));
+            path38.Add(new Vector2(200, 75));
+            path38.Add(new Vector2(150, 125));
+            path38.Add(new Vector2(125, 150));
+            path38.Add(new Vector2(100, 180));
+            path38.Add(new Vector2(100, 200));
+            path38.Add(new Vector2(125, 225));
+            path38.Add(new Vector2(150, 250));
+            path38.Add(new Vector2(250, 300));
+            path38.Add(new Vector2(400, 350));
+            path38.Add(new Vector2(500, 325));
+            path38.Add(new Vector2(600, 275));
+            path38.Add(new Vector2(700, 200));
+            path38.Add(new Vector2(850, 100));
+            pathWayPoints.Add(path38);
+            waveSpawns.Add(38, new WaveInfo(0, EnemyType.Easy));
+
+            // Added in version 2.10
+            List<Vector2> path39 = new List<Vector2>();
+            path39.Add(new Vector2(350, -50));
+            path39.Add(new Vector2(350, 250));
+            path39.Add(new Vector2(325, 300));
+            path39.Add(new Vector2(275, 350));
+            path39.Add(new Vector2(225, 375));
+            path39.Add(new Vector2(200, 375));
+            path39.Add(new Vector2(150, 350));
+            path39.Add(new Vector2(100, 300));
+            path39.Add(new Vector2(75,  250));
+            path39.Add(new Vector2(75, 225));
+            path39.Add(new Vector2(100, 175));
+            path39.Add(new Vector2(150, 125));
+            path39.Add(new Vector2(200, 100));
+            path39.Add(new Vector2(600, 100));
+            path39.Add(new Vector2(650, 125));
+            path39.Add(new Vector2(700, 175));
+            path39.Add(new Vector2(725, 225));
+            path39.Add(new Vector2(725, 250));
+            path39.Add(new Vector2(700, 300));
+            path39.Add(new Vector2(650, 350));
+            path39.Add(new Vector2(600, 375));
+            path39.Add(new Vector2(575, 375));
+            path39.Add(new Vector2(525, 350));
+            path39.Add(new Vector2(475, 300));
+            path39.Add(new Vector2(450, 250));
+            path39.Add(new Vector2(450, -50));
+            pathWayPoints.Add(path39);
+            waveSpawns.Add(39, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path40 = new List<Vector2>();
+            path40.Add(new Vector2(500, -50));
+            path40.Add(new Vector2(500, 300));
+            path40.Add(new Vector2(525, 350));
+            path40.Add(new Vector2(575, 400));
+            path40.Add(new Vector2(625, 425));
+            path40.Add(new Vector2(650, 425));
+            path40.Add(new Vector2(700, 400));
+            path40.Add(new Vector2(750, 350));
+            path40.Add(new Vector2(775, 300));
+            path40.Add(new Vector2(775, 275));
+            path40.Add(new Vector2(750, 225));
+            path40.Add(new Vector2(700, 175));
+            path40.Add(new Vector2(650, 150));
+            path40.Add(new Vector2(150, 150));
+            path40.Add(new Vector2(100, 175));
+            path40.Add(new Vector2(50, 225));
+            path40.Add(new Vector2(25, 275));
+            path40.Add(new Vector2(25, 300));
+            path40.Add(new Vector2(50, 350));
+            path40.Add(new Vector2(100, 400));
+            path40.Add(new Vector2(150, 425));
+            path40.Add(new Vector2(175, 425));
+            path40.Add(new Vector2(225, 400));
+            path40.Add(new Vector2(275, 350));
+            path40.Add(new Vector2(300, 300));
+            path40.Add(new Vector2(300, -50));
+            pathWayPoints.Add(path40);
+            waveSpawns.Add(40, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path41 = new List<Vector2>();
+            path41.Add(new Vector2(850, 175));
+            path41.Add(new Vector2(150, 175));
+            path41.Add(new Vector2(100, 200));
+            path41.Add(new Vector2(50, 250));
+            path41.Add(new Vector2(25, 300));
+            path41.Add(new Vector2(25, 325));
+            path41.Add(new Vector2(50, 375));
+            path41.Add(new Vector2(100, 425));
+            path41.Add(new Vector2(150, 450));
+            path41.Add(new Vector2(475, 450));
+            path41.Add(new Vector2(525, 425));
+            path41.Add(new Vector2(575, 375));
+            path41.Add(new Vector2(600, 325));
+            path41.Add(new Vector2(600, -50));
+            pathWayPoints.Add(path41);
+            waveSpawns.Add(41, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path42 = new List<Vector2>();
+            path42.Add(new Vector2(850, 125));
+            path42.Add(new Vector2(150, 125));
+            path42.Add(new Vector2(100, 150));
+            path42.Add(new Vector2(50, 200));
+            path42.Add(new Vector2(25, 250));
+            path42.Add(new Vector2(25, 275));
+            path42.Add(new Vector2(50, 325));
+            path42.Add(new Vector2(100, 375));
+            path42.Add(new Vector2(150, 400));
+            path42.Add(new Vector2(600, 400));
+            path42.Add(new Vector2(650, 375));
+            path42.Add(new Vector2(700, 325));
+            path42.Add(new Vector2(725, 275));
+            path42.Add(new Vector2(725, -50));
+            pathWayPoints.Add(path42);
+            waveSpawns.Add(42, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path43 = new List<Vector2>();
+            path43.Add(new Vector2(-50, 175));
+            path43.Add(new Vector2(650, 175));
+            path43.Add(new Vector2(700, 200));
+            path43.Add(new Vector2(750, 250));
+            path43.Add(new Vector2(775, 300));
+            path43.Add(new Vector2(775, 325));
+            path43.Add(new Vector2(750, 375));
+            path43.Add(new Vector2(700, 425));
+            path43.Add(new Vector2(650, 450));
+            path43.Add(new Vector2(325, 450));
+            path43.Add(new Vector2(275, 425));
+            path43.Add(new Vector2(225, 375));
+            path43.Add(new Vector2(200, 325));
+            path43.Add(new Vector2(200, -50));
+            pathWayPoints.Add(path43);
+            waveSpawns.Add(43, new WaveInfo(0, EnemyType.Easy));
+
+            List<Vector2> path44 = new List<Vector2>();
+            path44.Add(new Vector2(-50, 125));
+            path44.Add(new Vector2(650, 125));
+            path44.Add(new Vector2(700, 150));
+            path44.Add(new Vector2(750, 200));
+            path44.Add(new Vector2(775, 250));
+            path44.Add(new Vector2(775, 275));
+            path44.Add(new Vector2(750, 325));
+            path44.Add(new Vector2(700, 375));
+            path44.Add(new Vector2(650, 400));
+            path44.Add(new Vector2(200, 400));
+            path44.Add(new Vector2(150, 375));
+            path44.Add(new Vector2(100, 325));
+            path44.Add(new Vector2(75, 275));
+            path44.Add(new Vector2(75, -50));
+            pathWayPoints.Add(path44);
+            waveSpawns.Add(44, new WaveInfo(0, EnemyType.Easy));
         }
 
         public void SpawnEnemy(int path, EnemyType type)
@@ -494,6 +730,8 @@ namespace SpacepiXX
 
         public void Update(GameTime gameTime)
         {
+            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             EnemyShotManager.Update(gameTime);
 
             for (int x = Enemies.Count - 1; x >= 0; --x)
@@ -506,7 +744,9 @@ namespace SpacepiXX
                 }
                 else
                 {
-                    if ((float)rand.Next(0, 2000) / 10 <= Enemies[x].ShotChance &&
+                    float rndShot = (float)rand.Next(0, ((int)(2000 * sentimentFactor))) / 10;
+
+                    if (rndShot <= Enemies[x].ShotChance &&
                         !playerManager.IsDestroyed &&
                          screen.Contains((int)Enemies[x].EnemySprite.Center.X,
                                          (int)Enemies[x].EnemySprite.Center.Y))
@@ -544,6 +784,17 @@ namespace SpacepiXX
             {
                 updateWaveSpawns(gameTime);
             }
+
+            // Angry/friendly
+            if (IsAngryOrFriendly)
+            {
+                sentimentTimer -= elapsed;
+
+                if (sentimentTimer <= 0.0f)
+                {
+                    sentimentFactor = SENTIMENT_NORMAL_FACTOR;
+                }
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -552,7 +803,20 @@ namespace SpacepiXX
 
             foreach (var enemy in Enemies)
             {
+                Color tint = enemy.EnemySprite.TintColor;
+
+                if (IsAngry)
+                {
+                    enemy.EnemySprite.TintColor = new Color(255, 128, 128, tint.A);
+                }
+                else if (IsFriendly)
+                {
+                    enemy.EnemySprite.TintColor = new Color(128, 255, 128, tint.A);
+                }
+
                 enemy.Draw(spriteBatch);
+
+                enemy.EnemySprite.TintColor = tint;
             }
         }
 
@@ -572,6 +836,9 @@ namespace SpacepiXX
             }
 
             this.IsActive = true;
+
+            this.sentimentFactor = SENTIMENT_NORMAL_FACTOR;
+            this.sentimentTimer = 0.0f;
         }
 
         public void SetLevel(int lvl)
@@ -588,6 +855,18 @@ namespace SpacepiXX
             float tmp = (int)(InitialNextWaveMinTimer - (float)Math.Sqrt(lvl - 1) * 0.075f + 0.02 * (lvl - 1)); // 5 - WURZEL(A2-1) / 2 * 0,15 - 0,02 * (A2 - 1)
 
             this.nextWaveMinTimer = Math.Max(tmp, 1.0f);
+        }
+
+        public void StartFriendly()
+        {
+            this.sentimentTimer = SENTIMENT_DURATION;
+            this.sentimentFactor = FRIENDLY_FACTOR;
+        }
+
+        public void StartAngry()
+        {
+            this.sentimentTimer = SENTIMENT_DURATION;
+            this.sentimentFactor = ANGRY_FACTOR;
         }
 
         #endregion
@@ -656,6 +935,10 @@ namespace SpacepiXX
             this.IsActive = Boolean.Parse(reader.ReadLine());
 
             this.currentLevel = Int32.Parse(reader.ReadLine());
+
+            // Angry/Friendly
+            this.sentimentTimer = Single.Parse(reader.ReadLine());
+            this.sentimentFactor = Single.Parse(reader.ReadLine());
         }
 
         public void Deactivated(StreamWriter writer)
@@ -691,6 +974,38 @@ namespace SpacepiXX
             writer.WriteLine(IsActive);
 
             writer.WriteLine(currentLevel);
+
+            // Angry/friendly
+            writer.WriteLine(this.sentimentTimer);
+            writer.WriteLine(this.sentimentFactor);
+        }
+
+        #endregion
+
+        #region Properties
+
+        public bool IsAngryOrFriendly
+        {
+            get
+            {
+                return sentimentFactor != SENTIMENT_NORMAL_FACTOR;
+            }
+        }
+
+        public bool IsFriendly
+        {
+            get
+            {
+                return sentimentFactor == FRIENDLY_FACTOR;
+            }
+        }
+
+        public bool IsAngry
+        {
+            get
+            {
+                return sentimentFactor == ANGRY_FACTOR;
+            }
         }
 
         #endregion

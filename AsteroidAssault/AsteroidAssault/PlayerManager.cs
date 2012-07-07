@@ -722,21 +722,25 @@ namespace SpacepiXX
             if (location.X < playerAreaLimit.X)
             {
                 location.X = playerAreaLimit.X;
+                playerSprite.Velocity = Vector2.Zero;
             }
 
             if (location.X > (playerAreaLimit.Right - playerSprite.Source.Width))
             {
                 location.X = (playerAreaLimit.Right - playerSprite.Source.Width);
+                playerSprite.Velocity = Vector2.Zero;
             }
 
             if (location.Y < playerAreaLimit.Y)
             {
                 location.Y = playerAreaLimit.Y;
+                playerSprite.Velocity = Vector2.Zero;
             }
 
             if (location.Y > (playerAreaLimit.Bottom - playerSprite.Source.Height))
             {
                 location.Y = (playerAreaLimit.Bottom - playerSprite.Source.Height);
+                playerSprite.Velocity = Vector2.Zero;
             }
 
             playerSprite.Location = location;

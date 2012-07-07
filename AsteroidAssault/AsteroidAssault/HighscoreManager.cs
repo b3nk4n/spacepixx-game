@@ -760,6 +760,8 @@ namespace SpacepiXX
         /// </summary>
         public void SaveHighScore(string name, long score, int level)
         {
+            this.lastName = name;
+
             if(this.IsInScoreboard(score))
             {
                 Highscore newScore = new Highscore(name, score, level);
@@ -768,7 +770,7 @@ namespace SpacepiXX
                 this.sortScoreList();
                 this.trimScoreList();
 
-                this.lastName = name;
+                //this.lastName = name;
 
                 using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
                 {
@@ -810,8 +812,6 @@ namespace SpacepiXX
                     {
                         using (StreamReader sr = new StreamReader(isfs))
                         {
-                            //this.currentHighScore = Int32.Parse(sr.ReadToEnd(), System.Globalization.CultureInfo.InvariantCulture);
-
                             for (int i = 0; i < MaxScores; i++)
                             {
                                 topScores.Add(new Highscore(sr.ReadLine()));

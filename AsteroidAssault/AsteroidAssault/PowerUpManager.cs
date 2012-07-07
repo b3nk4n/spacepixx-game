@@ -42,7 +42,7 @@ namespace SpacepiXX
             if (spawnChance >= SPAWN_CHANCE)
                 return;
 
-            int rnd = rand.Next(63);
+            int rnd = rand.Next(67);
 
             PowerUp.PowerUpType type = PowerUp.PowerUpType.SpecialShot;
             Rectangle initialFrame = new Rectangle(0, 0, 25, 25);
@@ -199,6 +199,18 @@ namespace SpacepiXX
                     type = PowerUp.PowerUpType.Underdrive;
                     initialFrame = new Rectangle(0, 525, 25, 25);
                     break;
+
+                case 63:
+                case 64:
+                    type = PowerUp.PowerUpType.Friendly;
+                    initialFrame = new Rectangle(0, 550, 25, 25);
+                    break;
+
+                case 65:
+                case 66:
+                    type = PowerUp.PowerUpType.Angry;
+                    initialFrame = new Rectangle(0, 575, 25, 25);
+                    break;
             }
 
             if (type == PowerUp.PowerUpType.Life && extraLifeTimer < extraLifeMinTimer)
@@ -224,7 +236,7 @@ namespace SpacepiXX
 
         public PowerUp.PowerUpType GetPowerUpNotRandom()
         {
-            int rnd = rand.Next(21);
+            int rnd = rand.Next(23);
             PowerUp.PowerUpType type = PowerUp.PowerUpType.ScoreMultiLow;
 
             switch (rnd)
@@ -312,6 +324,14 @@ namespace SpacepiXX
                 case 20:
                     type = PowerUp.PowerUpType.Underdrive;
                     break;
+
+                case 21:
+                    type = PowerUp.PowerUpType.Friendly;
+                    break;
+
+                case 22:
+                    type = PowerUp.PowerUpType.Angry;
+                    break;
             }
 
             return type;
@@ -398,6 +418,10 @@ namespace SpacepiXX
                     return new Rectangle(0, 500, 25, 25);
                 case PowerUp.PowerUpType.Underdrive:
                     return new Rectangle(0, 525, 25, 25);
+                case PowerUp.PowerUpType.Friendly:
+                    return new Rectangle(0, 550, 25, 25);
+                case PowerUp.PowerUpType.Angry:
+                    return new Rectangle(0, 575, 25, 25);
                 default:
                     return new Rectangle(0, 0, 25, 25);
             }

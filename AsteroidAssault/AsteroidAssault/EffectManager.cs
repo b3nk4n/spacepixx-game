@@ -44,15 +44,6 @@ namespace SpacepiXX
             // Generate free explosion particles:
             for (int i = 0; i < PRELOADED_EXPLOSION_EFFECTS; i++)
             {
-                //ExplosionEffects.Add(new Particle(Vector2.Zero,
-                //                         Texture,
-                //                         ExplosionFrames[rand.Next(0, ExplosionFrames.Count - 1)],
-                //                         Vector2.Zero,
-                //                         Vector2.Zero,
-                //                         0.0f,
-                //                         0,
-                //                         Color.White,
-                //                         Color.White));
                 freeExplosionParticles.Enqueue(new Particle(Vector2.Zero,
                                          Texture,
                                          ExplosionFrames[rand.Next(0, ExplosionFrames.Count - 1)],
@@ -67,15 +58,6 @@ namespace SpacepiXX
             // Generate free explosion particles:
             for (int i = 0; i < PRELOADED_POINT_EFFECTS; i++)
             {
-                //ExplosionEffects.Add(new Particle(Vector2.Zero,
-                //                         Texture,
-                //                         ParticleFrame,
-                //                         Vector2.Zero,
-                //                         Vector2.Zero,
-                //                         0.0f,
-                //                         0,
-                //                         Color.White,
-                //                         Color.White));
                 freePointParticles.Enqueue(new Particle(Vector2.Zero,
                                          Texture,
                                          ParticleFrame,
@@ -153,7 +135,6 @@ namespace SpacepiXX
                                               float pieceSpeedScale, int duration, Color initialColor,
                                               Color finalColor)
         {
-            //float explosionMaxSpeed = 30.0f;
             float explosionMaxSpeed = pieceSpeedScale;
 
             int pointSpeedMin = (int)pieceSpeedScale * 2;
@@ -162,7 +143,7 @@ namespace SpacepiXX
             Vector2 pieceLocation = location - new Vector2(ExplosionFrames[0].Width / 2,
                                                            ExplosionFrames[0].Height / 2);
 
-            int pieceCount = rand.Next(minPieceCount, maxPointCount + 1);
+            int pieceCount = rand.Next(minPieceCount, maxPieceCount + 1);
 
             for (int x = 0; x < pieceCount; x++)
             {
@@ -232,8 +213,8 @@ namespace SpacepiXX
                                momentum,
                                5,
                                10,
-                               2,
                                3,
+                               5,
                                20.0f,
                                50, 
                                new Color(1.0f, 1.0f, 1.0f),
@@ -246,8 +227,8 @@ namespace SpacepiXX
                                momentum,
                                10,
                                15,
-                               3,
                                5,
+                               10,
                                30.0f,
                                100,
                                new Color(1.0f, 1.0f, 1.0f),
@@ -353,8 +334,8 @@ namespace SpacepiXX
                                momentum,
                                10,
                                20,
-                               2,
                                4,
+                               10,
                                40.0f,
                                75,
                                Color.DarkGray * 0.5f,

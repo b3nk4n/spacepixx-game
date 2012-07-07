@@ -14,8 +14,8 @@ namespace SpacepiXX
         private const float SPEED = 100.0f;
         private const int RADIUS = 10;
 
-        public enum PowerUpType { Health25, Health50, Health100, CoolWater, Life, SpecialShot, KillAll, LowBonusScore, MediumBonusScore, HighBonusScore, ScoreMultiLow, ScoreMultiMedium, ScoreMultiHigh, BonusRockets, Shield, Overdrive,
-                                  AntiScoreMulti, OutOfControl, Slow, OverHeat, Underdrive,
+        public enum PowerUpType { Health25, Health50, Health100, CoolWater, Life, SpecialShot, KillAll, LowBonusScore, MediumBonusScore, HighBonusScore, ScoreMultiLow, ScoreMultiMedium, ScoreMultiHigh, BonusRockets, Shield, Overdrive, Friendly,
+                                  AntiScoreMulti, OutOfControl, Slow, OverHeat, Underdrive, Angry,
                                   Random};
 
         private PowerUpType type;
