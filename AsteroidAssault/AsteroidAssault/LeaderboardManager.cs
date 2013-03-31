@@ -154,7 +154,7 @@ namespace SpacepiXX
         {
             string phoneid = PHONE_ID;
 
-            string hash = MD5Core.GetHashString(phoneid + name + score + level + pw).ToLower();
+            string hash = MD5Core.GetHashString(phoneid + name + score + level).ToLower();
             if (!wc.IsBusy)
             {
                 if (method.Equals(RESUBMIT))

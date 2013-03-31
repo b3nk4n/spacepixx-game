@@ -971,11 +971,6 @@ namespace SpacepiXX
         public void Activated(StreamReader reader)
         {
             //Player sprite
-            //this.playerSprite.Location = new Vector2(Single.Parse(reader.ReadLine()),
-            //                                         Single.Parse(reader.ReadLine()));
-            //this.playerSprite.Rotation = Single.Parse(reader.ReadLine());
-            //this.playerSprite.Velocity = new Vector2(Single.Parse(reader.ReadLine()),
-            //                                         Single.Parse(reader.ReadLine()));
             playerSprite.Activated(reader);
 
             this.playerScore = Int64.Parse(reader.ReadLine());
@@ -1020,11 +1015,6 @@ namespace SpacepiXX
         public void Deactivated(StreamWriter writer)
         {
             // Player sprite
-            //writer.WriteLine(playerSprite.Location.X);
-            //writer.WriteLine(playerSprite.Location.Y);
-            //writer.WriteLine(playerSprite.Rotation);
-            //writer.WriteLine(playerSprite.Velocity.X);
-            //writer.WriteLine(playerSprite.Velocity.Y);
             playerSprite.Deactivated(writer);
 
             writer.WriteLine(this.playerScore);

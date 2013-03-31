@@ -23,7 +23,7 @@ namespace SpacepiXX
 
         private const string Email = "apps@bsautermeister.de";
         private const string EmailSubject = "SpacepiXX - Support";
-        private const string Blog = "bsautermeister.de/blog";
+        private const string Blog = "bsautermeister.de";
 
         private readonly Rectangle screenBounds;
 
@@ -35,7 +35,7 @@ namespace SpacepiXX
         private bool isActive = false;
 
         private WebBrowserTask browser;
-        private const string BROWSER_URL = "http://bsautermeister.de/blog";
+        private const string BROWSER_URL = "http://bsautermeister.de";
 
         private readonly Rectangle EmailDestination = new Rectangle(250,330,
                                                                     300,50);

@@ -31,7 +31,7 @@ namespace SpacepiXX
             KillBoss,
             BossBonus,
             GoodLuck, 
-            ReturnWithBackButton};
+            Finished};
 
         private InstructionStates state = InstructionStates.Welcome;
 
@@ -52,6 +52,8 @@ namespace SpacepiXX
         private const float PowerUpsLimit = 50.0f;
         private const float KillBossLimit = 55.0f;
         private const float BossBonusLimit = 60.0f;
+        private const float GoodLuckLimit = 63.0f;
+        private const float FinishedLimit = 66.0f;
 
         private SpriteFont font;
 
@@ -106,8 +108,17 @@ namespace SpacepiXX
         private readonly string BossBonusText = "Kill the BOSS at the first try results in bonus score!";
         private readonly string GoodLuckText = "Good luck commander!";
         private readonly string ReturnWithBackButtonText = "Press BACK to return...";
+        private readonly string ContinueWithBackButtonText = "Press BACK to start the game...";
 
-        private static bool hasDoneInstructions = false;
+        private bool hasDoneInstructions = false;
+
+        private const string INSTRUCTION_FILE = "instructions2.txt";
+
+        SettingsManager settings = SettingsManager.GetInstance();
+
+        private bool isInvalidated = false;
+
+        private bool isAutostarted;
 
         #endregion
 
@@ -151,13 +162,12 @@ namespace SpacepiXX
 
             if (playerManager.IsDestroyed)
             {
-                this.state = InstructionStates.ReturnWithBackButton;
+                this.state = InstructionStates.Finished;
 
                 asteroidManager.Update(gameTime);
                 powerUpManager.Update(gameTime);
                 enemyManager.Update(gameTime);
                 bossManager.Update(gameTime);
-                return;
             }
             else if (progressTimer < WelcomeLimit)
             {
@@ -264,9 +274,18 @@ namespace SpacepiXX
 
                 powerUpManager.Update(gameTime);
             }
-            else
+            else if (progressTimer < GoodLuckLimit)
             {
                 this.state = InstructionStates.GoodLuck;
+
+                asteroidManager.Update(gameTime);
+                enemyManager.Update(gameTime);
+                bossManager.Update(gameTime);
+                powerUpManager.Update(gameTime);
+            }
+            else
+            {
+                this.state = InstructionStates.Finished;
 
                 asteroidManager.Update(gameTime);
                 enemyManager.Update(gameTime);
@@ -488,13 +507,17 @@ namespace SpacepiXX
                     drawRedCenteredText(spriteBatch, GoodLuckText);
                     break;
 
-                case InstructionStates.ReturnWithBackButton:
+                case InstructionStates.Finished:
                     powerUpManager.Draw(spriteBatch);
                     asteroidManager.Draw(spriteBatch);
                     enemyManager.Draw(spriteBatch);
                     bossManager.Draw(spriteBatch);
+                    playerManager.Draw(spriteBatch);
 
-                    drawRedCenteredText(spriteBatch, ReturnWithBackButtonText);
+                    if (isAutostarted)
+                        drawRedCenteredText(spriteBatch, ContinueWithBackButtonText);
+                    else
+                        drawRedCenteredText(spriteBatch, ReturnWithBackButtonText);
                     break;
             }
         }
@@ -512,14 +535,26 @@ namespace SpacepiXX
         {
             this.progressTimer = 0.0f;
             this.state = InstructionStates.Welcome;
+            this.isAutostarted = false;
+        }
+
+        public void InstructionsDone()
+        {
+            if (!hasDoneInstructions)
+            {
+                hasDoneInstructions = true;
+                isInvalidated = true;
+            }
         }
 
         public void SaveHasDoneInstructions()
         {
+            if (!isInvalidated)
+                return;
 
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream("instructions2.txt", FileMode.Create, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(INSTRUCTION_FILE, FileMode.Create, isf))
                 {
                     using (StreamWriter sw = new StreamWriter(isfs))
                     {
@@ -536,10 +571,12 @@ namespace SpacepiXX
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                bool hasExisted = isf.FileExists(@"instructions2.txt");
+                bool hasExisted = isf.FileExists(INSTRUCTION_FILE);
 
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(@"instructions2.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(INSTRUCTION_FILE, FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
                 {
+                    isInvalidated = false;
+
                     if (hasExisted)
                     {
                         using (StreamReader sr = new StreamReader(isfs))
@@ -557,10 +594,6 @@ namespace SpacepiXX
                         }
                     }
                 }
-
-                // Delete the old file
-                if (isf.FileExists(@"instructions.txt"))
-                    isf.DeleteFile(@"instructions.txt");
             }
         }
 
@@ -572,19 +605,23 @@ namespace SpacepiXX
         {
             this.progressTimer = Single.Parse(reader.ReadLine());
             hasDoneInstructions = Boolean.Parse(reader.ReadLine());
+            this.isInvalidated = Boolean.Parse(reader.ReadLine());
+            this.isAutostarted = Boolean.Parse(reader.ReadLine());
         }
 
         public void Deactivated(StreamWriter writer)
         {
             writer.WriteLine(progressTimer);
             writer.WriteLine(hasDoneInstructions);
+            writer.WriteLine(isInvalidated);
+            writer.WriteLine(isAutostarted);
         }
 
         #endregion
 
         #region Properties
 
-        public static bool HasDoneInstructions
+        public bool HasDoneInstructions
         {
             get
             {
@@ -593,6 +630,26 @@ namespace SpacepiXX
             set
             {
                 hasDoneInstructions = value;
+            }
+        }
+
+        public bool IsAutostarted
+        {
+            set
+            {
+                this.isAutostarted = value;
+            }
+            get
+            {
+                return this.isAutostarted;
+            }
+        }
+
+        public bool EnougthInstructionsDone
+        {
+            get
+            {
+                return (progressTimer > 5.0f);
             }
         }
 

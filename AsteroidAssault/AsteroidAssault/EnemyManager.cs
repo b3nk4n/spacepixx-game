@@ -877,7 +877,7 @@ namespace SpacepiXX
         {
             // Enemies
             int enemiesCount = Int32.Parse(reader.ReadLine());
-
+            Enemies.Clear();
             for (int i = 0; i < enemiesCount; ++i)
             {
                 EnemyType type = EnemyType.Easy;
@@ -923,7 +923,7 @@ namespace SpacepiXX
 
             // Wave spawns
             int waveSpawnsCount = Int32.Parse(reader.ReadLine());
-
+            // no clearing here, because the waypoints are initialized at startup.
             for (int i = 0; i < waveSpawnsCount; ++i)
             {
                 int idx = Int32.Parse(reader.ReadLine());

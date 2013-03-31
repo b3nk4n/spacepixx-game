@@ -116,6 +116,7 @@
     <Compile Include="MainMenuManager.cs" />
     <Compile Include="MD5.cs" />
     <Compile Include="Particle.cs" />
+    <Compile Include="PhonePositionManager.cs" />
     <Compile Include="PlayerManager.cs" />
     <Compile Include="PowerUp.cs" />
     <Compile Include="PowerUpManager.cs" />

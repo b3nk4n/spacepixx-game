@@ -53,7 +53,8 @@ namespace SpacepiXX
         private const string MusicCreatorText = "Tscho";
         private const string CreatorText = "by B. Sautermeister";
 
-        enum GameStates { TitleScreen, MainMenu, Highscores, Inscructions, Help, Settings, Playing, BossDuell, Paused, PlayerDead, GameOver, Leaderboards, Submittion };
+        enum GameStates { TitleScreen, MainMenu, Highscores, Instructions, Help, Settings, Playing, BossDuell, Paused, PlayerDead, GameOver,
+        Leaderboards, Submittion, PhonePosition};
         GameStates gameState = GameStates.TitleScreen;
         GameStates stateBeforePaused;
         Texture2D spriteSheet;
@@ -74,6 +75,7 @@ namespace SpacepiXX
 
         SpriteFont pericles16;
         SpriteFont pericles18;
+        SpriteFont pericles26;
 
         ZoomTextManager zoomTextManager;
         
@@ -130,6 +132,8 @@ namespace SpacepiXX
                                                                   300, 50);
         private readonly Rectangle continueDestination = new Rectangle(50, 370,
                                                                        300, 50);
+
+        PhonePositionManager phonePositionManager;
 
         public Spacepixx()
         {
@@ -268,6 +272,7 @@ namespace SpacepiXX
 
             pericles16 = Content.Load<SpriteFont>(@"Fonts\Pericles16");
             pericles18 = Content.Load<SpriteFont>(@"Fonts\Pericles18");
+            pericles26 = Content.Load<SpriteFont>(@"Fonts\Pericles26");
 
             zoomTextManager = new ZoomTextManager(new Vector2(this.GraphicsDevice.Viewport.Width / 2,
                                                               this.GraphicsDevice.Viewport.Height / 2),
@@ -333,6 +338,11 @@ namespace SpacepiXX
                                                                             GraphicsDevice.Viewport.Height));
             SettingsManager.GameInput = gameInput;
 
+            phonePositionManager = PhonePositionManager.GetInstance();
+            PhonePositionManager.Font = pericles26;
+            PhonePositionManager.Texture = menuSheet;
+            PhonePositionManager.GameInput = gameInput;
+
             setupInputs();
         }
 
@@ -348,6 +358,7 @@ namespace SpacepiXX
             highscoreManager.SetupInputs();
             settingsManager.SetupInputs();
             helpManager.SetupInputs();
+            phonePositionManager.SetupInputs();
         }
 
         /// <summary>
@@ -419,6 +430,8 @@ namespace SpacepiXX
 
                         submissionManager.Deactivated(writer);
 
+                        settingsManager.Deactivated(writer);
+
                         writer.Close();
                     }
                 }
@@ -435,7 +448,7 @@ namespace SpacepiXX
 
             if (gameState == GameStates.Playing
                 || gameState == GameStates.PlayerDead
-                || gameState == GameStates.Inscructions
+                || gameState == GameStates.Instructions
                 || gameState == GameStates.BossDuell)
             {
                 stateBeforePaused = gameState;
@@ -540,6 +553,8 @@ namespace SpacepiXX
 
                                 submissionManager.Activated(reader);
 
+                                settingsManager.Activated(reader);
+
                                 reader.Close();
                             }
                         }
@@ -626,36 +641,19 @@ namespace SpacepiXX
                     switch(mainMenuManager.LastPressedMenuItem)
                     {
                         case MainMenuManager.MenuItems.Start:
-                            resetGame();
-                            hud.Update(playerManager.PlayerScore,
-                                       playerManager.LivesRemaining,
-                                       playerManager.Overheat,
-                                       playerManager.HitPoints,
-                                       playerManager.ShieldPoints,
-                                       playerManager.SpecialShotsRemaining,
-                                       playerManager.CarliRocketsRemaining,
-                                       playerManager.ScoreMulti,
-                                       levelManager.CurrentLevel);
-                            gameState = GameStates.Playing;
+                            gameState = GameStates.PhonePosition;
                             break;
 
                         case MainMenuManager.MenuItems.Highscores:
+                            leaderboardManager.Receive();
                             gameState = GameStates.Highscores;
                             break;
 
                         case MainMenuManager.MenuItems.Instructions:
                             resetGame();
                             instructionManager.Reset();
-                            hud.Update(playerManager.PlayerScore,
-                                       playerManager.LivesRemaining,
-                                       playerManager.Overheat,
-                                       playerManager.HitPoints,
-                                       playerManager.ShieldPoints,
-                                       playerManager.SpecialShotsRemaining,
-                                       playerManager.CarliRocketsRemaining,
-                                       playerManager.ScoreMulti,
-                                       levelManager.CurrentLevel);
-                            gameState = GameStates.Inscructions;
+                            updateHud();
+                            gameState = GameStates.Instructions;
                             break;
 
                         case MainMenuManager.MenuItems.Help:
@@ -676,6 +674,39 @@ namespace SpacepiXX
 
                     if (backButtonPressed)
                         this.Exit();
+
+                    break;
+
+                case GameStates.PhonePosition:
+
+                    updateBackground(gameTime);
+
+                    EffectManager.Update(gameTime);
+
+                    phonePositionManager.IsActive = true;
+                    phonePositionManager.Update(gameTime);
+
+                    if (phonePositionManager.CancelClicked || backButtonPressed)
+                    {
+                        phonePositionManager.IsActive = false;
+                        gameState = GameStates.MainMenu;
+                    }
+                    else if (phonePositionManager.StartClicked)
+                    {
+                        phonePositionManager.IsActive = false;
+                        resetGame();
+                        updateHud();
+                        if (instructionManager.HasDoneInstructions)
+                        {
+                            gameState = GameStates.Playing;
+                        }
+                        else
+                        {
+                            instructionManager.Reset();
+                            instructionManager.IsAutostarted = true;
+                            gameState = GameStates.Instructions;
+                        }
+                    }
 
                     break;
 
@@ -710,21 +741,13 @@ namespace SpacepiXX
                     {
                         submissionManager.IsActive = false;
                         resetGame();
-                        hud.Update(playerManager.PlayerScore,
-                                   playerManager.LivesRemaining,
-                                   playerManager.Overheat,
-                                   playerManager.HitPoints,
-                                   playerManager.ShieldPoints,
-                                   playerManager.SpecialShotsRemaining,
-                                   playerManager.CarliRocketsRemaining,
-                                   playerManager.ScoreMulti,
-                                   levelManager.CurrentLevel);
+                        updateHud();
                         gameState = GameStates.Playing;
                     }
 
                     break;
 
-                case GameStates.Inscructions:
+                case GameStates.Instructions:
 
                     starFieldManager1.Update(gameTime);
                     starFieldManager2.Update(gameTime);
@@ -733,20 +756,27 @@ namespace SpacepiXX
                     instructionManager.Update(gameTime);
                     collisionManager.Update();
                     EffectManager.Update(gameTime);
-                    hud.Update(playerManager.PlayerScore,
-                               playerManager.LivesRemaining, 
-                               playerManager.Overheat, 
-                               playerManager.HitPoints,
-                               playerManager.ShieldPoints,
-                               playerManager.SpecialShotsRemaining,
-                               playerManager.CarliRocketsRemaining,
-                               playerManager.ScoreMulti,
-                               levelManager.CurrentLevel);
+                    updateHud();
 
                     if (backButtonPressed)
                     {
-                        InstructionManager.HasDoneInstructions = true;
-                        gameState = GameStates.MainMenu;
+                        if (!instructionManager.HasDoneInstructions && instructionManager.EnougthInstructionsDone)
+                        {
+                            instructionManager.InstructionsDone();
+                            instructionManager.SaveHasDoneInstructions();
+                        }
+
+                        EffectManager.Reset();
+                        if (instructionManager.IsAutostarted)
+                        {
+                            resetGame();
+                            updateHud();
+                            gameState = GameStates.Playing;
+                        }
+                        else
+                        {
+                            gameState = GameStates.MainMenu;
+                        }
                     }
 
                     break;
@@ -802,15 +832,7 @@ namespace SpacepiXX
 
                     zoomTextManager.Update();
 
-                    hud.Update(playerManager.PlayerScore,
-                               playerManager.LivesRemaining,
-                               playerManager.Overheat,
-                               playerManager.HitPoints,
-                               playerManager.ShieldPoints,
-                               playerManager.SpecialShotsRemaining,
-                               playerManager.CarliRocketsRemaining,
-                               playerManager.ScoreMulti,
-                               levelManager.CurrentLevel);
+                    updateHud();
 
                     if (levelManager.HasChanged)
                     {
@@ -880,15 +902,7 @@ namespace SpacepiXX
 
                     zoomTextManager.Update();
 
-                    hud.Update(playerManager.PlayerScore,
-                               playerManager.LivesRemaining,
-                               playerManager.Overheat,
-                               playerManager.HitPoints,
-                               playerManager.ShieldPoints,
-                               playerManager.SpecialShotsRemaining,
-                               playerManager.CarliRocketsRemaining,
-                               playerManager.ScoreMulti,
-                               levelManager.CurrentLevel);
+                    updateHud();
 
                     if (bossManager.Bosses.Count == 0 && levelManager.HasChanged)
                     {
@@ -1009,15 +1023,7 @@ namespace SpacepiXX
                     EffectManager.Update(gameTime);
                     collisionManager.Update();
                     zoomTextManager.Update();
-                    hud.Update(playerManager.PlayerScore,
-                               playerManager.LivesRemaining,
-                               playerManager.Overheat,
-                               playerManager.HitPoints,
-                               playerManager.ShieldPoints,
-                               playerManager.SpecialShotsRemaining,
-                               playerManager.CarliRocketsRemaining,
-                               playerManager.ScoreMulti,
-                               levelManager.CurrentLevel);
+                    updateHud();
 
                     if (playerDeathTimer >= playerDeathDelayTime)
                     {
@@ -1054,15 +1060,7 @@ namespace SpacepiXX
                     EffectManager.Update(gameTime);
                     collisionManager.Update();
                     zoomTextManager.Update();
-                    hud.Update(playerManager.PlayerScore,
-                               playerManager.LivesRemaining,
-                               playerManager.Overheat,
-                               playerManager.HitPoints,
-                               playerManager.ShieldPoints,
-                               playerManager.SpecialShotsRemaining,
-                               playerManager.CarliRocketsRemaining,
-                               playerManager.ScoreMulti,
-                               levelManager.CurrentLevel);
+                    updateHud();
 
                     if (playerDeathTimer >= playerGameOverDelayTime)
                     {
@@ -1095,12 +1093,6 @@ namespace SpacepiXX
 
                     break;
             }
-
-            // Remove gesture queue
-            //while (TouchPanel.IsGestureAvailable)
-            //{
-            //    TouchPanel.ReadGesture();
-            //}
 
             // Reset Back-Button flag
             backButtonPressed = false;
@@ -1169,6 +1161,13 @@ namespace SpacepiXX
                 mainMenuManager.Draw(spriteBatch);
             }
 
+            if (gameState == GameStates.PhonePosition)
+            {
+                drawBackground(spriteBatch);
+
+                phonePositionManager.Draw(spriteBatch);
+            }
+
             if (gameState == GameStates.Highscores)
             {
                 drawBackground(spriteBatch);
@@ -1183,7 +1182,7 @@ namespace SpacepiXX
                 submissionManager.Draw(spriteBatch);
             }
 
-            if (gameState == GameStates.Inscructions)
+            if (gameState == GameStates.Instructions)
             {
                 starFieldManager1.Draw(spriteBatch);
                 starFieldManager2.Draw(spriteBatch);
@@ -1434,6 +1433,19 @@ namespace SpacepiXX
                                          highscoreManager.LastName,
                                          keyboardCallback,
                                          null);
+        }
+
+        private void updateHud()
+        {
+            hud.Update(playerManager.PlayerScore,
+                               playerManager.LivesRemaining,
+                               playerManager.Overheat,
+                               playerManager.HitPoints,
+                               playerManager.ShieldPoints,
+                               playerManager.SpecialShotsRemaining,
+                               playerManager.CarliRocketsRemaining,
+                               playerManager.ScoreMulti,
+                               levelManager.CurrentLevel);
         }
     }
 }

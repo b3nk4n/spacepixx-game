@@ -314,7 +314,7 @@ namespace SpacepiXX
 
             //Waypoints
             int waypointsCount = Int32.Parse(reader.ReadLine());
-
+            wayPoints.Clear();
             for (int i = 0; i < waypointsCount; ++i)
             {
                 Vector2 v = new Vector2(Single.Parse(reader.ReadLine()),

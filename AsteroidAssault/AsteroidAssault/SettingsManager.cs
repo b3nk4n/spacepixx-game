@@ -12,6 +12,8 @@ namespace SpacepiXX
     {
         #region Members
 
+        private const string SETTINGS_FILE = "settings2.txt";
+
         private static SettingsManager settingsManager;
 
         private static Texture2D texture;
@@ -22,31 +24,27 @@ namespace SpacepiXX
 
         public enum SoundValues {Off, VeryLow, Low, Med, High, VeryHigh};
         public enum VibrationValues { On, Off };
-        public enum NeutralPositionValues { Angle0, Angle15, Angle30, Angle45 };
+        public enum NeutralPositionValues { Angle0, Angle10, Angle20, Angle30, Angle40, Angle50, Angle60, Unsupported };
 
         private const string MUSIC_TITLE = "Music: ";
         private SoundValues musicValue = SoundValues.Med;
-        private readonly int musicPositionY = 180;
-        private readonly Rectangle musicDestination = new Rectangle(250, 175,
+        private readonly int musicPositionY = 200;
+        private readonly Rectangle musicDestination = new Rectangle(250, 195,
                                                                     300, 50);
 
         private const string SFX_TITLE = "SFX: ";
-        private SoundValues sfxValue = SoundValues.Med;
-        private readonly int sfxPositionY = 250;
-        private readonly Rectangle sfxDestination = new Rectangle(250, 245,
+        private SoundValues sfxValue = SoundValues.High;
+        private readonly int sfxPositionY = 270;
+        private readonly Rectangle sfxDestination = new Rectangle(250, 265,
                                                                   300, 50);
 
         private const string VIBRATION_TITLE = "Vibration: ";
         private VibrationValues vibrationValue = VibrationValues.On;
-        private readonly int vibrationPositionY = 320;
-        private readonly Rectangle vibrationDestination = new Rectangle(250, 315,
+        private readonly int vibrationPositionY = 340;
+        private readonly Rectangle vibrationDestination = new Rectangle(250, 335,
                                                                         300, 50);
 
-        private const string NEUTRAL_POSITION_TITLE = "Neutral Position: ";
-        private NeutralPositionValues neutralPositionValue = NeutralPositionValues.Angle30;
-        private readonly int neutralPositionY = 390;
-        private readonly Rectangle neutralPositionDestination = new Rectangle(250, 385,
-                                                                              300, 50);
+        private NeutralPositionValues neutralPositionValue = NeutralPositionValues.Angle20;
 
         private static Rectangle screenBounds;
 
@@ -61,7 +59,6 @@ namespace SpacepiXX
         private const string MusicAction = "Music";
         private const string SfxAction = "SFX";
         private const string VibrationAction = "Vibration";
-        private const string NeutralPositionAction = "NeutralPos";
 
         private const string ON = "ON";
         private const string OFF = "OFF";
@@ -73,10 +70,10 @@ namespace SpacepiXX
         private const string LEFT = "LEFT";
         private const string RIGHT = "RIGHT";
 
-        private const string ANGLE0 = "0   ";
-        private const string ANGLE15 = "15   ";
-        private const string ANGLE30 = "30   ";
-        private const string ANGLE45 = "45   ";
+        private const int TextPositonX = 250;
+        private const int ValuePositionX = 550;
+
+        private bool isInvalidated = false;
 
         #endregion
 
@@ -102,9 +99,6 @@ namespace SpacepiXX
             GameInput.AddTouchGestureInput(VibrationAction,
                                            GestureType.Tap,
                                            vibrationDestination);
-            GameInput.AddTouchGestureInput(NeutralPositionAction,
-                                           GestureType.Tap,
-                                           neutralPositionDestination);
         }
 
         public void Initialize(Texture2D tex, SpriteFont f, Rectangle screen)
@@ -145,7 +139,6 @@ namespace SpacepiXX
             drawMusic(spriteBatch);
             drawSfx(spriteBatch);
             drawVibration(spriteBatch);
-            drawNeutralPosition(spriteBatch);
         }
 
         private void handleTouchInputs()
@@ -164,11 +157,6 @@ namespace SpacepiXX
             if (GameInput.IsPressed(VibrationAction))
             {
                 toggleVibration();
-            }
-            // NeutralPosition
-            if (GameInput.IsPressed(NeutralPositionAction))
-            {
-                toggleNeutralPosition();
             }
         }
 
@@ -195,7 +183,7 @@ namespace SpacepiXX
                     musicValue = SoundValues.Off;
                     break;
             }
-
+            isInvalidated = true;
             SoundManager.RefreshMusicVolume();
         }
 
@@ -222,7 +210,7 @@ namespace SpacepiXX
                     sfxValue = SoundValues.Off;
                     break;
             }
-
+            isInvalidated = true;
             if (sfxValue != SoundValues.Off)
                 SoundManager.PlayPlayerShot();
         }
@@ -238,30 +226,14 @@ namespace SpacepiXX
                     vibrationValue = VibrationValues.Off;
                     break;
             }
-
+            isInvalidated = true;
             if (vibrationValue == VibrationValues.On)
                 VibrationManager.Vibrate(0.2f);
         }
 
-        private void toggleNeutralPosition()
+        public void SetNeutralPosition(NeutralPositionValues value)
         {
-            switch (neutralPositionValue)
-            {
-                case NeutralPositionValues.Angle0:
-                    neutralPositionValue = NeutralPositionValues.Angle15;
-                    break;
-                case NeutralPositionValues.Angle15:
-                    neutralPositionValue = NeutralPositionValues.Angle30;
-                    break;
-                case NeutralPositionValues.Angle30:
-                    neutralPositionValue = NeutralPositionValues.Angle45;
-                    break;
-                case NeutralPositionValues.Angle45:
-                    neutralPositionValue = NeutralPositionValues.Angle0;
-                    break;
-                default:
-                    break;
-            }
+            this.neutralPositionValue = value;
         }
 
         private void drawMusic(SpriteBatch spriteBatch)
@@ -292,13 +264,13 @@ namespace SpacepiXX
 
             spriteBatch.DrawString(font,
                                    MUSIC_TITLE,
-                                   new Vector2(250,
+                                   new Vector2(TextPositonX,
                                                musicPositionY),
                                    Color.Red * opacity);
 
             spriteBatch.DrawString(font,
                                    text,
-                                   new Vector2((550 - font.MeasureString(text).X),
+                                   new Vector2((ValuePositionX - font.MeasureString(text).X),
                                                musicPositionY),
                                    Color.Red * opacity);
         }
@@ -331,13 +303,13 @@ namespace SpacepiXX
 
             spriteBatch.DrawString(font,
                                    SFX_TITLE,
-                                   new Vector2(250,
+                                   new Vector2(TextPositonX,
                                                sfxPositionY),
                                    Color.Red * opacity);
 
             spriteBatch.DrawString(font,
                                    text,
-                                   new Vector2((550 - font.MeasureString(text).X),
+                                   new Vector2((ValuePositionX - font.MeasureString(text).X),
                                                sfxPositionY),
                                    Color.Red * opacity);
         }
@@ -358,52 +330,14 @@ namespace SpacepiXX
 
             spriteBatch.DrawString(font,
                                    VIBRATION_TITLE,
-                                   new Vector2(250,
+                                   new Vector2(TextPositonX,
                                                vibrationPositionY),
                                    Color.Red * opacity);
 
             spriteBatch.DrawString(font,
                                    text,
-                                   new Vector2((550 - font.MeasureString(text).X),
+                                   new Vector2((ValuePositionX - font.MeasureString(text).X),
                                                vibrationPositionY),
-                                   Color.Red * opacity);
-        }
-
-        private void drawNeutralPosition(SpriteBatch spriteBatch)
-        {
-            string text;
-
-            switch (neutralPositionValue)
-            {
-                case NeutralPositionValues.Angle0:
-                    text = ANGLE0;
-                    break;
-                case NeutralPositionValues.Angle15:
-                    text = ANGLE15;
-                    break;
-                case NeutralPositionValues.Angle30:
-                    text = ANGLE30;
-                    break;
-                default:
-                    text = ANGLE45;
-                    break;
-            }
-
-            spriteBatch.DrawString(font,
-                                   NEUTRAL_POSITION_TITLE,
-                                   new Vector2(250,
-                                               neutralPositionY),
-                                   Color.Red * opacity);
-
-            spriteBatch.DrawString(font,
-                                   text,
-                                   new Vector2((550 - font.MeasureString(text).X),
-                                               neutralPositionY),
-                                   Color.Red * opacity);
-            spriteBatch.DrawString(font,
-                                   "o",
-                                   new Vector2((550 - font.MeasureString("o").X),
-                                               neutralPositionY - 10),
                                    Color.Red * opacity);
         }
 
@@ -413,16 +347,18 @@ namespace SpacepiXX
 
         public void Save()
         {
+            if (!isInvalidated)
+                return;
+
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream("settings.txt", FileMode.Create, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(SETTINGS_FILE, FileMode.Create, isf))
                 {
                     using (StreamWriter sw = new StreamWriter(isfs))
                     {
                         sw.WriteLine(this.musicValue);
                         sw.WriteLine(this.sfxValue);
                         sw.WriteLine(this.vibrationValue);
-                        sw.WriteLine(this.neutralPositionValue);
 
                         sw.Flush();
                         sw.Close();
@@ -435,10 +371,12 @@ namespace SpacepiXX
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                bool hasExisted = isf.FileExists(@"settings.txt");
+                bool hasExisted = isf.FileExists(SETTINGS_FILE);
 
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(@"settings.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(SETTINGS_FILE, FileMode.OpenOrCreate, FileAccess.ReadWrite, isf))
                 {
+                    isInvalidated = false;
+
                     if (hasExisted)
                     {
                         using (StreamReader sr = new StreamReader(isfs))
@@ -446,7 +384,6 @@ namespace SpacepiXX
                             this.musicValue = (SoundValues)Enum.Parse(musicValue.GetType(), sr.ReadLine(), true);
                             this.sfxValue = (SoundValues)Enum.Parse(sfxValue.GetType(), sr.ReadLine(), true);
                             this.vibrationValue = (VibrationValues)Enum.Parse(vibrationValue.GetType(), sr.ReadLine(), true);
-                            this.neutralPositionValue = (NeutralPositionValues)Enum.Parse(neutralPositionValue.GetType(), sr.ReadLine(), true);
                         }
                     }
                     else
@@ -456,7 +393,6 @@ namespace SpacepiXX
                             sw.WriteLine(this.musicValue);
                             sw.WriteLine(this.sfxValue);
                             sw.WriteLine(this.vibrationValue);
-                            sw.WriteLine(this.neutralPositionValue);
 
                             // ... ? 
                         }
@@ -536,23 +472,90 @@ namespace SpacepiXX
 
         public float GetNeutralPosition()
         {
-            switch (settingsManager.neutralPositionValue)
+            return GetNeutralPositionValue(settingsManager.neutralPositionValue);
+        }
+
+        private float GetNeutralPositionValue(NeutralPositionValues value)
+        {
+            switch (value)
             {
                 case NeutralPositionValues.Angle0:
                     return 0.0f;
 
-                case NeutralPositionValues.Angle15:
-                    return (float)Math.PI * 15.0f / 180.0f;
+                case NeutralPositionValues.Angle10:
+                    return (float)Math.PI * 10.0f / 180.0f;
+
+                case NeutralPositionValues.Angle20:
+                    return (float)Math.PI * 20.0f / 180.0f;
 
                 case NeutralPositionValues.Angle30:
-                    return (float)Math.PI * 30.0f / 180.0f;;
+                    return (float)Math.PI * 30.0f / 180.0f;
 
-                case NeutralPositionValues.Angle45:
-                    return (float)Math.PI * 45.0f / 180.0f;;
+                case NeutralPositionValues.Angle40:
+                    return (float)Math.PI * 40.0f / 180.0f;
+
+                case NeutralPositionValues.Angle50:
+                    return (float)Math.PI * 50.0f / 180.0f;
+
+                case NeutralPositionValues.Angle60:
+                    return (float)Math.PI * 60.0f / 180.0f;
 
                 default:
                     return 0.0f;
             }
+        }
+
+        public float GetNeutralPositionRadianValue(float angle)
+        {
+            return (float)Math.PI * angle / 180.0f;
+        }
+
+        public int GetNeutralPositionIndex()
+        {
+            switch (settingsManager.neutralPositionValue)
+            {
+                case NeutralPositionValues.Angle0:
+                    return 0;
+
+                case NeutralPositionValues.Angle10:
+                    return 1;
+
+                case NeutralPositionValues.Angle20:
+                    return 2;
+
+                case NeutralPositionValues.Angle30:
+                    return 3;
+
+                case NeutralPositionValues.Angle40:
+                    return 4;
+
+                case NeutralPositionValues.Angle50:
+                    return 5;
+
+                case NeutralPositionValues.Angle60:
+                    return 6;
+
+                default:
+                    return -1;
+            }
+        }
+
+        #endregion
+
+        #region Activate/Deactivate
+
+        public void Activated(StreamReader reader)
+        {
+            opacity = Single.Parse(reader.ReadLine());
+            isInvalidated = Boolean.Parse(reader.ReadLine());
+            neutralPositionValue = (NeutralPositionValues)Enum.Parse(neutralPositionValue.GetType(), reader.ReadLine(), false);
+        }
+
+        public void Deactivated(StreamWriter writer)
+        {
+            writer.WriteLine(opacity);
+            writer.WriteLine(isInvalidated);
+            writer.WriteLine(neutralPositionValue);
         }
 
         #endregion
