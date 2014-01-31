@@ -10,6 +10,8 @@ using System.IO.IsolatedStorage;
 using System.IO;
 using SpacepiXX.Inputs;
 using Microsoft.Advertising.Mobile.Xna;
+using AdDuplex.Xna;
+using SpacepiXX.Nokia;
 
 namespace SpacepiXX
 {
@@ -26,6 +28,8 @@ namespace SpacepiXX
         /// </summary>
         static AdGameComponent adGameComponent;
         static DrawableAd bannerAd;
+        private AdManager dpManager;
+        private bool isAdDuplexActive = false;
 
         private const string HighscoreText = "Personal Highscore!";
         private const string GameOverText = "GAME OVER!";
@@ -183,6 +187,8 @@ namespace SpacepiXX
 
             loadVersion();
 
+            FeedbackHelper.Default.Initialise();
+
             base.Initialize();
         }
 
@@ -202,6 +208,7 @@ namespace SpacepiXX
             bannerAd = adGameComponent.CreateAd("92277", new Rectangle(160, 0, 480, 80));
 #endif       
             bannerAd.BorderEnabled = false;
+            bannerAd.ErrorOccurred += bannerAd_ErrorOccurred;
 
             spriteSheet = Content.Load<Texture2D>(@"Textures\SpriteSheet");
             menuSheet = Content.Load<Texture2D>(@"Textures\MenuSheet");
@@ -344,6 +351,16 @@ namespace SpacepiXX
             PhonePositionManager.GameInput = gameInput;
 
             setupInputs();
+
+            // ad duplex
+            dpManager = new AdManager(this, "62383");
+            dpManager.LoadContent();
+        }
+
+        void bannerAd_ErrorOccurred(object sender, Microsoft.Advertising.AdErrorEventArgs e)
+        {
+            // If loading of banner is failed, load an ad duplex banner.
+            isAdDuplexActive = true;
         }
 
         private void setupInputs()
@@ -473,6 +490,10 @@ namespace SpacepiXX
         ///// </summary>
         void GameActivated(object sender, ActivatedEventArgs e)
         {
+            // no data reload if resumed from DORMANT state
+            if (e.IsApplicationInstancePreserved)
+                return;
+
             tryLoadGame();
         }
 
@@ -590,7 +611,10 @@ namespace SpacepiXX
                 gameState == GameStates.TitleScreen ||
                 gameState == GameStates.Submittion)
             {
-                adGameComponent.Update(gameTime);
+                if (isAdDuplexActive)
+                    dpManager.Update(gameTime);
+                else
+                    adGameComponent.Update(gameTime);
             }
 
             SoundManager.Update(gameTime);
@@ -1278,10 +1302,23 @@ namespace SpacepiXX
                 gameState == GameStates.TitleScreen ||
                 gameState == GameStates.Submittion)
             {
-                adGameComponent.Draw(gameTime);
+                if (!isAdDuplexActive)
+                    adGameComponent.Draw(gameTime);
             }
 
             spriteBatch.End();
+
+            // AdDuplex (must be AFTER End())
+            if (gameState == GameStates.Help ||
+                gameState == GameStates.MainMenu ||
+                gameState == GameStates.Paused ||
+                gameState == GameStates.Settings ||
+                gameState == GameStates.TitleScreen ||
+                gameState == GameStates.Submittion)
+            {
+                if (isAdDuplexActive)
+                    dpManager.Draw(spriteBatch, new Vector2(160, 0));
+            }
 
             base.Draw(gameTime);
         }

@@ -51,7 +51,11 @@
     <XnaCompressContent>false</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Advertising.Mobile.Xna, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="AdDuplex.Xna">
+      <HintPath>..\..\..\..\..\lib\adduplex-xna-v.1.2.3\AdDuplex.Xna.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Advertising.Mobile, Version=6.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Advertising.Mobile.Xna, Version=6.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Devices.Sensors, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework">
@@ -115,6 +119,8 @@
     <Compile Include="LevelManager.cs" />
     <Compile Include="MainMenuManager.cs" />
     <Compile Include="MD5.cs" />
+    <Compile Include="Nokia\FeedbackHelper.cs" />
+    <Compile Include="Nokia\StorageHelper.cs" />
     <Compile Include="Particle.cs" />
     <Compile Include="PhonePositionManager.cs" />
     <Compile Include="PlayerManager.cs" />

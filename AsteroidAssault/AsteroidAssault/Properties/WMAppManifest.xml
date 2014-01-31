@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2009/deployment" AppPlatformVersion="7.0">
-  <App xmlns="" ProductID="{cbe0dfa7-2879-4c2c-b7c6-3798781fba16}" Title="SpacepiXX" RuntimeType="XNA" Version="2.11.0.0" Genre="Apps.Games" Author="B. Sautermeister" Description="SpacepiXX is an adictive retro space shooter." Publisher="Benjamin Sautermeister">
+  <App xmlns="" ProductID="{cbe0dfa7-2879-4c2c-b7c6-3798781fba16}" Title="SpacepiXX" RuntimeType="XNA" Version="2.12.0.0" Genre="Apps.Games" Author="B. Sautermeister" Description="SpacepiXX is an adictive retro space shooter." Publisher="Benjamin Sautermeister">
     <IconPath IsRelative="true" IsResource="false">
     </IconPath>
     <Capabilities>
